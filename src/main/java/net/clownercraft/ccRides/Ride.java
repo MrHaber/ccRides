@@ -3,10 +3,18 @@ package net.clownercraft.ccRides;
 /**
  * Represents a generic single ride.
  */
-public interface Ride {
+public abstract class Ride {
 
-    //i can commit using those buttons
 
+    /**
+     * Starts the movement of the ride.
+     */
+    public abstract void startRide();
+
+    /**
+     * Halts the ride operation and kicks players out
+     */
+    public abstract void stopRide();
 
 
 }
