@@ -4,13 +4,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class RidesPlugin extends JavaPlugin {
 
-    @Override
-    public void onEnable() {
-        //TODO
+   private static RidesPlugin instance;
+
+    public static RidesPlugin getRidesPlugin() {
+        return instance;
     }
 
     @Override
-    public void onDisable() {
-        //TODO
+    public void onEnable() {
+        instance = this;
     }
+
+    @Override
+    public void onDisable() {}
 }
