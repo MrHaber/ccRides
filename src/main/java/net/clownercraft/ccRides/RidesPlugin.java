@@ -5,16 +5,31 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class RidesPlugin extends JavaPlugin {
 
    private static RidesPlugin instance;
+   private ConfigHandler configHandler;
 
-    public static RidesPlugin getRidesPlugin() {
-        return instance;
-    }
+    /**
+     *
+     * @return
+     * Returns an instance of RidesPlugin
+     */
+   static RidesPlugin getInstance() { return instance; }
 
-    @Override
-    public void onEnable() {
-        instance = this;
-    }
+    /**
+     *
+     * @return
+     * Returns an instance of ConfigHandler
+     */
+   public ConfigHandler getConfigHandler() { return configHandler; }
 
-    @Override
-    public void onDisable() {}
+   @Override
+   public void onEnable() {
+
+       //Grabbing instances of the lasses to pass around
+       instance = this;
+       configHandler = new ConfigHandler();
+
+   }
+
+   @Override
+   public void onDisable() {}
 }
