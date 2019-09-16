@@ -1,9 +1,11 @@
 package net.clownercraft.ccRides;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class RidesPlugin extends JavaPlugin {
 
+    //creating variables for class instances
    private static RidesPlugin instance;
    private ConfigHandler configHandler;
 
@@ -28,8 +30,11 @@ public class RidesPlugin extends JavaPlugin {
        instance = this;
        configHandler = new ConfigHandler();
 
+       Bukkit.getLogger().info("Starting RidesPlugin!");
    }
 
    @Override
-   public void onDisable() {}
+   public void onDisable() {
+       Bukkit.getLogger().info("Stopping RidesPlugin.");
+   }
 }
