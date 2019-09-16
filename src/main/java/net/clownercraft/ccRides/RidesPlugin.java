@@ -26,7 +26,7 @@ public class RidesPlugin extends JavaPlugin {
    @Override
    public void onEnable() {
 
-       //Grabbing instances of the lasses to pass around
+       //Grabbing instances of the classes to pass around
        instance = this;
        configHandler = new ConfigHandler();
 
