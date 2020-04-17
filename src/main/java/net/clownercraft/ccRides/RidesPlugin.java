@@ -8,6 +8,7 @@ public class RidesPlugin extends JavaPlugin {
     //creating variables for class instances
    private static RidesPlugin instance;
    private ConfigHandler configHandler;
+   private CommandExecutor commandExecutor;
 
     /**
      *
@@ -23,12 +24,22 @@ public class RidesPlugin extends JavaPlugin {
      */
    public ConfigHandler getConfigHandler() { return configHandler; }
 
+    /**
+     *
+     * @return
+     * Returns an instance of RidesPlugin
+     */
+    public CommandExecutor getCommandExecutor() {return commandExecutor; }
+
    @Override
    public void onEnable() {
 
        //Grabbing instances of the classes to pass around
        instance = this;
        configHandler = new ConfigHandler();
+       commandExecutor = new CommandExecutor();
+
+       getCommand("ccrides").setExecutor(commandExecutor);
 
        Bukkit.getLogger().info("Starting RidesPlugin!");
    }

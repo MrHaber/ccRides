@@ -20,13 +20,13 @@ public class Carousel extends Ride {
         this.length = length;
 
         //Spawn a minecart for each seat of the ride.
-        for (int i=0;i<cap;i++) {
+        for (int i = 0; i < cap; i++) {
             Location loc2 = getPosition(i);
             Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
             //Make carts invulnerable, not affected by gravity and have no velocity
             cart.setInvulnerable(true);
             cart.setGravity(false);
-            cart.setVelocity(new Vector(0,0,0));
+            cart.setVelocity(new Vector(0, 0, 0));
             super.seats.add(cart);
         }
     }
@@ -50,19 +50,20 @@ public class Carousel extends Ride {
         //despawn minecarts & clear seats list
         super.despawnSeats();
         //Spawn a minecart for each seat of the ride.
-        for (int i=0;i<capacity;i++) {
+        for (int i = 0; i < capacity; i++) {
             Location loc2 = getPosition(i);
             Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
             //Make carts invulnerable, not affected by gravity and have no velocity
             cart.setInvulnerable(true);
             cart.setGravity(false);
-            cart.setVelocity(new Vector(0,0,0));
+            cart.setVelocity(new Vector(0, 0, 0));
             seats.add(cart);
         }
     }
 
     /**
      * gets the position of a seat
+     *
      * @param seatNum = the index of the seat to check
      * @return = the location the seat should currently be
      */

@@ -14,11 +14,9 @@ import java.util.List;
 public abstract class Ride {
     public int capacity = 0; //The number of available seats
     public List<Vehicle> seats = new ArrayList<Vehicle>(); //stores vehicle entities for the seats
-
-    public Location base; //Centre location for the ride layout
-    public boolean rideRunning = false;
-
-    public List<Player> riders = new ArrayList<Player>();
+    public Location base; //Center location for the ride layout
+    public boolean rideRunning = false;//Whether the ride is operating or not
+    public List<Player> riders = new ArrayList<Player>();//The list of player on the ride
 
     /**
      * Starts the movement of the ride.
@@ -37,10 +35,10 @@ public abstract class Ride {
 
     /**
      * Gets the location of a single seat of the ride
-     * @param seatNum
+     * @param seatNumber
      * @return the current location the seat should be in
      */
-    public abstract Location getPosition(int seatNum);
+    public abstract Location getPosition(int seatNumber);
 
     /**
      * Forces the ride to remove all it's vehicles/seats and respawn them.
