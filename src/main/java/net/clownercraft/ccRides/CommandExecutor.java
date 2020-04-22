@@ -15,7 +15,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
         if(command.toString().equalsIgnoreCase("ccrides")) {
 
-            if(argument[0].equalsIgnoreCase("config")) {
+            if(string.equalsIgnoreCase("config")) {
 
                 //error detection: making sure there is a minimum number of arguments
                 if(argument.length < 4) {
