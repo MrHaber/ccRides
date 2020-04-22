@@ -1,6 +1,6 @@
 name: ccRides
 version: 0.0.2
-api-version: 1.15.2
+api-version: 1.15
 main: net.clownercraft.ccRides.RidesPlugin
 authors: [TheClowner, N1ghthauq]
 description: This plugin will be the heart and soul of the Clowner Carnival
