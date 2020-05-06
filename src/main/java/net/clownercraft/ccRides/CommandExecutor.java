@@ -4,6 +4,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
+import java.util.Arrays;
+
 public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
     ConfigHandler configHandler = new ConfigHandler();
@@ -37,21 +39,35 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                     switch(argument[1].toLowerCase()) {
 
                         case "information":
+
                             type = ConfigHandler.ConfigType.INFORMATION;
                             break;
+
                         case "carousel":
+
                             type = ConfigHandler.ConfigType.CAROUSEL;
                             break;
+
                         case "droptower":
+
                             type = ConfigHandler.ConfigType.DROPTOWER;
                             break;
+
                         case "ferriswheel":
+
                             type = ConfigHandler.ConfigType.FERRISWHEEL;
                             break;
 
+                        case "help":
+
+                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@aThere are currently these config files, " + Arrays.toString(ConfigHandler.ConfigType.values())));
+                            return false;
+
                         default:
-                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@aSelect a config file to access!"));
+
+                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@aSelect a config file to access! " + Arrays.toString(ConfigHandler.ConfigType.values())));
                             return true;
+
                     }
 
                     //error detection: testing if config path exists
@@ -63,7 +79,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
                     }
 
-                    switch(argument[2]){
+                    switch(argument[2].toLowerCase()){
 
                         case "set":
 
@@ -81,8 +97,12 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                         case "get":
 
                             String entry = configHandler.getConfigPath(type, argument[3]);
-                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@2The current entry in @b" + argument[2] + "@2 under @d" +argument[3] + "@2 is @6" + entry + "@2!"));
+                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@2The current entry in @b" + argument[1] + "@2 under @d" +argument[3] + "@2 is @6" + entry + "@2!"));
                             return true;
+
+                        case "help":
+
+                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@a Choose between 'set' or 'get'. 'set' replaces the value in the config file with the new one. 'get' returns to you the current value of the config file."));
 
                         default:
                             commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@aYou must choose between 'set' or 'get'!"));

@@ -41,6 +41,8 @@ public class RidesPlugin extends JavaPlugin {
 
        getCommand("ccrides").setExecutor(commandExecutor);
 
+       configHandler.createConfig();
+
        Bukkit.getLogger().info("Starting RidesPlugin!");
    }
 
