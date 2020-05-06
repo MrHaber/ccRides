@@ -44,8 +44,10 @@ class ConfigHandler {
      */
     public void createConfig() {
 
-        //creating this file again, as it is strictly for informative purposes
-        instance.saveResource("information.yml", true);
+        testConfig(information, "information.yml");
+        testConfig(dropTower, "droptower.yml");
+        testConfig(carousel, "carousel.yml");
+        testConfig(ferrisWheel, "ferriswheel.yml");
 
         try {
             //Loading the custom config file into the file configuration
