@@ -19,8 +19,8 @@ class ConfigHandler {
     private FileConfiguration ferrisWheelConfig = new YamlConfiguration();
     private File information = new File(instance.getDataFolder(), "information.yml");
     private File carousel = new File(instance.getDataFolder(), "carousel.yml");
-    private File dropTower = new File(instance.getDataFolder(), "information.yml");
-    private File ferrisWheel = new File(instance.getDataFolder(), "information.yml");
+    private File dropTower = new File(instance.getDataFolder(), "droptower.yml");
+    private File ferrisWheel = new File(instance.getDataFolder(), "ferriswheel.yml");
 
 
     /**
