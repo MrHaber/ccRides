@@ -43,6 +43,8 @@ public class RidesPlugin extends JavaPlugin {
        commandExecutor = new CommandExecutor();
        rightClickEvent = new RightClickEvent();
 
+       getServer().getPluginManager().registerEvents(rightClickEvent, instance);
+
        Objects.requireNonNull(getCommand("ccrides")).setExecutor(commandExecutor);
 
        //this should create the config files
