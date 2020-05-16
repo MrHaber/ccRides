@@ -11,6 +11,7 @@ public class RidesPlugin extends JavaPlugin {
    private static RidesPlugin instance;
    private ConfigHandler configHandler;
    private CommandExecutor commandExecutor;
+   private RightClickEvent rightClickEvent;
 
     /**
      *
@@ -40,6 +41,7 @@ public class RidesPlugin extends JavaPlugin {
        instance = this;
        configHandler = new ConfigHandler();
        commandExecutor = new CommandExecutor();
+       rightClickEvent = new RightClickEvent();
 
        Objects.requireNonNull(getCommand("ccrides")).setExecutor(commandExecutor);
 
