@@ -3,6 +3,8 @@ package net.clownercraft.ccRides;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
+
 public class RidesPlugin extends JavaPlugin {
 
     //creating variables for class instances
@@ -39,8 +41,9 @@ public class RidesPlugin extends JavaPlugin {
        configHandler = new ConfigHandler();
        commandExecutor = new CommandExecutor();
 
-       getCommand("ccrides").setExecutor(commandExecutor);
+       Objects.requireNonNull(getCommand("ccrides")).setExecutor(commandExecutor);
 
+       //this should create the config files
        configHandler.createConfig();
 
        Bukkit.getLogger().info("Starting RidesPlugin!");
