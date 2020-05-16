@@ -13,14 +13,15 @@ class ConfigHandler {
     private RidesPlugin instance = RidesPlugin.getInstance();
 
     //creating the config
-    private File information = new File(instance.getDataFolder(), "information.yml");
-    private FileConfiguration info = new YamlConfiguration();
-    private File carousel = new File(instance.getDataFolder(), "carousel.yml");
     private FileConfiguration carouselConfig = new YamlConfiguration();
-    private File dropTower = new File(instance.getDataFolder(), "information.yml");
+    private FileConfiguration info = new YamlConfiguration();
     private FileConfiguration dropTowerConfig = new YamlConfiguration();
-    private File ferrisWheel = new File(instance.getDataFolder(), "information.yml");
     private FileConfiguration ferrisWheelConfig = new YamlConfiguration();
+    private File information = new File(instance.getDataFolder(), "information.yml");
+    private File carousel = new File(instance.getDataFolder(), "carousel.yml");
+    private File dropTower = new File(instance.getDataFolder(), "information.yml");
+    private File ferrisWheel = new File(instance.getDataFolder(), "information.yml");
+
 
     /**
      *
@@ -33,6 +34,7 @@ class ConfigHandler {
 
         if(!(file.exists())) {
             instance.saveResource(name, true);
+            instance.getLogger().info(name + " has been loaded.");
         }
 
     }
@@ -43,15 +45,19 @@ class ConfigHandler {
      * This method loads the custom configuration files into a read/writeable state
      */
     public void createConfig() {
-
+        
         testConfig(information, "information.yml");
         testConfig(dropTower, "droptower.yml");
         testConfig(carousel, "carousel.yml");
         testConfig(ferrisWheel, "ferriswheel.yml");
 
         try {
+
             //Loading the custom config file into the file configuration
             info.load(information);
+            dropTowerConfig.load(dropTower);
+            carouselConfig.load(carousel);
+            ferrisWheelConfig.load(ferrisWheel);
 
         } catch (InvalidConfigurationException | IOException e) {
             e.printStackTrace();
@@ -67,7 +73,7 @@ class ConfigHandler {
             INFORMATION,
             DROPTOWER,
             FERRISWHEEL,
-            CAROUSEL;
+            CAROUSEL
         }
 
 
@@ -85,11 +91,23 @@ class ConfigHandler {
             switch (type) {
                 case INFORMATION:
 
+                    info.set(path, entry);
+                    break;
+
                 case CAROUSEL:
+
+                    carouselConfig.set(path, entry);
+                    break;
 
                 case DROPTOWER:
 
+                    dropTowerConfig.set(path, entry);
+                    break;
+
                 case FERRISWHEEL:
+
+                    ferrisWheelConfig.set(path, entry);
+                    break;
 
             }
         }
@@ -107,11 +125,19 @@ class ConfigHandler {
             switch (type) {
                 case INFORMATION:
 
+                    return (String) info.get(path);
+
                 case CAROUSEL:
+
+                    return (String) carouselConfig.get(path);
 
                 case DROPTOWER:
 
+                    return (String) dropTowerConfig.get(path);
+
                 case FERRISWHEEL:
+
+                    return (String) ferrisWheelConfig.get(path);
 
                 default:
                     return "No config files at the moment.";

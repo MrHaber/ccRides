@@ -15,7 +15,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String string, String[] argument) {
 
-        if(string.toString().equalsIgnoreCase("ccrides")) {
+        if(string.equalsIgnoreCase("ccrides")) {
 
             try{
 
@@ -28,12 +28,12 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 if(argument[0].equalsIgnoreCase("config")) {
 
                     //error detection: making sure there is a minimum number of arguments
-                    if(argument.length < 4) {
+                   // if(argument.length < 4) {
 
-                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@cThere must be at least 4 arguments for the config command!"));
-                        return false;
+                        //commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@cThere must be at least 4 arguments for the config command!"));
+                        //return false;
 
-                    }
+                    //}
 
                     //getting the enum type
                     switch(argument[1].toLowerCase()) {
@@ -65,7 +65,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
                         default:
 
-                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@aSelect a config file to access! " + Arrays.toString(ConfigHandler.ConfigType.values())));
+                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@cSelect a config file to access! " + Arrays.toString(ConfigHandler.ConfigType.values())));
                             return true;
 
                     }
@@ -74,7 +74,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                     String oldEntry = configHandler.getConfigPath(type, argument[3]);
                     if(oldEntry == null) {
 
-                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@aThat config path doesn't exist for the selected config file!"));
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@cThat config path doesn't exist for the selected config file!"));
                         return true;
 
                     }
@@ -105,7 +105,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                             commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@a Choose between 'set' or 'get'. 'set' replaces the value in the config file with the new one. 'get' returns to you the current value of the config file."));
 
                         default:
-                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@aYou must choose between 'set' or 'get'!"));
+                            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@cYou must choose between 'set' or 'get'!"));
                             return false;
 
                     }
