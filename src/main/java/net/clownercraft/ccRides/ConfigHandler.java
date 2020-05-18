@@ -3,6 +3,7 @@ package net.clownercraft.ccRides;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,10 @@ class ConfigHandler {
     private FileConfiguration info = new YamlConfiguration();
     private FileConfiguration dropTowerConfig = new YamlConfiguration();
     private FileConfiguration ferrisWheelConfig = new YamlConfiguration();
+    private FileConfiguration signsConfig = new YamlConfiguration();
+    private FileConfiguration chairSwingConfig = new YamlConfiguration();
+    private File chairSwing = new File(instance.getDataFolder(), "chaiswing.yml");
+    private File signs = new File(instance.getDataFolder(), "signs.yml");
     private File information = new File(instance.getDataFolder(), "information.yml");
     private File carousel = new File(instance.getDataFolder(), "carousel.yml");
     private File dropTower = new File(instance.getDataFolder(), "droptower.yml");
@@ -50,6 +55,8 @@ class ConfigHandler {
         testConfig(dropTower, "droptower.yml");
         testConfig(carousel, "carousel.yml");
         testConfig(ferrisWheel, "ferriswheel.yml");
+        testConfig(signs, "signs.yml");
+        testConfig(chairSwing, "chairswing.yml");
 
         try {
 
@@ -58,6 +65,8 @@ class ConfigHandler {
             dropTowerConfig.load(dropTower);
             carouselConfig.load(carousel);
             ferrisWheelConfig.load(ferrisWheel);
+            signsConfig.load(signs);
+            chairSwingConfig.load(chairSwing);
 
         } catch (InvalidConfigurationException | IOException e) {
             e.printStackTrace();
@@ -73,9 +82,10 @@ class ConfigHandler {
             INFORMATION,
             DROPTOWER,
             FERRISWHEEL,
-            CAROUSEL
+            CAROUSEL,
+            SIGNS,
+            CHAIRSWING
         }
-
 
 
     /**
@@ -109,6 +119,16 @@ class ConfigHandler {
                     ferrisWheelConfig.set(path, entry);
                     break;
 
+                case SIGNS:
+
+                    signsConfig.set(path, entry);
+                    break;
+
+                case CHAIRSWING:
+
+                    chairSwingConfig.set(path, entry);
+                    break;
+
             }
         }
 
@@ -138,6 +158,13 @@ class ConfigHandler {
                 case FERRISWHEEL:
 
                     return (String) ferrisWheelConfig.get(path);
+
+                case SIGNS:
+
+                    return (String) signsConfig.get(path);
+
+                case CHAIRSWING:
+                    return (String) chairSwingConfig.get(path);
 
                 default:
                     return "No config files at the moment.";

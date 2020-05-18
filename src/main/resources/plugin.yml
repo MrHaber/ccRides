@@ -1,5 +1,5 @@
 name: ccRides
-version: 0.1.1
+version: 0.1.2
 api-version: '1.15'
 main: net.clownercraft.ccRides.RidesPlugin
 authors: [TheClowner, N1ghthauq]
@@ -11,4 +11,4 @@ commands:
     ccrides:
         description: the command that is the base for everything spherepvp admin
         permission: ccrides.admin
-        usage: "/ccrides (config <type> {set[<path> <entry>], get[<path>]}) (help)"
+        usage: "/ccrides (config <type> {set[<path> <entry>] | get[<path>]}) (help) (set-ride <name> <type> {ride start: <x-loc> <y-loc> <z-loc>} {orientation: <west-east | north-south>) (delete-ride <name>) (show-rides)"

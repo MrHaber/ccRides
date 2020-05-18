@@ -13,27 +13,56 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
     ConfigHandler.ConfigType type;
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String string, String[] argument) {
+    public boolean onCommand(CommandSender commandSender, Command command, String alias, String[] argument) {
 
-        if(string.equalsIgnoreCase("ccrides")) {
+        if(alias.equalsIgnoreCase("ccrides")) {
 
             try{
 
+                //show-rides sub-command
+                if(argument[0].equalsIgnoreCase("show-rides")) {
+
+                    //TO-DO
+                    /*
+                    get names
+                    get locations
+                    display them
+                     */
+
+                }
+
+                //delete-ride sub-command
+                if(argument[0].equalsIgnoreCase("delete-ride")) {
+
+                    //TO-DO
+                    /*
+                    get name
+                    delete config path
+                     */
+
+                }
+
+                //set-ride sub-command
+                if (argument[0].equalsIgnoreCase("set-ride")){
+
+                    //TO-DO
+                    /*
+                    save location
+                    save name
+                    save ride type
+                     */
+
+                }
+
+                //help sub-command
                 if(argument[0].equalsIgnoreCase("help")){
 
                     return false;
 
                 }
 
+                //config sub-command
                 if(argument[0].equalsIgnoreCase("config")) {
-
-                    //error detection: making sure there is a minimum number of arguments
-                   // if(argument.length < 4) {
-
-                        //commandSender.sendMessage(ChatColor.translateAlternateColorCodes('@', "@cThere must be at least 4 arguments for the config command!"));
-                        //return false;
-
-                    //}
 
                     //getting the enum type
                     switch(argument[1].toLowerCase()) {
