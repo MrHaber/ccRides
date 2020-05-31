@@ -9,6 +9,7 @@ prefix: ccRides
 website: clownercraft.net
 commands:
     ccrides:
-        description: the command that is the base for everything spherepvp admin
+        description: Rides Base Command
         permission: ccrides.admin
+        aliases: [ride,rides,ccride]
         usage: "/ccrides (config <type> {set[<path> <entry>] | get[<path>]}) (help) (set-ride <name> <type> {ride start: <x-loc> <y-loc> <z-loc>} {orientation: <west-east | north-south>) (delete-ride <name>) (show-rides)"

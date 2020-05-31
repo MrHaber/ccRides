@@ -1,24 +1,27 @@
 package net.clownercraft.ccRides;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class RidesPlugin extends JavaPlugin {
-
     //creating variables for class instances
-   private static RidesPlugin instance;
-   private ConfigHandler configHandler;
-   private CommandExecutor commandExecutor;
-   private ClickEvent rightClickEvent;
+    private static RidesPlugin instance;
+    private ConfigHandler configHandler;
+    private CommandExecutor commandExecutor;
+    private RidesListener listener;
 
     /**
      *
      * @return
      * Returns an instance of RidesPlugin
      */
-   static RidesPlugin getInstance() { return instance; }
+   public static RidesPlugin getInstance() { return instance; }
 
     /**
      *
@@ -30,7 +33,7 @@ public class RidesPlugin extends JavaPlugin {
     /**
      *
      * @return
-     * Returns an instance of RidesPlugin
+     * Returns an instance of the Command Executor
      */
     public CommandExecutor getCommandExecutor() {return commandExecutor; }
 
@@ -41,9 +44,9 @@ public class RidesPlugin extends JavaPlugin {
        instance = this;
        configHandler = new ConfigHandler();
        commandExecutor = new CommandExecutor();
-       rightClickEvent = new ClickEvent();
+       listener = new RidesListener();
 
-       getServer().getPluginManager().registerEvents(rightClickEvent, instance);
+       getServer().getPluginManager().registerEvents(listener, instance);
 
        Objects.requireNonNull(getCommand("ccrides")).setExecutor(commandExecutor);
 
@@ -51,10 +54,18 @@ public class RidesPlugin extends JavaPlugin {
        configHandler.createConfig();
 
        Bukkit.getLogger().info("Starting RidesPlugin!");
+
    }
 
    @Override
    public void onDisable() {
+
+        //Eject all players so they don't login where they shouldn't be
+
+        //TODO Remove all vehicles to prevent duplicates in the world.
+
        Bukkit.getLogger().info("Stopping RidesPlugin.");
    }
+
+
 }

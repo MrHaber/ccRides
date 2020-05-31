@@ -1,6 +1,5 @@
 package net.clownercraft.ccRides.rides;
 
-import net.clownercraft.ccRides.Ride;
 import org.bukkit.Location;
 
 public class FerrisWheel extends Ride {

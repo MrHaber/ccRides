@@ -1,32 +1,62 @@
 package net.clownercraft.ccRides;
 
+import net.clownercraft.ccRides.rides.Ride;
+import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.yaml.snakeyaml.Yaml;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-class ConfigHandler {
+public class ConfigHandler {
 
     //Getting an instance of the main class
-    private RidesPlugin instance = RidesPlugin.getInstance();
+    private RidesPlugin instance;
 
-    //creating the config
-    private FileConfiguration carouselConfig = new YamlConfiguration();
-    private FileConfiguration info = new YamlConfiguration();
-    private FileConfiguration dropTowerConfig = new YamlConfiguration();
-    private FileConfiguration ferrisWheelConfig = new YamlConfiguration();
+    /*
+    Config Objects
+     */
+    private FileConfiguration mainConfig = new YamlConfiguration();
+    private FileConfiguration infoConfig = new YamlConfiguration();
     private FileConfiguration signsConfig = new YamlConfiguration();
-    private FileConfiguration chairSwingConfig = new YamlConfiguration();
-    private File chairSwing = new File(instance.getDataFolder(), "chaiswing.yml");
-    private File signs = new File(instance.getDataFolder(), "signs.yml");
-    private File information = new File(instance.getDataFolder(), "information.yml");
-    private File carousel = new File(instance.getDataFolder(), "carousel.yml");
-    private File dropTower = new File(instance.getDataFolder(), "droptower.yml");
-    private File ferrisWheel = new File(instance.getDataFolder(), "ferriswheel.yml");
+    private List<FileConfiguration> rideConfigs = new ArrayList<>();
 
+    private File mainFile = new File(instance.getDataFolder(), "config.yml");
+    private File infoFile = new File(instance.getDataFolder(), "information.yml");
+    private File signFile = new File(instance.getDataFolder(), "signs.yml");
+    private List<File> rideFiles = new ArrayList<>();
+
+    /*
+    Ride Data
+     */
+    public HashMap<String,Ride> rides = new HashMap<>(); //Ride Name/ID, Ride Object
+    public HashMap<Location,String> RideSigns = new HashMap<>(); //Sign Location, Ride ID
+    public HashMap<Vehicle,String> rideVehicles = new HashMap<>(); //Vehicle Object, Ride ID
+    public HashMap<Player,String> riders = new HashMap<>(); //All Players currently riding a ride
+    /*
+    Global Config Options
+     */
+    //None yet...
+
+    /**
+     * Init the configHandler
+     * and Load all the files
+     */
+    public ConfigHandler() {
+        instance = RidesPlugin.getInstance();
+
+        //Load Base Config
+
+        //Load Signs File
+
+        //Load Rides Files
+    }
 
     /**
      *
@@ -39,8 +69,10 @@ class ConfigHandler {
 
         if(!(file.exists())) {
             instance.saveResource(name, true);
-            instance.getLogger().info(name + " has been loaded.");
+            instance.getLogger().info(name + " default config saved.");
         }
+        instance.getLogger().info(name + " config has been loaded.");
+
 
     }
 
@@ -50,23 +82,21 @@ class ConfigHandler {
      * This method loads the custom configuration files into a read/writeable state
      */
     public void createConfig() {
-        
-        testConfig(information, "information.yml");
-        testConfig(dropTower, "droptower.yml");
-        testConfig(carousel, "carousel.yml");
-        testConfig(ferrisWheel, "ferriswheel.yml");
-        testConfig(signs, "signs.yml");
-        testConfig(chairSwing, "chairswing.yml");
+
+        testConfig(mainFile, "config.yml");
+        testConfig(infoFile, "information.yml");
+        testConfig(signFile, "signs.yml");
+
+        //TODO add ride files
 
         try {
 
             //Loading the custom config file into the file configuration
-            info.load(information);
-            dropTowerConfig.load(dropTower);
-            carouselConfig.load(carousel);
-            ferrisWheelConfig.load(ferrisWheel);
-            signsConfig.load(signs);
-            chairSwingConfig.load(chairSwing);
+            infoConfig.load(infoFile);
+            signsConfig.load(signFile);
+            mainConfig.load(mainFile);
+
+            //TODO add ride files
 
         } catch (InvalidConfigurationException | IOException e) {
             e.printStackTrace();
@@ -80,11 +110,9 @@ class ConfigHandler {
     public enum ConfigType
         {
             INFORMATION,
-            DROPTOWER,
-            FERRISWHEEL,
-            CAROUSEL,
+            MAIN,
             SIGNS,
-            CHAIRSWING
+            RIDE
         }
 
 
@@ -101,32 +129,12 @@ class ConfigHandler {
             switch (type) {
                 case INFORMATION:
 
-                    info.set(path, entry);
-                    break;
-
-                case CAROUSEL:
-
-                    carouselConfig.set(path, entry);
-                    break;
-
-                case DROPTOWER:
-
-                    dropTowerConfig.set(path, entry);
-                    break;
-
-                case FERRISWHEEL:
-
-                    ferrisWheelConfig.set(path, entry);
+                    infoConfig.set(path, entry);
                     break;
 
                 case SIGNS:
 
                     signsConfig.set(path, entry);
-                    break;
-
-                case CHAIRSWING:
-
-                    chairSwingConfig.set(path, entry);
                     break;
 
             }
@@ -145,26 +153,12 @@ class ConfigHandler {
             switch (type) {
                 case INFORMATION:
 
-                    return (String) info.get(path);
-
-                case CAROUSEL:
-
-                    return (String) carouselConfig.get(path);
-
-                case DROPTOWER:
-
-                    return (String) dropTowerConfig.get(path);
-
-                case FERRISWHEEL:
-
-                    return (String) ferrisWheelConfig.get(path);
+                    return (String) infoConfig.get(path);
 
                 case SIGNS:
 
                     return (String) signsConfig.get(path);
 
-                case CHAIRSWING:
-                    return (String) chairSwingConfig.get(path);
 
                 default:
                     return "No config files at the moment.";

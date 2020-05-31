@@ -12,6 +12,26 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
     ConfigHandler.ConfigType type;
 
+    /*
+    Aliases are: /ccrides /ccride /rides /ride
+    
+        Player Commands
+        /ride -> /ride Help
+        /ride help - Show help
+
+        /ride [name] - ride a ride.
+        /ride exit - Abandon your ride.
+        /ride list - list all rides
+
+        Admin Commands
+        /ride reload - reload the plugin & rides
+        /ride create [name] [type] - create a new ride of type
+        /ride delete [name] - delete a ride
+        /ride enable [name] - enable a ride
+        /ride disable [name] - disable a ride
+        /ride linksign [name] - Link a sign to the ride
+        /ride config [name] [option] [value] - Change a ride option
+     */
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String alias, String[] argument) {
 
@@ -72,20 +92,20 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                             type = ConfigHandler.ConfigType.INFORMATION;
                             break;
 
-                        case "carousel":
-
-                            type = ConfigHandler.ConfigType.CAROUSEL;
-                            break;
-
-                        case "droptower":
-
-                            type = ConfigHandler.ConfigType.DROPTOWER;
-                            break;
-
-                        case "ferriswheel":
-
-                            type = ConfigHandler.ConfigType.FERRISWHEEL;
-                            break;
+//                        case "carousel":
+//
+//                            type = ConfigHandler.ConfigType.CAROUSEL;
+//                            break;
+//
+//                        case "droptower":
+//
+//                            type = ConfigHandler.ConfigType.DROPTOWER;
+//                            break;
+//
+//                        case "ferriswheel":
+//
+//                            type = ConfigHandler.ConfigType.FERRISWHEEL;
+//                            break;
 
                         case "help":
 

@@ -1,23 +1,44 @@
 package net.clownercraft.ccRides.rides;
 
-import net.clownercraft.ccRides.Ride;
 import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.util.Vector;
 
 public class Carousel extends Ride {
     int radius;//the radius of the carousel seats
     double currentRotation = 0.0; //Current rotation of the carousel in radians
-    int speed; //number of ticks per full rotation of the carousel
+    int rotatespeed; //number of ticks per full rotation of the carousel
     int length; //number of full rotations per ride.
+    double heightVariation; //The maximum change in height while riding (this is +/-)
+    double heightSpeed; //How many full sine waves per rotation
 
-    public Carousel(Location loc, int cap, int radius, int speed, int length) {
-        super.capacity = cap;
-        super.base = loc;
+    /**
+     * Create a Carousel based on an existing config
+     * @param conf the config to read
+     */
+    public Carousel(FileConfiguration conf) {
+        //TODO
+    }
+
+    /**
+     * Create a carousel
+     * @param loc the location of the centre of rotaion
+     * @param cap the maximum capacity (number of players)
+     * @param radius radius in blocks
+     * @param rotspeed in ticks per revolution
+     * @param length Number of full rotations
+     */
+    public Carousel(Location loc, int cap, int radius, int rotspeed, int length, double heightAmt, double heightCycles) {
+        super.CAPACITY = cap;
+        super.BASE_LOCATION = loc;
         this.radius = radius;
-        this.speed = speed;
+        this.rotatespeed = rotspeed;
         this.length = length;
+        this.heightVariation = heightAmt;
+        this.heightSpeed = heightCycles;
 
         //Spawn a minecart for each seat of the ride.
         for (int i = 0; i < cap; i++) {
@@ -31,14 +52,15 @@ public class Carousel extends Ride {
         }
     }
 
+
     public void startRide() {
-        rideRunning = true;
+        RUNNING = true;
         //TODO
     }
 
     public void stopRide() {
         currentRotation = 0.0;
-        rideRunning = false;
+        RUNNING = false;
         //TODO
     }
 
@@ -50,7 +72,7 @@ public class Carousel extends Ride {
         //despawn minecarts & clear seats list
         super.despawnSeats();
         //Spawn a minecart for each seat of the ride.
-        for (int i = 0; i < capacity; i++) {
+        for (int i = 0; i < CAPACITY; i++) {
             Location loc2 = getPosition(i);
             Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
             //Make carts invulnerable, not affected by gravity and have no velocity
@@ -62,6 +84,30 @@ public class Carousel extends Ride {
     }
 
     /**
+     * Put a player onto the ride
+     *
+     * @param player the player to add
+     */
+    @Override
+    public void addPlayer(Player player) {
+
+    }
+
+    @Override
+    public void ejectPlayer(Player player) {
+
+    }
+
+    /**
+     * @return A FileConfiguration containing all of this Carousel's settings
+     */
+    @Override
+    public FileConfiguration createConfig() {
+        //TODO
+        return null;
+    }
+
+    /**
      * gets the position of a seat
      *
      * @param seatNum = the index of the seat to check
@@ -69,6 +115,7 @@ public class Carousel extends Ride {
      */
     public Location getPosition(int seatNum) {
         return null;
+        //todo
     }
 
 }
