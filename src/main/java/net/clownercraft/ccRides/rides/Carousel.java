@@ -20,37 +20,48 @@ public class Carousel extends Ride {
      * @param conf the config to read
      */
     public Carousel(FileConfiguration conf) {
+        super.TYPE = "CAROUSEL";
         //TODO
     }
 
     /**
-     * Create a carousel
-     * @param loc the location of the centre of rotaion
-     * @param cap the maximum capacity (number of players)
-     * @param radius radius in blocks
-     * @param rotspeed in ticks per revolution
-     * @param length Number of full rotations
+     * Create a new Carousel, with no settings
+     * @param name the ID/Name for this ride
      */
-    public Carousel(Location loc, int cap, int radius, int rotspeed, int length, double heightAmt, double heightCycles) {
-        super.CAPACITY = cap;
-        super.BASE_LOCATION = loc;
-        this.radius = radius;
-        this.rotatespeed = rotspeed;
-        this.length = length;
-        this.heightVariation = heightAmt;
-        this.heightSpeed = heightCycles;
-
-        //Spawn a minecart for each seat of the ride.
-        for (int i = 0; i < cap; i++) {
-            Location loc2 = getPosition(i);
-            Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
-            //Make carts invulnerable, not affected by gravity and have no velocity
-            cart.setInvulnerable(true);
-            cart.setGravity(false);
-            cart.setVelocity(new Vector(0, 0, 0));
-            super.seats.add(cart);
-        }
+    public Carousel(String name) {
+        super.TYPE = "CAROUSEL";
+    //TODO
     }
+
+
+//    /**
+//     * Create a carousel
+//     * @param loc the location of the centre of rotaion
+//     * @param cap the maximum capacity (number of players)
+//     * @param radius radius in blocks
+//     * @param rotspeed in ticks per revolution
+//     * @param length Number of full rotations
+//     */
+//    public Carousel(Location loc, int cap, int radius, int rotspeed, int length, double heightAmt, double heightCycles) {
+//        super.CAPACITY = cap;
+//        super.BASE_LOCATION = loc;
+//        this.radius = radius;
+//        this.rotatespeed = rotspeed;
+//        this.length = length;
+//        this.heightVariation = heightAmt;
+//        this.heightSpeed = heightCycles;
+//
+//        //Spawn a minecart for each seat of the ride.
+//        for (int i = 0; i < cap; i++) {
+//            Location loc2 = getPosition(i);
+//            Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
+//            //Make carts invulnerable, not affected by gravity and have no velocity
+//            cart.setInvulnerable(true);
+//            cart.setGravity(false);
+//            cart.setVelocity(new Vector(0, 0, 0));
+//            super.seats.add(cart);
+//        }
+//    }
 
 
     public void startRide() {
@@ -105,6 +116,49 @@ public class Carousel extends Ride {
     public FileConfiguration createConfig() {
         //TODO
         return null;
+    }
+
+    /**
+     * Get the list of options you can set
+     *
+     * @return A string containing a list of options, comma seperated.
+     */
+    @Override
+    public String getConfigOptions() {
+        return null;
+    }
+
+    /**
+     * @param key    the key of the setting
+     * @param value  the new value of the setting
+     * @param sender the player that executed the setting change
+     * @return String containing the message to tell player
+     */
+    @Override
+    public String setConfigOption(String key, String value, Player sender) {
+        return null;
+    }
+
+    /**
+     * Enable the ride
+     *
+     * @return false if failed (ie not all settings configured yet)
+     */
+    @Override
+    public boolean enable() {
+        //TODO Check if all settings are set
+
+
+        //TODO Actually Enable the ride
+        return false;
+    }
+
+    /**
+     * Disable the ride
+     */
+    @Override
+    public void disable() {
+        //TODO disable the ride.
     }
 
     /**

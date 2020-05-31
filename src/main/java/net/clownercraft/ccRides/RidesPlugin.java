@@ -1,5 +1,9 @@
 package net.clownercraft.ccRides;
 
+import net.clownercraft.ccRides.rides.Carousel;
+import net.clownercraft.ccRides.rides.DropTower;
+import net.clownercraft.ccRides.rides.FerrisWheel;
+import net.clownercraft.ccRides.rides.Ride;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,6 +56,12 @@ public class RidesPlugin extends JavaPlugin {
 
        //this should create the config files
        configHandler.createConfig();
+
+
+       //Register Rides
+       Ride.registerType("CAROUSEL", Carousel.class);
+       Ride.registerType("DROP_TOWER", DropTower.class);
+       Ride.registerType("FERRIS_WHEEL", FerrisWheel.class);
 
        Bukkit.getLogger().info("Starting RidesPlugin!");
 

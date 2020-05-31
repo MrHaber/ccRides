@@ -6,16 +6,19 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
  * Represents a generic single ride.
  */
 public abstract class Ride {
+    public static HashMap<String,Class<? extends Ride>> RideTypes = new HashMap<>();
+
     /*
     SETTINGS
      */
-    RideType TYPE; //Which type of ride this is
+    String TYPE; //Which type of ride this is
     String ID; //A Unique ID/Name for the ride. Used in Commands
     int CAPACITY = 0; //The number of available seats
     Location BASE_LOCATION; //Center location for the ride layout
@@ -103,33 +106,17 @@ public abstract class Ride {
      */
     public abstract FileConfiguration createConfig();
 
-    /**
-     * Enum of all Available Ride Types
-     */
-    public enum RideType {
-        CAROUSEL,
-        DROP_TOWER,
-        FERRIS_WHEEL;
-
-    }
     public static Ride RideFromConfig(FileConfiguration conf) {
         String type = conf.getString("RideType");
-        RideType Rtype = RideType.valueOf(type);
-
-        Ride out;
-
-        switch (Rtype) {
-            case CAROUSEL:
-                out = new Carousel(conf);
-                //TODO
-                break;
-            case DROP_TOWER:
-                //TODO
-                break;
-            case FERRIS_WHEEL:
-                //TODO
-                break;
-        }
+        if (RideTypes.containsKey(type)) {
+            try {
+                Ride out = RideTypes.get(type).getConstructor(conf.getClass()).newInstance(conf);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                RidesPlugin.getInstance().getLogger().severe("Couldn't load ride from Config! Unrecognised type: " + type);
+                e.printStackTrace();
+                return null;
+            }
+        } else return null;
         return null;
     }
 
@@ -148,6 +135,41 @@ public abstract class Ride {
     }
 
     public void addToQueue() {
+        //TODO
+    }
 
+    /**
+     * Get the list of options you can set
+     * @return A string containing a list of options, comma seperated.
+     */
+    public abstract String getConfigOptions();
+
+    /**
+     *
+     * @param key the key of the setting
+     * @param value the new value of the setting
+     * @param sender the player that executed the setting change
+     * @return String containing the message to tell player
+     */
+    public abstract String setConfigOption(String key, String value, Player sender);
+
+    /**
+     * Enable the ride
+     * @return false if failed (ie not all settings configured yet)
+     */
+    public abstract boolean enable();
+
+    /**
+     * Disable the ride
+     */
+    public abstract void disable();
+
+    /**
+     * Register a ride type
+     * @param type String identifier for the ride type
+     * @param rideClass The Class for that ride
+     */
+    public static void registerType(String type, Class<? extends Ride> rideClass) {
+        RideTypes.put(type,rideClass);
     }
 }
