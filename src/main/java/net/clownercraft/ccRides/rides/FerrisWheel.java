@@ -4,6 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class FerrisWheel extends Ride {
 
     public void startRide() {
@@ -49,9 +51,16 @@ public class FerrisWheel extends Ride {
      *
      * @return A string containing a list of options, comma seperated.
      */
-    @Override
-    public String getConfigOptions() {
-        return null;
+    public static List<String> getConfigOptions() {
+        //Get default options;
+        List<String> out = Ride.getConfigOptions();
+        //Add Ride Specific Options
+        out.add("RADIUS");
+        out.add("ROTATE_SPEED");
+        out.add("RIDE_LENGTH");
+        out.add("HEIGHT_VAR");
+        out.add("HEIGHT_SPEED");
+        return out;
     }
 
     /**

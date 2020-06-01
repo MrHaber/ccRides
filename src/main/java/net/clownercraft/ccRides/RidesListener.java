@@ -35,27 +35,6 @@ class RidesListener implements Listener {
 
     }
 
-    @EventHandler
-    public void onCartExit(VehicleExitEvent e) {
-        //Cancel if cart is part of a ride.
-        //TODO
-    }
-
-    @EventHandler
-    public void onCartEnter(VehicleEnterEvent e) {
-        //Cancel if cart is part of a ride.
-        //TODO
-    }
-
-    /**
-     * Check when players disconnect if they are on a ride, and eject them from it if they are
-     * @param event the quit event
-     */
-    @EventHandler
-    public void onPlayerLeave(PlayerQuitEvent event) {
-        //TODO
-    }
-
     /**
      * Remove minecarts from the world as it's unloaded, to prevent them being saved
      * @param event the world unload event

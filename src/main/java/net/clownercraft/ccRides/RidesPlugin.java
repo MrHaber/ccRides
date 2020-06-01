@@ -63,6 +63,9 @@ public class RidesPlugin extends JavaPlugin {
        Ride.registerType("DROP_TOWER", DropTower.class);
        Ride.registerType("FERRIS_WHEEL", FerrisWheel.class);
 
+       //init rides
+       //register rides as event listener
+
        Bukkit.getLogger().info("Starting RidesPlugin!");
 
    }

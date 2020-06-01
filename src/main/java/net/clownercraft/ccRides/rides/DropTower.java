@@ -4,6 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class DropTower extends Ride {
 
     public void startRide() {
@@ -52,8 +54,8 @@ public class DropTower extends Ride {
      *
      * @return A string containing a list of options, comma seperated.
      */
-    @Override
-    public String getConfigOptions() {
+
+    public static List<String> getConfigOptions() {
         return null;
     }
 
