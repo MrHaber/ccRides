@@ -15,6 +15,7 @@ public class Carousel extends Ride {
     Double heightVariation; //The maximum change in height while riding (this is +/-)
     Double heightSpeed; //How many full sine waves per rotation
 
+
     /**
      * Create a Carousel based on an existing config
      * @param conf the config to read
@@ -103,9 +104,10 @@ public class Carousel extends Ride {
      *
      * @return A string list containing all options.
      */
-    public static List<String> getConfigOptions() {
+    @Override
+    public List<String> getConfigOptions() {
         //Get Default Options
-        List<String> out = Ride.getConfigOptions();
+        List<String> out = super.getConfigOptions();
         //Add Carousel Specific Options
         out.add("RADIUS");
         out.add("ROTATE_SPEED");

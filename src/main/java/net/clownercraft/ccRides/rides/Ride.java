@@ -26,6 +26,10 @@ import java.util.*;
  * Represents a generic single ride.
  */
 public abstract class Ride implements Listener {
+    public static HashMap<String, Class<? extends Ride>> getRideTypes() {
+        return RideTypes;
+    }
+
     public static HashMap<String,Class<? extends Ride>> RideTypes = new HashMap<>();
 
     /*
@@ -320,7 +324,7 @@ public abstract class Ride implements Listener {
      * Get the list of options you can set
      * @return A string List containing all options.
      */
-    public static List<String> getConfigOptions() {
+    public List<String> getConfigOptions() {
         List<String> out = new ArrayList<>();
         out.add("ENABLED");
         out.add("BASE_LOCATION");

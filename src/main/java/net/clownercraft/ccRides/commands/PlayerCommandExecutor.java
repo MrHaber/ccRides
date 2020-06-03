@@ -11,13 +11,14 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Handles the player rides command
  *
+ * Command Structure:
+ *
  * Aliases: /ride /ccride /rides /ccrides
+ *
  * /ride - show help
  * /ride help - show help
  * /ride <name> - ride a ride
@@ -79,12 +80,12 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                 }
                 String finalList = list.substring(0,list.length()-4);
 
-                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_player_listRides).replaceAll("\\{ridelist}", finalList));
+                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_listRides).replaceAll("\\{ridelist}", finalList));
                 return true;
             } else {
                 // Check if they entered a ride name
                 ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
-                if (conf.rides.keySet().contains(subcommand.toLowerCase())) {
+                if (conf.rides.keySet().contains(subcommand)) {
                     //The arg is a ride name, add the player to it
                     //The addplayer method sends messages depending what it does, so we don't need to here.
                     conf.rides.get(subcommand).addPlayer((Player) commandSender);
@@ -107,16 +108,9 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
             }
 
             //Filter by what they've already typed
-            out = filterList(out,"^"+args[0]);
+            out = Messages.filterList(out,"^"+args[0]);
         }
         return out;
-    }
-
-    public List<String> filterList(List<String> list, String regex) {
-        Pattern filter = Pattern.compile(regex);
-        return list.stream()
-                .filter(filter.asPredicate())
-                .collect(Collectors.toList());
     }
 
 }
