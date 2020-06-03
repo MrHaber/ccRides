@@ -1,21 +1,19 @@
 package net.clownercraft.ccRides.rides;
 
+import net.clownercraft.ccRides.RidesPlugin;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.util.Vector;
 
 import java.util.List;
 
 public class Carousel extends Ride {
-    int radius;//the radius of the carousel seats
-    double currentRotation = 0.0; //Current rotation of the carousel in radians
-    int rotatespeed; //number of ticks per full rotation of the carousel
-    int length; //number of full rotations per ride.
-    double heightVariation; //The maximum change in height while riding (this is +/-)
-    double heightSpeed; //How many full sine waves per rotation
+    Integer radius;//the radius of the carousel seats
+    Double currentRotation = 0.0; //Current rotation of the carousel in radians
+    Integer rotatespeed; //number of ticks per full rotation of the carousel
+    Integer length; //number of full rotations per ride.
+    Double heightVariation; //The maximum change in height while riding (this is +/-)
+    Double heightSpeed; //How many full sine waves per rotation
 
     /**
      * Create a Carousel based on an existing config
@@ -29,7 +27,11 @@ public class Carousel extends Ride {
         super.setRideOptions(conf);
 
         //load carousel specific options
-        //TODO
+        radius = conf.getInt("Carousel.Radius");
+        rotatespeed = conf.getInt("Carousel.Rotation.Ticks_Per_Full_Rotation");
+        length = conf.getInt("Carousel.Rotation.Num_Cycles");
+        heightVariation = conf.getDouble("Carousel.Height.Max_Change_±");
+        heightSpeed = conf.getDouble("Carousel.Height.Cycles_Per_Rotation");
     }
 
     /**
@@ -37,84 +39,43 @@ public class Carousel extends Ride {
      * @param name the ID/Name for this ride
      */
     public Carousel(String name) {
+        //Setyp basic settings
         super.TYPE = "CAROUSEL";
-    //TODO
+        super.ID = name;
+
+        //Save a default config
+        RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
     }
-
-
-//    /**
-//     * Create a carousel
-//     * @param loc the location of the centre of rotaion
-//     * @param cap the maximum capacity (number of players)
-//     * @param radius radius in blocks
-//     * @param rotspeed in ticks per revolution
-//     * @param length Number of full rotations
-//     */
-//    public Carousel(Location loc, int cap, int radius, int rotspeed, int length, double heightAmt, double heightCycles) {
-//        super.CAPACITY = cap;
-//        super.BASE_LOCATION = loc;
-//        this.radius = radius;
-//        this.rotatespeed = rotspeed;
-//        this.length = length;
-//        this.heightVariation = heightAmt;
-//        this.heightSpeed = heightCycles;
-//
-//        //Spawn a minecart for each seat of the ride.
-//        for (int i = 0; i < cap; i++) {
-//            Location loc2 = getPosition(i);
-//            Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
-//            //Make carts invulnerable, not affected by gravity and have no velocity
-//            cart.setInvulnerable(true);
-//            cart.setGravity(false);
-//            cart.setVelocity(new Vector(0, 0, 0));
-//            super.seats.add(cart);
-//        }
-//    }
-
 
     public void startRide() {
         RUNNING = true;
+
+
         //TODO
     }
 
     public void stopRide() {
+        //TODO Cancel movement & reset Positions
+
         currentRotation = 0.0;
-        RUNNING = false;
-        //TODO
-    }
 
-    public void tickPositions() {
-        //TODO
-    }
-
-    public void respawnSeats() {
-        //despawn minecarts & clear seats list
-        super.despawnSeats();
-        //Spawn a minecart for each seat of the ride.
-        for (int i = 0; i < CAPACITY; i++) {
-            Location loc2 = getPosition(i);
-            Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
-            //Make carts invulnerable, not affected by gravity and have no velocity
-            cart.setInvulnerable(true);
-            cart.setGravity(false);
-            cart.setVelocity(new Vector(0, 0, 0));
-            seats.add(cart);
+        //Eject Players
+        for (Player p:riders) {
+            ejectPlayer(p);
         }
+
+        RUNNING = false;
     }
 
     /**
-     * Put a player onto the ride
+     * gets the position of a seat at the current point in the ride cycle
      *
-     * @param player the player to add
+     * @param seatNum = the index of the seat to check
+     * @return = the location the seat should currently be
      */
-    @Override
-    public void addPlayer(Player player) {
-
-    }
-
-    @Override
-    public void ejectPlayer(Player player) {
-
+    public Location getPosition(int seatNum) {
+        return null;
+        //todo
     }
 
     /**
@@ -126,11 +87,13 @@ public class Carousel extends Ride {
         FileConfiguration out = super.createConfig();
 
         //Add Carousel Specific Options
+        try{
         out.set("Carousel.Radius",radius);
         out.set("Carousel.Rotation.Ticks_Per_Full_Rotation",rotatespeed);
         out.set("Carousel.Rotation.Num_Cycles",length);
         out.set("Carousel.Height.Max_Change_±",heightVariation);
         out.set("Carousel.Height.Cycles_Per_Rotation",heightSpeed);
+        } catch (NullPointerException ignored) {}
 
         return out;
     }
@@ -167,24 +130,52 @@ public class Carousel extends Ride {
     public String setConfigOption(String key, String value, Player sender) {
         String out = super.setConfigOption(key,value,sender);
         if (out.equals("")) {
-            //The setting wasn't one of the defaults, so let's set ride specicis ones.
+
+            //The setting wasn't one of the defaults, so let's set carousel specific ones.
             switch (key) {
+
                 case "RADIUS": //integer, in number of blocks
-                    //TODO
+                    try{
+                        radius = Integer.parseInt(value);
+                    out = "Radius set to " + radius + " blocks.";
+                    } catch (NumberFormatException e) {
+                        out = "Radius must be an integer number of blocks.";
+                    }
                     break;
                 case "ROTATE_SPEED": //integer, ticks per full rotation
-                    //TODO
+                    try{
+                        rotatespeed = Integer.parseInt(value);
+                        out = "Rotate_Speed set to " + rotatespeed + " ticks per rotation.";
+                    } catch (NumberFormatException e) {
+                        out = "Rotate_Speed must be an integer number of ticks per rotation.";
+                    }
                     break;
                 case "RIDE_LENGTH": //integer, number of full rotations per ride
-                    //TODO
+                    try{
+                        length = Integer.parseInt(value);
+                        out = "RIDE_LENGTH set to " + length + " rotations.";
+                    } catch (NumberFormatException e) {
+                        out = "RIDE_LENGTH must be an integer number of rotations.";
+                    }
                     break;
                 case "HEIGHT_VAR": //double, the max +/- height variation in blocks
-                    //TODO
+                    try{
+                        heightVariation = Double.parseDouble(value);
+                        out = "HEIGHT_VAR set to ±" + heightVariation + " blocks.";
+                    } catch (NumberFormatException e) {
+                        out = "HEIGHT_VAR must be an double number of blocks.";
+                    }
                     break;
                 case "HEIGHT_SPEED": //double, the number of full height cycles per rotation
-                    //TODO
+                    try{
+                        heightSpeed = Double.parseDouble(value);
+                        out = "HEIGHT_SPEED set to " + heightSpeed + " cycles per rotation.";
+                    } catch (NumberFormatException e) {
+                        out = "HEIGHT_VAR must be an double number of cycles per rotation.";
+                    }
                     break;
             }
+            RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
         }
 
         //If out is still empty, we didn't recognise the option key
@@ -201,11 +192,25 @@ public class Carousel extends Ride {
      */
     @Override
     public boolean enable() {
-        //TODO Check if all settings are set
+        //Check if all settings are set
+        if (
+                BASE_LOCATION == null
+                        || EXIT_LOCATION == null
+                        || CAPACITY == null
+                        || ID == null
+                        || TYPE == null
+                        || radius == null
+                        || rotatespeed == null
+                        || length == null
+                        || heightVariation == null
+                        || heightSpeed == null
+        ) return false;
 
+        //Enable the ride and spawn in seats
+        respawnSeats();
+        ENABLED = true;
 
-        //TODO Actually Enable the ride
-        return false;
+        return true;
     }
 
     /**
@@ -213,18 +218,10 @@ public class Carousel extends Ride {
      */
     @Override
     public void disable() {
-        //TODO disable the ride.
+        stopRide();
+        despawnSeats();
+        ENABLED = false;
     }
 
-    /**
-     * gets the position of a seat
-     *
-     * @param seatNum = the index of the seat to check
-     * @return = the location the seat should currently be
-     */
-    public Location getPosition(int seatNum) {
-        return null;
-        //todo
-    }
 
 }

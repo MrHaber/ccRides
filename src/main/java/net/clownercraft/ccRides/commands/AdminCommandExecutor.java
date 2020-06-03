@@ -1,40 +1,40 @@
-package net.clownercraft.ccRides;
+package net.clownercraft.ccRides.commands;
 
+import net.clownercraft.ccRides.Config.ConfigHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
 import java.util.Arrays;
+import java.util.List;
 
-public class CommandExecutor implements org.bukkit.command.CommandExecutor {
+/**
+ * Handles the Ride Admin Command
+ *
+ * Aliases: /rideadmin /rideadm
+ * /rideadm reload - reload the whole plugin
+ * /rideadm reload [ridename] - reload a specific plugin
+ * /rideadm create [ridename] - create a new ride
+ * /rideadm delete [ridename] - create a new ride
+ * /rideadm linksign [ridename] - link a sign to a ride
+ * /rideadm list - see a list of all rides
+ *
+ * /rideadm <ridename> - View ride info
+ * /rideadm <ridename> reload - reload a single ride
+ * /rideadm <ridename> enable/disable - enable/disable ride
+ * /rideadm <ridename> setting [setting] [value] - reload a ride setting.
+ */
+public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
 
     ConfigHandler configHandler = new ConfigHandler();
 
     ConfigHandler.ConfigType type;
 
-    /*
-    Aliases are: /ccrides /ccride /rides /ride
-    
-        Player Commands
-        /ride -> /ride Help
-        /ride help - Show help
-
-        /ride [name] - ride a ride.
-        /ride exit - Abandon your ride.
-        /ride list - list all rides
-
-        Admin Commands
-        /ride reload - reload the plugin & rides
-        /ride create [name] [type] - create a new ride of type
-        /ride delete [name] - delete a ride
-        /ride enable [name] - enable a ride
-        /ride disable [name] - disable a ride
-        /ride linksign [name] - Link a sign to the ride
-        /ride config [name] [option] [value] - Change a ride option
-     */
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String alias, String[] argument) {
-
+        //TODO Redo this vvv
         if(alias.equalsIgnoreCase("ccrides")) {
 
             try{
@@ -174,5 +174,19 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
         return false;
 
+    }
+
+    /**
+     * Implement Tab completion
+     * @param commandSender
+     * @param command
+     * @param s
+     * @param strings
+     * @return
+     */
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        return null;
+        //TODO
     }
 }

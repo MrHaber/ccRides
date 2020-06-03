@@ -1,15 +1,20 @@
 name: ccRides
-version: 0.1.2
+version: ${project.version}
 api-version: '1.15'
 main: net.clownercraft.ccRides.RidesPlugin
 authors: [TheClowner, N1ghthauq]
-description: This plugin will be the heart and soul of the Clowner Carnival
+description: This plugin will be the heart and soul of the ClownerCraft Carnival
 load: POSTWORLD
 prefix: ccRides
 website: clownercraft.net
 commands:
-    ccrides:
-        description: Rides Base Command
+    ride:
+        description: Rides Base Command, for player functions
+        permission: ccrides.user
+        aliases: [ccride,rides,ccrides]
+        usage: "/ride help"
+    rideadmin:
+        description: Rides admin command
         permission: ccrides.admin
-        aliases: [ride,rides,ccride]
-        usage: "/ccrides (config <type> {set[<path> <entry>] | get[<path>]}) (help) (set-ride <name> <type> {ride start: <x-loc> <y-loc> <z-loc>} {orientation: <west-east | north-south>) (delete-ride <name>) (show-rides)"
+        aliases: [rideadm]
+        usage: "/rideadmin help"
