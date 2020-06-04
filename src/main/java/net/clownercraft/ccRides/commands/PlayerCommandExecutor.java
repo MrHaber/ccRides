@@ -80,7 +80,7 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                 }
                 String finalList = list.substring(0,list.length()-4);
 
-                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_listRides).replaceAll("\\{ridelist}", finalList));
+                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_listRides.replaceAll("\\{ridelist}", finalList)));
                 return true;
             } else {
                 // Check if they entered a ride name
@@ -97,18 +97,18 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String label, String[] args) {
-        List<String> out = new ArrayList<>();
+        ArrayList<String> out = new ArrayList<>();
         if (args.length==1) {
             //Add basic options
-            out = Arrays.asList("help", "exit", "lq", "list");
+            out = new ArrayList<>(Arrays.asList("help", "exit", "lq", "list"));
 
             //add ride names
-            for (String ride: RidesPlugin.getInstance().getConfigHandler().rides.keySet()) {
-                out.add(ride);
-            }
+            out.addAll(RidesPlugin.getInstance().getConfigHandler().rides.keySet());
 
             //Filter by what they've already typed
             out = Messages.filterList(out,"^"+args[0]);
+        } else {
+            out.add("");
         }
         return out;
     }

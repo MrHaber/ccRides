@@ -208,7 +208,7 @@ public class ConfigHandler {
        sender.sendMessage("Reloading the config...");
 
        //Load the updated config
-       FileConfiguration conf = YamlConfiguration.loadConfiguration(new File(rideFolder,rideID+".yml"));
+       YamlConfiguration conf = YamlConfiguration.loadConfiguration(new File(rideFolder,rideID+".yml"));
        rideConfigs.put(rideID,conf);
 
 
@@ -257,6 +257,34 @@ public class ConfigHandler {
        } catch (IOException e) {
            e.printStackTrace();
        }
+   }
+
+   public void deleteRide(String name) {
+       Ride r = rides.get(name);
+
+       //Disable the ride
+       //Ejects players, despawns seats, clears queue
+       r.disable();
+
+       //unregister listeners
+       HandlerList.unregisterAll(r);
+
+       //remove ride object
+        rides.remove(name);
+
+       //remove any linked signs
+       for (Location loc : rideSigns.keySet()) {
+           String rname = rideSigns.get(loc);
+           if (rname!=null && rname.equals(name)) {
+               rideSigns.remove(loc);
+           }
+       }
+       saveSignConfig();
+
+       //delete the ride config
+       rideConfigs.remove(name);
+       File rideFile = new File(rideFolder,name+".yml");
+       rideFile.delete();
    }
 
 }

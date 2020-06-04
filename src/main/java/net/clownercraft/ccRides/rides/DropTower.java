@@ -54,9 +54,9 @@ public class DropTower extends Ride {
      *
      * @return A string containing a list of options, comma seperated.
      */
-
-    public static List<String> getConfigOptions() {
-        return null;
+    @Override
+    public List<String> getConfigOptions() {
+        return super.getConfigOptions();
     }
 
     /**

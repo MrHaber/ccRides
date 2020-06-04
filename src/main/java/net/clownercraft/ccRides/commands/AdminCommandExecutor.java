@@ -12,10 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Handles the Ride Admin Command
@@ -86,7 +83,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                 }
                 String finalList = list.substring(0,list.length()-4);
 
-                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_listRides).replaceAll("\\{ridelist}", finalList));
+                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_listRides.replaceAll("\\{ridelist}", finalList)));
                 return true;
             case "create":
                 Set<String> rideTypes = Ride.RideTypes.keySet();
@@ -99,36 +96,178 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
 
                 if (args.length<3) {
                     //Missing arguments
-                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_create_ride_syntax).replaceAll("\\{types}", finalTypeList));
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_create_ride_syntax.replaceAll("\\{types}", finalTypeList)));
                     return true;
                 }
                 String rideName = args[1];
+                if (conf.rides.keySet().contains(rideName)) {
+                    //Ride already exists
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_create_ride_exists.replaceAll("\\{ride}", rideName)));
+
+                    return true;
+
+                }
                 String rideType = args[2].toUpperCase();
                 if(!Ride.RideTypes.containsKey(rideType)) {
                     //Invalid ride type
-                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_create_ride_syntax).replaceAll("\\{types}", finalTypeList));
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_create_ride_syntax.replaceAll("\\{types}", finalTypeList)));
                 }
 
                 try {
                     conf.rides.put(rideName, Ride.RideTypes.get(rideType).getConstructor(new Class[]{String.class}).newInstance(rideName));
-                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_create_ride).replaceAll("\\{ride}", rideName).replaceAll("\\{type}",rideType));
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_create_ride.replaceAll("\\{ride}", rideName).replaceAll("\\{type}",rideType)));
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
 
                 return true;
             case "delete":
-                //TODO
-                return true;
+                if (args.length<2) {
+                    //Missing arguments
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_delete_ride_syntax));
+                    return true;
+                } else {
+                    String rideName2 = args[1];
+                    if (conf.rides.containsKey(rideName2)) {
+                        //Disable the ride
+                        conf.deleteRide(rideName2);
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_delete_ride).replaceAll("\\{ride}",rideName2));
+                    } else {
+                        //Ride name is invalid
+                        Set<String> rides2 = RidesPlugin.getInstance().getConfigHandler().rides.keySet();
+
+                        StringBuilder list2 = new StringBuilder();
+                        for (String r:rides2) {
+                            list2.append("&9").append(r).append("&1, ");
+                        }
+                        String finalList2 = list2.substring(0,list2.length()-4);
+
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_ride_not_exist));
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_listRides.replaceAll("\\{ridelist}", finalList2)));
+                    }
+                    return true;
+                }
             case "linksign":
                 //TODO
+
+
+                return true;
+            case "unlinksign":
+                //TODO
+
+
                 return true;
             default:
                 //args[0] is a ride name or not valid.
-                //TODO
-        }
+                String rideName3 = args[0];
+                if (conf.rides.containsKey(rideName3)) {
+                    Ride ride = conf.rides.get(rideName3);
 
-        return false;
+                    if (args.length<2) {
+                        // Show Ride Info
+                        StringBuilder out = new StringBuilder(Messages.command_admin_ride_info);
+                        HashMap<String,String> info = ride.getRideInfo();
+                        for (String str:info.keySet()) {
+                            out.append("&9").append(str).append(": &b").append(info.get(str)).append("\n");
+                        }
+                        out = new StringBuilder(ChatColor.translateAlternateColorCodes('&', out.toString()));
+                        commandSender.sendMessage(out.toString());
+                    } else {
+                        switch (args[1]) {
+                            case "info":
+                                // Show ride info
+                                StringBuilder out = new StringBuilder(Messages.command_admin_ride_info);
+                                HashMap<String,String> info = ride.getRideInfo();
+
+                                for (String str:info.keySet()) {
+                                    out.append("&9").append(str).append(": &b").append(info.get(str)).append("\n");
+                                }
+
+                                out = new StringBuilder(ChatColor.translateAlternateColorCodes('&', out.toString()));
+                                commandSender.sendMessage(out.toString());
+
+                                break;
+                            case "reload":
+                                //reloadRide sends messages
+                                conf.reloadRide(rideName3,commandSender);
+                                return true;
+                            case "enable":
+                                //Try to enable the ride
+                                if (ride.enable()) {
+                                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_ride_enable).replaceAll("\\{ride}",rideName3));
+                                } else {
+                                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_ride_enable_fail).replaceAll("\\{ride}",rideName3));
+                                }
+                                return true;
+                            case "disable":
+                                ride.disable();
+                                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_ride_disable).replaceAll("\\{ride}",rideName3));
+                                return true;
+                            case "setting":
+                                //Check if a setting is given
+                                if (args.length<4) {
+                                    //Not enough arguments
+
+                                    //Show available settings
+                                    List<String> options = ride.getConfigOptions();
+                                    StringBuilder optionStr = new StringBuilder();
+                                    for (String str:options) {
+                                        optionStr.append("&9").append(str).append("&1, ");
+                                    }
+                                    String optionStr2 = optionStr.toString().substring(0,optionStr.length()-4);
+                                    String message = Messages.command_admin_ride_setting_list.replaceAll("\\{settings}",optionStr2);
+                                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',message));
+                                    return true;
+                                }
+                                String settingKey = args[2];
+                                if (ride.getConfigOptions().contains(settingKey.toUpperCase())) {
+                                    //Valid option, try setting the value
+                                    StringBuilder value = new StringBuilder();
+                                    for (int i=3;i<args.length;i++) {
+                                        value.append(args[i]).append(" ");
+                                    }
+
+                                    String result = ride.setConfigOption(settingKey.toUpperCase(), value.toString(), (Player) commandSender);
+                                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',result));
+                                    return true;
+                                } else {
+                                    //invalid setting. Print options.
+                                    //Show available settings
+                                    List<String> options = ride.getConfigOptions();
+                                    StringBuilder optionStr = new StringBuilder();
+                                    for (String str:options) {
+                                        optionStr.append("&9").append(str).append("&1, ");
+                                    }
+                                    String optionStr2 = optionStr.toString().substring(0,optionStr.length()-4);
+                                    String message = Messages.command_admin_ride_setting_list.replaceAll("\\{settings}",optionStr2);
+                                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',message));
+                                    return true;
+                                }
+                            default:
+                                //Invalid sub command
+                                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_admin_ride_invalid_sub));
+                                return true;
+                        }
+
+                    }
+
+
+                } else {
+                    //Ride name is invalid
+                    Set<String> rides2 = RidesPlugin.getInstance().getConfigHandler().rides.keySet();
+
+                    StringBuilder list2 = new StringBuilder();
+                    for (String r:rides2) {
+                        list2.append("&9").append(r).append("&1, ");
+                    }
+                    String finalList2 = list2.substring(0,list2.length()-4);
+
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_ride_not_exist));
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_listRides.replaceAll("\\{ridelist}", finalList2)));
+                }
+                return true;
+
+        }
 
     }
 
@@ -137,12 +276,12 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
      */
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String label, String[] args) {
-        List<String> out = new ArrayList<>();
+        ArrayList<String> out = new ArrayList<>();
 
         //First level options
         if (args.length==1) {
             //Add basic options
-            out = Arrays.asList("help", "reload", "create", "delete", "linksign", "list");
+            out = new ArrayList<>(Arrays.asList("help", "reload", "create", "delete", "linksign","unlinksign", "list"));
 
             //add ride names
             for (String ride: RidesPlugin.getInstance().getConfigHandler().rides.keySet()) {
@@ -169,15 +308,20 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                     break;
                 case "help":
                 case "list":
+                case "create":
+                case "unlinksign":
                     //Add empty string, they have no sub commands
                     out.add("");
                     break;
                 default:
-                    out = Arrays.asList("info", "enable", "disable", "reload", "setting");
+                    out = new ArrayList<>(Arrays.asList("info", "enable", "disable", "reload", "setting"));
                     break;
             }
             out = Messages.filterList(out,"^"+args[1]);
         } else if (args.length==3) {
+            if (args[0].equalsIgnoreCase("create")) {
+                out = new ArrayList<>(Ride.RideTypes.keySet());
+            }
             String ridename = args[0];
             String ridecmd = args[1];
 
@@ -192,7 +336,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                 case "setting":
                     ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
                     if (RidesPlugin.getInstance().getConfigHandler().rides.containsKey(ridename)) {
-                        out = conf.rides.get(ridename).getConfigOptions();
+                        out = new ArrayList<>(conf.rides.get(ridename).getConfigOptions());
                     }
                     break;
             }

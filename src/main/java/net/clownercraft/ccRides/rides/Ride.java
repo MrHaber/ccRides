@@ -26,10 +26,6 @@ import java.util.*;
  * Represents a generic single ride.
  */
 public abstract class Ride implements Listener {
-    public static HashMap<String, Class<? extends Ride>> getRideTypes() {
-        return RideTypes;
-    }
-
     public static HashMap<String,Class<? extends Ride>> RideTypes = new HashMap<>();
 
     /*
@@ -245,18 +241,18 @@ public abstract class Ride implements Listener {
         return out;
     }
 
-    public static Ride RideFromConfig(FileConfiguration conf) {
+    public static Ride RideFromConfig(YamlConfiguration conf) {
         String type = conf.getString("Generic.RideType");
         if (RideTypes.containsKey(type)) {
             try {
                 Ride out = RideTypes.get(type).getConstructor(conf.getClass()).newInstance(conf);
+                return out;
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 RidesPlugin.getInstance().getLogger().severe("Couldn't load ride from Config! Unrecognised type: " + type);
                 e.printStackTrace();
                 return null;
             }
         } else return null;
-        return null;
     }
 
     /**
@@ -349,10 +345,11 @@ public abstract class Ride implements Listener {
      */
     public String setConfigOption(String key, String value, Player sender) {
         String out = "";
+        String[] values = value.split(" ");
         switch(key) {
             case "ENABLED":
                 //Value should be true/false
-                if (Boolean.parseBoolean(value)) {
+                if (Boolean.parseBoolean(values[0])) {
                     if (enable()) {out = "Ride Enabled.";} else {
                         out = "Could Not Enable Ride. Check All Options are set.";
                     }
@@ -369,12 +366,11 @@ public abstract class Ride implements Listener {
                     BASE_LOCATION = location;
                     out = "BASE_LOCATION set to your current position";
                 } else {
-                    String[] strings = value.split(" ");
                     double x,y,z;
                     try{
-                        x = Double.parseDouble(strings[0]);
-                        y = Double.parseDouble(strings[1]);
-                        z = Double.parseDouble(strings[2]);
+                        x = Double.parseDouble(values[0]);
+                        y = Double.parseDouble(values[1]);
+                        z = Double.parseDouble(values[2]);
 
                         location.setX(x);
                         location.setY(y);
@@ -388,7 +384,7 @@ public abstract class Ride implements Listener {
                 break;
             case "CAPACITY":
                 try{
-                    int cap = Integer.parseInt(value);
+                    int cap = Integer.parseInt(values[0]);
                     CAPACITY = cap;
                     out = "CAPACITY set to " + cap + " seats";
                 } catch (NumberFormatException e) {
@@ -403,12 +399,11 @@ public abstract class Ride implements Listener {
                     EXIT_LOCATION = loc2;
                     out = "EXIT_LOCATION set to your current position";
                 } else {
-                    String[] strings = value.split(" ");
                     double x,y,z;
                     try{
-                        x = Double.parseDouble(strings[0]);
-                        y = Double.parseDouble(strings[1]);
-                        z = Double.parseDouble(strings[2]);
+                        x = Double.parseDouble(values[0]);
+                        y = Double.parseDouble(values[1]);
+                        z = Double.parseDouble(values[2]);
 
                         loc2.setX(x);
                         loc2.setY(y);
@@ -422,7 +417,7 @@ public abstract class Ride implements Listener {
                 break;
             case "START_PLAYERS":
                 try{
-                    int startPl = Integer.parseInt(value);
+                    int startPl = Integer.parseInt(values[0]);
                     MIN_START_PLAYERS = startPl;
                     out = "Minimum START_PLAYERS set to " + startPl;
                 } catch (NumberFormatException e) {
@@ -432,7 +427,7 @@ public abstract class Ride implements Listener {
                 break;
             case "START_DELAY":
                 try{
-                    int delay = Integer.parseInt(value);
+                    int delay = Integer.parseInt(values[0]);
                     START_WAIT_TIME = delay;
                     out = "START_DELAY set to " + delay + " seconds";
                 } catch (NumberFormatException e) {
@@ -442,7 +437,7 @@ public abstract class Ride implements Listener {
                 break;
             case "JOIN_AFTER_START":
                 //Value should be true/false
-                if (Boolean.parseBoolean(value)) {
+                if (Boolean.parseBoolean(values[0])) {
                     JOIN_AFTER_START = true;
                     out = "JOIN_AFTER_START set to true. Players can now join the ride even if it has started.";
                 } else {
@@ -452,7 +447,7 @@ public abstract class Ride implements Listener {
                 break;
             case "PRICE":
                 try{
-                    int price = Integer.parseInt(value);
+                    int price = Integer.parseInt(values[0]);
                     PRICE = price;
                     out = "PRICE set to " + price + " tokens";
                 } catch (NumberFormatException e) {
@@ -495,6 +490,26 @@ public abstract class Ride implements Listener {
         START_WAIT_TIME = conf.getInt("Generic.Start.WAIT_TIME");
         JOIN_AFTER_START = conf.getBoolean("Generic.Start.ALLOW_JOIN_AFTER_START");
         PRICE = conf.getInt("Generic.Price");
+    }
+
+    /**
+     * @return a map of the ride's settings with a human friendly name
+     */
+    public HashMap<String,String> getRideInfo() {
+        HashMap<String,String> out = new HashMap<>();
+        out.put("Ride Name",ID);
+        out.put("Ride Type",TYPE);
+        out.put("ENABLED",Boolean.toString(ENABLED));
+        out.put("START_PLAYERS &o(Minimum riders)",Integer.toString(MIN_START_PLAYERS));
+        out.put("START_DELAY &o(Seconds)",Integer.toString(START_WAIT_TIME));
+        out.put("JOIN_AFTER_START",Boolean.toString(JOIN_AFTER_START));
+        out.put("PRICE &o(Cost to ride)",Integer.toString(PRICE));
+
+        //Nullable
+        if (CAPACITY==null||CAPACITY==0) out.put("CAPACITY &o(Number of seats)","NOT SET"); else out.put("CAPACITY &o(Number of seats)",Integer.toString(CAPACITY));
+        if (BASE_LOCATION==null) out.put("BASE_LOCATION &o(Centre of ride)","NOT SET"); else out.put("BASE_LOCATION &o(Centre of ride)",BASE_LOCATION.getWorld().getName() + " x"+BASE_LOCATION.getX() + " y"+BASE_LOCATION.getY() + " z" + BASE_LOCATION.getZ());
+        if (EXIT_LOCATION==null) out.put("EXIT_LOCATION","NOT SET"); else out.put("EXIT_LOCATION",EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ());
+        return out;
     }
 
     /*

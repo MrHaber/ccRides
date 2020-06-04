@@ -51,9 +51,10 @@ public class FerrisWheel extends Ride {
      *
      * @return A string containing a list of options, comma seperated.
      */
-    public static List<String> getConfigOptions() {
+    @Override
+    public List<String> getConfigOptions() {
         //Get default options;
-        List<String> out = Ride.getConfigOptions();
+        List<String> out = super.getConfigOptions();
         //Add Ride Specific Options
         out.add("RADIUS");
         out.add("ROTATE_SPEED");
