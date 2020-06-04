@@ -1,21 +1,33 @@
 package net.clownercraft.ccRides.rides;
 
 import net.clownercraft.ccRides.RidesPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class Carousel extends Ride {
     Integer radius;//the radius of the carousel seats
-    Double currentRotation = 0.0; //Current rotation of the carousel in radians
     Integer rotatespeed; //number of ticks per full rotation of the carousel
     Integer length; //number of full rotations per ride.
     Double heightVariation = 0.0; //The maximum change in height while riding (this is +/-)
     Double heightSpeed = 1.0; //How many full sine waves per rotation
+    Boolean horseMode = false; //Use horses instead of minecarts
+
+    /*
+    Running data
+     */
+    Double currentRotation = 0.0; //Current rotation of the carousel in radians
+    BukkitTask updateTask;
 
 
     /**
@@ -35,6 +47,8 @@ public class Carousel extends Ride {
         length = conf.getInt("Carousel.Rotation.Num_Cycles");
         heightVariation = conf.getDouble("Carousel.Height.Max_Change_±");
         heightSpeed = conf.getDouble("Carousel.Height.Cycles_Per_Rotation");
+        horseMode = conf.getBoolean("Carousel.HorseMode");
+
         if (ENABLED) enable();
     }
 
@@ -61,23 +75,71 @@ public class Carousel extends Ride {
     }
 
     public void startRide() {
+        //TODO charge tokens
+        RidesPlugin.getInstance().getLogger().info("Starting Carousel " + ID);
+        double rotationStep = 2*Math.PI / rotatespeed;
+        updateTask = Bukkit.getScheduler().runTaskTimer(RidesPlugin.getInstance(), new Runnable() {
+            @Override
+            public void run() {
+                currentRotation += rotationStep;
+                tickPositions();
+                if (currentRotation>=2*Math.PI*length) stopRide();
+            }
+        },1l,1l);
         RUNNING = true;
-
-
-        //TODO
+        COUNTDOWN_STARTED = false;
     }
 
     public void stopRide() {
-        //TODO Cancel movement & reset Positions
+        //Cancel movement & reset Positions
+        if (updateTask!=null) updateTask.cancel();
 
         currentRotation = 0.0;
 
         //Eject Players
-        for (Player p:riders) {
+        for (Player p:(ArrayList<Player>) riders.clone()) {
             ejectPlayer(p);
         }
-
+        COUNTDOWN_STARTED = false;
         RUNNING = false;
+
+        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (ENABLED) checkQueue();},10l);
+    }
+
+
+    /**
+     * Forces the ride to remove all it's vehicles/seats and respawn them.
+     */
+    @Override
+    public void respawnSeats() {
+        despawnSeats();
+
+        for (int i=0;i<CAPACITY;i++){
+            Location loc2 = getPosition(i);
+            if (horseMode) {
+                Horse horse = (Horse) loc2.getWorld().spawnEntity(loc2, EntityType.HORSE);
+                //Make carts invulnerable, not affected by gravity and have no velocity
+
+                horse.setInvulnerable(true);
+                horse.setGravity(false);
+                horse.setVelocity(new Vector(0, 0, 0));
+                horse.setSilent(true);
+                horse.setAgeLock(true);
+                horse.setBaby();
+                horse.setAI(false);
+                seats.add(horse);
+            } else {
+                Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
+                //Make carts invulnerable, not affected by gravity and have no velocity
+
+                cart.setInvulnerable(true);
+                cart.setGravity(false);
+                cart.setVelocity(new Vector(0, 0, 0));
+                cart.setSilent(true);
+                seats.add(cart);
+            }
+
+        }
     }
 
     /**
@@ -87,8 +149,19 @@ public class Carousel extends Ride {
      * @return = the location the seat should currently be
      */
     public Location getPosition(int seatNum) {
-        return null;
-        //todo
+        double angle = currentRotation + (seatNum/(double)CAPACITY)*2*Math.PI;
+
+        Location loc = BASE_LOCATION.clone();
+        double xvec = radius * Math.cos(angle);
+        double zvec = radius * Math.sin(angle);
+        double yvec = heightVariation * Math.sin(angle*heightSpeed);
+
+        loc.add(xvec,yvec,zvec);
+        loc.setPitch(0.0f);
+        if (horseMode) loc.setYaw((float) Math.toDegrees(angle));
+        else loc.setYaw((float) Math.toDegrees(angle)+90f);
+
+        return loc;
     }
 
     /**
@@ -106,6 +179,8 @@ public class Carousel extends Ride {
         out.set("Carousel.Rotation.Num_Cycles",length);
         out.set("Carousel.Height.Max_Change_±",heightVariation);
         out.set("Carousel.Height.Cycles_Per_Rotation",heightSpeed);
+        out.set("Carousel.HorseMode",horseMode);
+
         } catch (NullPointerException ignored) {}
 
         return out;
@@ -126,6 +201,7 @@ public class Carousel extends Ride {
         out.add("RIDE_LENGTH");
         out.add("HEIGHT_VAR");
         out.add("HEIGHT_SPEED");
+        out.add("HORSE_MODE");
         return out;
     }
 
@@ -187,6 +263,15 @@ public class Carousel extends Ride {
                         out = "HEIGHT_SPEED set to " + heightSpeed + " cycles per rotation.";
                     } catch (NumberFormatException e) {
                         out = "HEIGHT_VAR must be an double number of cycles per rotation.";
+                    }
+                    break;
+                case "HORSE_MODE": //boolean
+                    if (Boolean.parseBoolean(values[0])) {
+                        horseMode = true;
+                        out = "HORSE_MODE set to true. Using Horses as seats.";
+                    } else {
+                        horseMode = false;
+                        out = "HORSE_MODE set to false. Using Minecarts as seats.";
                     }
                     break;
             }
@@ -270,6 +355,9 @@ public class Carousel extends Ride {
         //These are set by default, so can't be null
         out.put("HEIGHT_VAR &o(Max +/- height change)",Double.toString(heightVariation));
         out.put("HEIGHT_SPEED &o(Height Cycles per rotation)",Double.toString(heightSpeed));
+
+        out.put("HORSE_MODE &o(Horses as seats instead of carts)",Boolean.toString(horseMode));
+
 
         return out;
     }

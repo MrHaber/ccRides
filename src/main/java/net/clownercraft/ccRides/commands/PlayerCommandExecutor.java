@@ -52,8 +52,8 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                 ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
                 HashMap<Player, String> ridePlayers = conf.ridePlayers;
                 if (ridePlayers.containsKey(player)) {
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_player_exit.replace("{ride}", ridePlayers.get(player))));
                     conf.rides.get(ridePlayers.get(player)).ejectPlayer(player);
-                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_player_exit).replaceAll("\\{ride}", ridePlayers.get(player)));
                 } else {
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_player_exit_notriding));
                 }
@@ -89,10 +89,10 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                     //The arg is a ride name, add the player to it
                     //The addplayer method sends messages depending what it does, so we don't need to here.
                     conf.rides.get(subcommand).addPlayer((Player) commandSender);
+                    return true;
                 } else return false; //They entered something that isn't a sub command...
             }
         }
-        return false;
     }
 
     @Override
