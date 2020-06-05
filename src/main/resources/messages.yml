@@ -1,0 +1,73 @@
+#TODO not loaded by the plugin yet...
+
+#Command Messages
+Command:
+  #general command messages
+  notPlayer: "&bccRides: &9This command must be run by a player."
+  listRides: "&bccRides: &9Available rides are: \n{ridelist}"
+  rideNotExist: "&bccRides: &cThat ride does not exist."
+
+  #player command messages
+  Player:
+    help:  "&1&m––––&b ccRides Help: &1&m––––\n
+            &7/ride &8[&7name&8]&9 - Ride a ride \n
+            &7/ride exit&9 - Exit a ride before it ends \n
+            &7/ride lq&9 - Leave a ride queue\n
+            &7/ride list&9 - see a list of all rides\n
+            &7/ride help&9 - show this help"
+    exit:
+      main: "&bccRides: &9You exited {ride}"
+      NotRiding: "&bccRides: &9You're not on a ride."
+    leaveQueue:
+      main: ""
+      NotQueing: "&bccRides: &9You're not in a queue"
+
+  #admin command messages
+  Admin:
+    help: "&1&m––––&c ccRides Admin Help: &1&m––––\n
+          &9Aliases: &7/rideadmin /rideadm\n
+          &7/rideadm help &9- show help\n
+          &7/rideadm reload &8<&7all&8|&7rideName&8> &9- reload a ride or everything\n
+          &7/rideadm create &8<&7rideName&8> <&7rideType&8>&9- create a new ride\n
+          &7/rideadm delete &8<&7rideName&8> &9- create a new ride\n
+          &7/rideadm linksign &8<&7rideName&8> &9- link a sign to a ride\n
+          &7/rideadm list &9- see a list of all rides\n
+          &7/rideadm &8<&7name&8> <&7info&8|&7reload&8|&7enable&8|&7disable&8>\n
+          &7/rideadm &8<&7name&8> &7setting &8<&7key&8> <&7value&8> &9- change ride settings."
+    reload:
+      all: "&bccRides: &9Reloading plugin"
+      ride:  "&bccRides: &9Reloading {ride} ride"
+    createRide:
+      main: "&bccRides: &9Created new ride: {ride} Type: {type}"
+      alreadyExists: "&bccRides: &c{ride} Already Exists"
+      syntax: "&bccRides: &cMissing/Incorrect arguments! \n
+              &cUsage &7/rideadm create <name> <type>\n
+              &cAvailable ride types: {types}"
+    deleteRide:
+      main: "&bccRides: &9Deleted ride {test}"
+      syntax: "&bccRides: &cMissing arguments! \n
+              &cUsage &7/rideadm delete <name>"
+    Ride:
+      enable:
+        main: "&bccRides: &9{ride} has been enabled";
+        fail: "&bccRides: &c{ride} could not be enabled. \n
+              &cPlease Check all it's settings are correct. "
+      disable: "&bccRides: &9{ride} has been disabled"
+      info:  "&bccRides: &9{ride} Info\n"
+      setting:
+        list: "&bccRides: &9Available Settings for this ride: \n{settings}";
+      invalidSub: "&bccRides: &cUnrecognised sub-command, options are info, reload, enable, disable, setting"
+
+#Ride Messages
+Ride:
+  queue:
+    joined: "&bccRides: &9You joined {ride}'s queue. &b{place} &9players are ahead of you.\n&9Use &7/ride lq&9 to abandon the queueing"
+    already: "&bccRides: &9You are already in the Queue. \n&9You are in place &b{place} of {total}"
+    alreadyOther: "&bccRides: &9You're already queuing for {ride}. \n&9Use &7/ride lq &9to abandon queueing."
+    onRide: "&bccRides: &9You can't join a queue while on a ride. \n&9Use &7/ride exit&9 to leave the ride"
+    left: "&bccRides: &9You left {ride}'s queue.";
+  cantAfford: "&bccRides: &cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens.";
+
+
+
+}

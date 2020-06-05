@@ -71,16 +71,12 @@ public class FerrisWheel extends Ride {
     }
 
     public void startRide() {
-        //TODO charge tokens
         RidesPlugin.getInstance().getLogger().info("Starting FerrisWheel " + ID);
         double rotationStep = 2*Math.PI / rotatespeed;
-        updateTask = Bukkit.getScheduler().runTaskTimer(RidesPlugin.getInstance(), new Runnable() {
-            @Override
-            public void run() {
-                currentRotation += rotationStep;
-                tickPositions();
-                if (currentRotation>=2*Math.PI*length) stopRide();
-            }
+        updateTask = Bukkit.getScheduler().runTaskTimer(RidesPlugin.getInstance(), () -> {
+            currentRotation += rotationStep;
+            tickPositions();
+            if (currentRotation>=2*Math.PI*length) stopRide();
         },1l,1l);
         RUNNING = true;
         COUNTDOWN_STARTED = false;

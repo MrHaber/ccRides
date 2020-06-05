@@ -1,2 +1,4 @@
-#No Settings here.
-#Maybe in the future.
+#Settings about linking to other plugins
+Integrations:
+  vault: false
+  placeholderAPI: false

@@ -7,8 +7,12 @@ import net.clownercraft.ccRides.rides.Carousel;
 import net.clownercraft.ccRides.rides.DropTower;
 import net.clownercraft.ccRides.rides.FerrisWheel;
 import net.clownercraft.ccRides.rides.Ride;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
@@ -18,6 +22,7 @@ public class RidesPlugin extends JavaPlugin {
     private static RidesPlugin instance;
     private ConfigHandler configHandler;
     private AdminCommandExecutor adminCommandExecutor;
+    private Economy econ = null;
 
     /**
      * @return the player command executor
@@ -75,6 +80,18 @@ public class RidesPlugin extends JavaPlugin {
        Objects.requireNonNull(getCommand("rideadmin")).setExecutor(adminCommandExecutor);
 
 
+       //Link Vault
+       if (configHandler.LinkVault) {
+           if (Bukkit.getPluginManager().getPlugin("Vault") != null){
+               setupEconomy();
+               getLogger().info("Linked into Vault for Economy");
+           } else {
+               getLogger().warning("Couldn't link Vault - is it installed?");
+               configHandler.LinkVault = false;
+           }
+
+       }
+
        //init rides
 
        for (Ride r: configHandler.rides.values()) {
@@ -82,7 +99,54 @@ public class RidesPlugin extends JavaPlugin {
            getLogger().info("Started " + r.ID + " Ride!");
        }
 
+       //Link PAPI
+       if (configHandler.LinkPlaceholderAPI) {
+           if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
+               new PlaceholderProvider(this).register();
+               getLogger().info("Linked PlaceholderAPI");
+           } else {
+               getLogger().warning("Couldn't link PlaceholerAPI - is it installed?");
+               configHandler.LinkPlaceholderAPI = false;
+           }
+       }
+
    }
+
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+        return econ != null;
+    }
+
+    /**
+     * Check if a player can afford a ride.
+     * returns true if vault is disabled or didn't link.
+     * @param player - the player to check
+     * @param cost - the cost of the ride
+     * @return whether to allow the player on the ride
+     */
+    public boolean canAfford(Player player, int cost) {
+        if (configHandler.LinkVault && cost > 0) return econ.has(player,cost);
+        else return true;
+    }
+
+    /**
+     * Take payment from player for a ride
+     * Does nothing if vault disabled or didn't link.
+     * @param player - the player to take from
+     * @param cost - the cost of the ride
+     */
+    public void takePayment(Player player, int cost) {
+        if (configHandler.LinkVault && cost > 0) {
+            econ.withdrawPlayer(player,cost);
+        }
+    }
 
    @Override
    public void onDisable() {

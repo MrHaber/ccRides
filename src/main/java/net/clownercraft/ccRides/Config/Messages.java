@@ -76,6 +76,8 @@ public class Messages {
     public static String ride_queue_other_riding = "&bccRides: &9You can't join a queue while on a ride. \n&9Use &7/ride exit&9 to leave the ride";
     public static String ride_queue_left = "&bccRides: &9You left {ride}'s queue.";
 
+    public static String ride_cant_afford = "&bccRides: &cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens.";
+
     //TODO make this configurable
 
 

@@ -46,6 +46,8 @@ public class ConfigHandler {
     /*
     Global Config Options
      */
+    public boolean LinkVault = false;
+    public boolean LinkPlaceholderAPI = false;
     //None yet...
 
     /**
@@ -76,8 +78,9 @@ public class ConfigHandler {
 
         instance.getLogger().info("Main Configs Loaded");
 
-        //TODO Load Settings into memory
-        //We have no main settings yet, so leaving this for now.
+        //Load Global Settings into memory
+        LinkVault = mainConfig.getBoolean("Integrations.Vault");
+        LinkPlaceholderAPI = mainConfig.getBoolean("Integrations.PlaceholderAPI");
 
         //Load Ride configurations
         rideConfigs = new HashMap<>();
@@ -109,72 +112,8 @@ public class ConfigHandler {
             instance.saveResource(name, true);
             instance.getLogger().info(name + " default config saved.");
         }
-//        instance.getLogger().info(name + " config has been loaded.");
-
-
     }
 
-    /**
-     * This enum is to be populated with the different config files
-     * This enum is used in the setConfigPath() and getConfigPath() methods
-     */
-    public enum ConfigType
-        {
-            INFORMATION,
-            MAIN,
-            SIGNS,
-            RIDE
-        }
-
-
-    /**
-     *
-     * @param type
-     * The type of config file that the method will use
-     * @param path
-     * The String path that the method will select within the config file
-     * @param entry
-     * The String that will be saved and overwrite the current configuration
-     */
-   public void setConfigPath(ConfigType type, String path, String entry) {
-            switch (type) {
-                case INFORMATION:
-
-                    infoConfig.set(path, entry);
-                    break;
-
-                case SIGNS:
-
-                    signsConfig.set(path, entry);
-                    break;
-
-            }
-        }
-
-    /**
-     *
-     * @param type
-     * The type of config file that the method will use
-     * @param path
-     * The String that will be saved and overwrite the current configuration
-     * @return
-     * Returns the String that is saved within the config file to be given to the player
-     */
-   public String getConfigPath(ConfigType type, String path) {
-        switch (type) {
-            case INFORMATION:
-
-                return (String) infoConfig.get(path);
-
-            case SIGNS:
-
-                return (String) signsConfig.get(path);
-
-
-            default:
-                return "No config files at the moment.";
-        }
-   }
 
     /**
      * Saves a ride's configuration to disk
@@ -248,8 +187,9 @@ public class ConfigHandler {
        //Create a new config
        mainConfig = new YamlConfiguration();
 
-       //TODO set settings
-       //There are no main settings yet...
+       //set settings
+       mainConfig.set("Integrations.Vault",LinkVault);
+       mainConfig.set("Integrations.PlaceholderAPI",LinkPlaceholderAPI);
 
        //Save the file
        try {

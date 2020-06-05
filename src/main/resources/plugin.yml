@@ -7,6 +7,9 @@ description: This plugin will be the heart and soul of the ClownerCraft Carnival
 load: POSTWORLD
 prefix: ccRides
 website: clownercraft.net
+softdepend:
+    - Vault
+    - PlaceholderAPI
 commands:
     ride:
         description: Rides Base Command, for player functions

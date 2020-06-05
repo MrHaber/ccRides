@@ -159,6 +159,12 @@ public abstract class Ride implements Listener {
         //Check if the fude is enabled
         if (!ENABLED) return;
 
+        //Check if player can afford to ride
+        if (!RidesPlugin.getInstance().canAfford(player,PRICE)) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.ride_cant_afford.replaceAll("\\{price}",Integer.toString(PRICE))));
+            return;
+        }
+
         //Check if Ride is full or already running
         //add to queue if the player can't join the ruide
         if (isFull()) {
@@ -170,14 +176,15 @@ public abstract class Ride implements Listener {
             return;
         }
 
-        //TODO check balance.
-
         //Otherwise, add them to riders and put them in a seat.
         riders.add(player);
         RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player,ID);
         int i = riders.indexOf(player);
 
         seats.get(i).addPassenger(player);
+
+        //charge them the price
+        RidesPlugin.getInstance().takePayment(player,PRICE);
 
         if (isFull()) {
             if (COUNTDOWN_STARTED) countdownTask.cancel();
