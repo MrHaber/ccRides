@@ -138,6 +138,12 @@ public abstract class Ride implements Listener {
 
         for (int i=0;i<CAPACITY;i++){
             Location loc2 = getPosition(i);
+
+            //remove any minecarts within a few blocks of each location in case there's duplicates in the world.
+            for (Entity e:loc2.getWorld().getNearbyEntities(loc2,3,3,3)) {
+                if (e.getType().equals(EntityType.MINECART)) e.remove();
+            }
+            //Spawn new minecarts
             Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
             //Make carts invulnerable, not affected by gravity and have no velocity
 

@@ -1,73 +1,108 @@
-#TODO not loaded by the plugin yet...
+#No touchey
+messagesVersion: 1
+
+#Added to the start of most messages
+Prefix: "&9&lccRides &b» "
 
 #Command Messages
 Command:
   #general command messages
-  notPlayer: "&bccRides: &9This command must be run by a player."
-  listRides: "&bccRides: &9Available rides are: \n{ridelist}"
-  rideNotExist: "&bccRides: &cThat ride does not exist."
+  notPlayer: "&cThis command must be run by a player."
+  listRides: "&9Available rides are: \n{ridelist}"
+  rideNotExist: "&cThat ride does not exist."
 
   #player command messages
   Player:
-    help:  "&1&m––––&b ccRides Help: &1&m––––\n
-            &7/ride &8[&7name&8]&9 - Ride a ride \n
-            &7/ride exit&9 - Exit a ride before it ends \n
+    help:  "&1&m–------–––&b ccRides Help: &1&m––------––\n
+            &7/ride &8[&7name&8]&9 - Ride a ride\n
+            &7/ride exit&9 - Exit a ride before it ends\n
             &7/ride lq&9 - Leave a ride queue\n
             &7/ride list&9 - see a list of all rides\n
-            &7/ride help&9 - show this help"
+            &7/ride help&9 - show this help\n
+            &1&m------------------------------------------"
     exit:
-      main: "&bccRides: &9You exited {ride}"
-      NotRiding: "&bccRides: &9You're not on a ride."
+      main: "&9You exited {ride}"
+      notRiding: "&9You're not on a ride."
     leaveQueue:
-      main: ""
-      NotQueing: "&bccRides: &9You're not in a queue"
+      main: "&9You abandoned queueing for {ride}"
+      notQueing: "&9You're not in a queue"
 
   #admin command messages
   Admin:
-    help: "&1&m––––&c ccRides Admin Help: &1&m––––\n
-          &9Aliases: &7/rideadmin /rideadm\n
-          &7/rideadm help &9- show help\n
-          &7/rideadm reload &8<&7all&8|&7rideName&8> &9- reload a ride or everything\n
-          &7/rideadm create &8<&7rideName&8> <&7rideType&8>&9- create a new ride\n
-          &7/rideadm delete &8<&7rideName&8> &9- create a new ride\n
-          &7/rideadm linksign &8<&7rideName&8> &9- link a sign to a ride\n
-          &7/rideadm list &9- see a list of all rides\n
+    help: "&4&m–––----–&c ccRides Admin Help: &4&m––----––\n
+          &cAliases: &7/rideadmin /rideadm\n
+          &7/rideadm help &c- show help\n
+          &7/rideadm reload &8<&7all&8|&7rideName&8> &c- reload a ride or everything\n
+          &7/rideadm create &8<&7rideName&8> <&7rideType&8> &c- create a new ride\n
+          &7/rideadm delete &8<&7rideName&8> &c- delete a ride\n
+          &7/rideadm linksign &8<&7rideName&8> &c- link a sign to a ride\n
+          &7/rideadm unlinksign &c- un-link a sign from a ride\n
+          &7/rideadm list &c- see a list of all rides\n
           &7/rideadm &8<&7name&8> <&7info&8|&7reload&8|&7enable&8|&7disable&8>\n
-          &7/rideadm &8<&7name&8> &7setting &8<&7key&8> <&7value&8> &9- change ride settings."
+          &7/rideadm &8<&7name&8> &7setting &8<&7key&8> <&7value&8> &c- change ride settings.
+          &4&m------------------------------------------------"
     reload:
-      all: "&bccRides: &9Reloading plugin"
-      ride:  "&bccRides: &9Reloading {ride} ride"
+      all: "&9Reloading plugin"
+      ride:  "&9Reloading {ride} ride"
     createRide:
-      main: "&bccRides: &9Created new ride: {ride} Type: {type}"
-      alreadyExists: "&bccRides: &c{ride} Already Exists"
-      syntax: "&bccRides: &cMissing/Incorrect arguments! \n
+      main: "&9Created new ride: {ride} Type: {type}"
+      exists: "&c{ride} Already Exists"
+      syntax: "&cMissing/Incorrect arguments! \n
               &cUsage &7/rideadm create <name> <type>\n
               &cAvailable ride types: {types}"
     deleteRide:
-      main: "&bccRides: &9Deleted ride {test}"
-      syntax: "&bccRides: &cMissing arguments! \n
+      main: "&9Deleted ride {test}"
+      syntax: "&cMissing arguments! \n
               &cUsage &7/rideadm delete <name>"
     Ride:
       enable:
-        main: "&bccRides: &9{ride} has been enabled";
-        fail: "&bccRides: &c{ride} could not be enabled. \n
+        main: "&9{ride} has been enabled";
+        fail: "&c{ride} could not be enabled. \n
               &cPlease Check all it's settings are correct. "
-      disable: "&bccRides: &9{ride} has been disabled"
-      info:  "&bccRides: &9{ride} Info\n"
+      disable: "&9{ride} has been disabled"
+      info:
+        general: "&4&m---- &c&l ccRides: &c{ride} Info &4&m----
+                  &4         -- &cGeneral Info &4--
+                  &9Enabled: {ENABLED} &8// &9Running: {RUNNING} &8// &9Price: {PRICE}
+                  &9Current Riders: {RIDER_COUNT} &8// &9Queue Size: {QUEUE_COUNT}
+                  &9Start Players: {START_PLAYERS} &8// &9Start Delay: {START_DELAY} &9seconds
+                  &9Join After Start: {JOIN_AFTER_START}
+                  &9Exit Location: {EXIT_LOCATION}
+                  &4&m------------------------------------------------"
+        carousel: "&4  -- &cCAROUSEL Specific Info &4--
+                  &9Radius: {RADIUS} &8// &9Capacity: {CAPACITY} &9seats
+                  &9Base Location: {BASE_LOCATION}
+                  &9Rotate Speed: {ROTATE_SPEED} &9ticks per rotation &8// &9Ride Length {RIDE_LENGTH} &9rotations
+                  &9Height Variation: ±{HEIGHT_VAR} &9blocks &8// &9Height Speed: {HEIGHT_SPEED} &9height cycles per rotation
+                  &9Horse mode: {HORSE_MODE} &9(false = minecart seats)
+                  &4&m------------------------------------------------"
+        ferrisWheel: "&4  -- &cFERRIS_WHEEL Specific Info &4--
+                  &9Radius: {RADIUS} &8// &9Capacity: {CAPACITY} &9seats &8// &9Seat Width: {SEAT_WIDTH}
+                  &9Base Location: {BASE_LOCATION} &8// &9Axis: {AXIS} &9(false = xy, true=zy)
+                  &9Rotate Speed: {ROTATE_SPEED} &9ticks per rotation &8// &9Ride Length {RIDE_LENGTH} &9rotations
+                  &4&m------------------------------------------------"
       setting:
-        list: "&bccRides: &9Available Settings for this ride: \n{settings}";
-      invalidSub: "&bccRides: &cUnrecognised sub-command, options are info, reload, enable, disable, setting"
+        list: "&9Available Settings for this ride: \n{settings}"
+      invalidSub: "&cUnrecognised sub-command, options are info, reload, enable, disable, setting."
+      linksign:
+        syntax: "&cPlease specify a ride to link the sign to\n
+                &cUsage: &7/rideadm linksign &8<&7rideName&8>"
+        click: "&9Please right click the sign to link it"
+        linked: "&9Sign now linked to {ride}"
+      unlinksign:
+        click: "&9Please right click the sign to unlink it"
+        unlinked: "&9Sign no longer linked to a ride"
 
 #Ride Messages
 Ride:
   queue:
-    joined: "&bccRides: &9You joined {ride}'s queue. &b{place} &9players are ahead of you.\n&9Use &7/ride lq&9 to abandon the queueing"
-    already: "&bccRides: &9You are already in the Queue. \n&9You are in place &b{place} of {total}"
-    alreadyOther: "&bccRides: &9You're already queuing for {ride}. \n&9Use &7/ride lq &9to abandon queueing."
-    onRide: "&bccRides: &9You can't join a queue while on a ride. \n&9Use &7/ride exit&9 to leave the ride"
-    left: "&bccRides: &9You left {ride}'s queue.";
-  cantAfford: "&bccRides: &cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens.";
-
-
-
-}
+    joined: "&9You joined {ride}'s queue. &b{place} &9players are ahead of you.\n&9Use &7/ride lq&9 to abandon the queueing."
+    already: "&9You are already in the Queue. \n&9You are in place &b{place} of {total}."
+    alreadyOther: "&9You're already queuing for {ride}. \n&9Use &7/ride lq &9to abandon queueing."
+    onRide: "&9You can't join a queue while on a ride. \n&9Use &7/ride exit&9 to leave the ride."
+    left: "&9You left {ride}'s queue.";
+  cantAfford: "&cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens."
+  starting:
+    needMoreRiders: "&9Waiting for {count} more players to start."
+    countdown: "&9The ride will start in {time} seconds."
+    seatsFull: "&9All seats are filled! Ride starting."

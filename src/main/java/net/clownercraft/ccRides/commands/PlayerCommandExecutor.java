@@ -31,7 +31,7 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_not_player));
+            commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_not_player));
             return true;
         }
 
@@ -52,10 +52,10 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                 ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
                 HashMap<Player, String> ridePlayers = conf.ridePlayers;
                 if (ridePlayers.containsKey(player)) {
-                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_player_exit.replace("{ride}", ridePlayers.get(player))));
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_player_exit.replaceAll("\\{ride}", ridePlayers.get(player))));
                     conf.rides.get(ridePlayers.get(player)).ejectPlayer(player);
                 } else {
-                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_player_exit_notriding));
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_player_exit_notriding));
                 }
                 return true;
             } else if (subcommand.equalsIgnoreCase("lq")) {
@@ -67,7 +67,7 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                     conf.rides.get(queue.get(player)).removeFromQueue(player);
                     //Remove from queue sends message to player, we don't need to.
                 } else {
-                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_player_leavequeue_notqueueing));
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_player_leavequeue_notqueueing));
                 }
                 return true;
             } else if (subcommand.equalsIgnoreCase("list")) {
@@ -80,7 +80,7 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                 }
                 String finalList = list.substring(0,list.length()-4);
 
-                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.command_listRides.replaceAll("\\{ridelist}", finalList)));
+                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_listRides.replaceAll("\\{ridelist}", finalList)));
                 return true;
             } else {
                 // Check if they entered a ride name

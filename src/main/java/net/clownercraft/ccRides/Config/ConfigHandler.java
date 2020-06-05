@@ -4,11 +4,9 @@ import net.clownercraft.ccRides.RidesPlugin;
 import net.clownercraft.ccRides.rides.Ride;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Vehicle;
 import org.bukkit.event.HandlerList;
 
 import java.io.File;
@@ -24,12 +22,12 @@ public class ConfigHandler {
     Config Objects
      */
     private FileConfiguration mainConfig;
-    private FileConfiguration infoConfig;
+    private FileConfiguration messagesConfig;
     private FileConfiguration signsConfig;
     private HashMap<String,FileConfiguration> rideConfigs; //Ride ID, Ride Configuration
 
     private final File mainFile;
-    private final File infoFile;
+    private final File messagesFile;
     private final File signFile;
     File rideFolder;
 
@@ -59,13 +57,13 @@ public class ConfigHandler {
 
         //Load Files
         mainFile = new File(instance.getDataFolder(), "config.yml");
-        infoFile = new File(instance.getDataFolder(), "information.yml");
+        messagesFile = new File(instance.getDataFolder(), "messages.yml");
         signFile = new File(instance.getDataFolder(), "signs.yml");
         rideFolder = new File(instance.getDataFolder(),"Rides");
 
         //Create Files if they don't exist
         testConfig(mainFile);
-        testConfig(infoFile);
+        testConfig(messagesFile);
         testConfig(signFile);
         if (rideFolder.mkdir()) instance.getLogger().info("Rides folder doesn't exist- creating it.");
 
@@ -73,7 +71,7 @@ public class ConfigHandler {
 
         //Load Main configurations
         mainConfig = YamlConfiguration.loadConfiguration(mainFile);
-        infoConfig= YamlConfiguration.loadConfiguration(infoFile);
+        messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
         signsConfig = YamlConfiguration.loadConfiguration(signFile);
 
         instance.getLogger().info("Main Configs Loaded");
@@ -81,6 +79,9 @@ public class ConfigHandler {
         //Load Global Settings into memory
         LinkVault = mainConfig.getBoolean("Integrations.Vault");
         LinkPlaceholderAPI = mainConfig.getBoolean("Integrations.PlaceholderAPI");
+
+        //Load Messages
+        Messages.init((YamlConfiguration) messagesConfig);
 
         //Load Ride configurations
         rideConfigs = new HashMap<>();
