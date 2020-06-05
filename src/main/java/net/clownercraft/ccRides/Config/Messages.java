@@ -101,6 +101,8 @@ public class Messages {
     public static String ride_queue_left = "&9You left {ride}'s queue.";
 
     public static String ride_cant_afford = "&cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens.";
+    public static String ride_paid = "&9You paid &6{price} tokens&9 to ride on {ride}";
+
 
     public static String ride_starting_needMoreRiders = "&9Waiting for {count} more players to start.";
     public static String ride_starting_countdown = "&9The ride will start in {time} seconds.";
@@ -157,6 +159,7 @@ public class Messages {
         ride_queue_other_riding = conf.getString("Ride.queue.onRide",ride_queue_other_riding);
         ride_queue_left = conf.getString("Ride.queue.left",ride_queue_left);
         ride_cant_afford = conf.getString("Ride.cantAfford",ride_cant_afford);
+        ride_paid = conf.getString("Ride.paid",ride_paid);
         ride_starting_needMoreRiders = conf.getString("Ride.starting.needMoreRiders",ride_starting_needMoreRiders);
         ride_starting_countdown = conf.getString("Ride.starting.countdown",ride_starting_countdown);
         ride_starting_seatsFUll = conf.getString("Ride.starting.seatsFull",ride_starting_seatsFUll);

@@ -56,7 +56,7 @@ Command:
               &cUsage &7/rideadm delete <name>"
     Ride:
       enable:
-        main: "&9{ride} has been enabled";
+        main: "&9{ride} has been enabled"
         fail: "&c{ride} could not be enabled. \n
               &cPlease Check all it's settings are correct. "
       disable: "&9{ride} has been disabled"
@@ -100,8 +100,9 @@ Ride:
     already: "&9You are already in the Queue. \n&9You are in place &b{place} of {total}."
     alreadyOther: "&9You're already queuing for {ride}. \n&9Use &7/ride lq &9to abandon queueing."
     onRide: "&9You can't join a queue while on a ride. \n&9Use &7/ride exit&9 to leave the ride."
-    left: "&9You left {ride}'s queue.";
+    left: "&9You left {ride}'s queue."
   cantAfford: "&cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens."
+  paid: "&9You paid &6{price} tokens&9 to ride on {ride}"
   starting:
     needMoreRiders: "&9Waiting for {count} more players to start."
     countdown: "&9The ride will start in {time} seconds."

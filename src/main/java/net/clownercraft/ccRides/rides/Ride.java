@@ -30,6 +30,10 @@ import java.util.function.Supplier;
 public abstract class Ride implements Listener {
     public static HashMap<String,Class<? extends Ride>> RideTypes = new HashMap<>();
 
+    /**
+     * Gets the method to set a vehicle's position by NMS.
+     * Necessary to allow vehicles to move with their passengers.
+     */
     private final Method[] methods = ((Supplier<Method[]>) () -> {
         try {
             Method getHandle = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".entity.CraftEntity").getDeclaredMethod("getHandle");
@@ -41,9 +45,7 @@ public abstract class Ride implements Listener {
         }
     }).get();
 
-    /*
-    SETTINGS
-     */
+    /* SETTINGS */
     public String TYPE; //Which type of ride this is
     public String ID; //A Unique ID/Name for the ride. Used in Commands
     Integer CAPACITY; //The number of available seats
@@ -55,9 +57,7 @@ public abstract class Ride implements Listener {
     boolean JOIN_AFTER_START = false; //Whether players can join once the ride has started.
     boolean ENABLED = true; //Whether the ride is enabled/disabled.
 
-    /*
-    Running Data
-     */
+    /* Running Data */
     boolean RUNNING = false; //Whether the ride is operating or not
     boolean COUNTDOWN_STARTED = false;
     ArrayList<Vehicle> seats = new ArrayList<>(); //stores vehicle entities for the seats
@@ -65,7 +65,9 @@ public abstract class Ride implements Listener {
     ArrayList<Player> QUEUE = new ArrayList<>(); //The queue for players waiting to join the ride when it next runs
     BukkitTask countdownTask;
 
-
+    /**
+     * Initialises the ride, register listeners and spawn seats if enabled.
+     */
     public void init() {
         //Register Listener
         RidesPlugin.getInstance().getServer().getPluginManager().registerEvents(this,RidesPlugin.getInstance());
@@ -73,7 +75,6 @@ public abstract class Ride implements Listener {
         //Spawn Seats if enabled
         if (ENABLED) respawnSeats();
     }
-
 
     /**
      * Starts the movement of the ride.
@@ -91,8 +92,6 @@ public abstract class Ride implements Listener {
      * @return the current location the seat should be in
      */
     public abstract Location getPosition(int seatNumber);
-
-
 
     /**
      * Triggers the ride to set the position of all it's vehicles,
@@ -141,7 +140,8 @@ public abstract class Ride implements Listener {
 
             //remove any minecarts within a few blocks of each location in case there's duplicates in the world.
             for (Entity e:loc2.getWorld().getNearbyEntities(loc2,3,3,3)) {
-                if (e.getType().equals(EntityType.MINECART)) e.remove();
+                if (e.getType().equals(EntityType.MINECART)
+                && !seats.contains(e)) e.remove();
             }
             //Spawn new minecarts
             Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
@@ -190,6 +190,7 @@ public abstract class Ride implements Listener {
         seats.get(i).addPassenger(player);
 
         //charge them the price
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.ride_paid.replaceAll("\\{price}",Integer.toString(PRICE)).replaceAll("\\{ride}",ID)));
         RidesPlugin.getInstance().takePayment(player,PRICE);
 
         if (isFull()) {
@@ -281,7 +282,6 @@ public abstract class Ride implements Listener {
             }
         }
     }
-
 
     /**
      * @return a config with all this rides settings
@@ -399,7 +399,6 @@ public abstract class Ride implements Listener {
     }
 
     /**
-     *
      * @param key the key of the setting
      *            options are:
      *            ENABLED, BASE_LOCATION, CAPACITY, EXIT_LOCATION, START_PLAYERS,
@@ -578,9 +577,12 @@ public abstract class Ride implements Listener {
         return out;
     }
 
-    /*
-    EVENT LISTENERS
-     */
+    public String getRideInfoStr() {
+        //TODO insert values into Messages.command_admin_ride_info_generic
+        return "";
+    }
+
+    /* EVENT LISTENERS */
 
     /**
      * Prevent players exiting vehicles that are part of a ride
@@ -623,7 +625,6 @@ public abstract class Ride implements Listener {
         }
     }
 
-
     @EventHandler
     public void onCartPush(VehicleEntityCollisionEvent e) {
         if (seats.contains(e.getVehicle())) {
@@ -637,8 +638,6 @@ public abstract class Ride implements Listener {
             e.getVehicle().setVelocity(new Vector(0,0,0));
         }
     }
-
-
 
     /**
      * Remove players from rides/queues when they disconnect
@@ -656,7 +655,5 @@ public abstract class Ride implements Listener {
             removeFromQueue(e.getPlayer());
         }
     }
-
-
 
 }

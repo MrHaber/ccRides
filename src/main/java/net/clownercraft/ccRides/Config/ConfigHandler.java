@@ -77,8 +77,8 @@ public class ConfigHandler {
         instance.getLogger().info("Main Configs Loaded");
 
         //Load Global Settings into memory
-        LinkVault = mainConfig.getBoolean("Integrations.Vault");
-        LinkPlaceholderAPI = mainConfig.getBoolean("Integrations.PlaceholderAPI");
+        LinkVault = mainConfig.getBoolean("Integrations.vault");
+        LinkPlaceholderAPI = mainConfig.getBoolean("Integrations.placeholderAPI");
 
         //Load Messages
         Messages.init((YamlConfiguration) messagesConfig);

@@ -34,7 +34,7 @@ public class RidesListener implements Listener {
 
         if(e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (waitingSignClick) {
-                if (e.getPlayer().equals(waitingSender) && e.getClickedBlock() instanceof Sign) {
+                if (e.getPlayer().equals(waitingSender) && e.getClickedBlock().getState() instanceof Sign) {
                     //Set or remove the sign as a ride sign
                     if (waitingUnlink) {
                         conf.rideSigns.remove(e.getClickedBlock().getLocation());
@@ -44,6 +44,7 @@ public class RidesListener implements Listener {
                         waitingSender.sendMessage(ChatColor.translateAlternateColorCodes('&', Messages.prefix + Messages.command_admin_linksign_linked.replaceAll("\\{ride}",waitingRideID)));
                     }
                     conf.saveSignConfig();
+                    waitingSignClick = false;
                 }
             } else if(conf.rideSigns.containsKey(e.getClickedBlock().getLocation())) {
                 //Clicked sign was a ride sign.
