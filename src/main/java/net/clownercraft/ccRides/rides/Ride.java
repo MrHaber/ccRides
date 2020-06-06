@@ -8,10 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -144,13 +141,14 @@ public abstract class Ride implements Listener {
                 && !seats.contains(e)) e.remove();
             }
             //Spawn new minecarts
-            Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
+            Minecart cart = (Minecart) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
             //Make carts invulnerable, not affected by gravity and have no velocity
 
             cart.setInvulnerable(true);
             cart.setGravity(false);
             cart.setVelocity(new Vector(0, 0, 0));
             cart.setSilent(true);
+            cart.setMaxSpeed(0);
             seats.add(cart);
         }
     }

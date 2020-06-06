@@ -98,7 +98,7 @@ public class ConfigHandler {
         //Load signs
         Set<String> keys = signsConfig.getKeys(false);
         for (String key:keys) {
-            rideSigns.put(signsConfig.getLocation(key+".location"),signsConfig.getString(key+".rideID"));
+            rideSigns.put(signsConfig.getLocation(key+".location"),signsConfig.getString(key+".ride"));
         }
     }
 

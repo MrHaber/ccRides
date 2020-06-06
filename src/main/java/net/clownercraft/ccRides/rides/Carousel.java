@@ -113,6 +113,14 @@ public class Carousel extends Ride {
         for (int i=0;i<CAPACITY;i++){
             Location loc2 = getPosition(i);
             if (horseMode) {
+
+                //remove any stray horses within a few blocks of each location in case there's duplicates in the world.
+                for (Entity e:loc2.getWorld().getNearbyEntities(loc2,3,3,3)) {
+                    if (e.getType().equals(EntityType.HORSE)
+                            && !seats.contains(e)) e.remove();
+                }
+
+
                 Horse horse = (Horse) loc2.getWorld().spawnEntity(loc2, EntityType.HORSE);
                 //Make carts invulnerable, not affected by gravity and have no velocity
 
@@ -125,13 +133,22 @@ public class Carousel extends Ride {
                 horse.setAI(false);
                 seats.add(horse);
             } else {
-                Vehicle cart = (Vehicle) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
+
+                //remove any stray minecarts within a few blocks of each location in case there's duplicates in the world.
+                for (Entity e:loc2.getWorld().getNearbyEntities(loc2,3,3,3)) {
+                    if (e.getType().equals(EntityType.MINECART)
+                            && !seats.contains(e)) e.remove();
+                }
+
+
+                Minecart cart = (Minecart) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
                 //Make carts invulnerable, not affected by gravity and have no velocity
 
                 cart.setInvulnerable(true);
                 cart.setGravity(false);
                 cart.setVelocity(new Vector(0, 0, 0));
                 cart.setSilent(true);
+                cart.setMaxSpeed(0);
                 seats.add(cart);
             }
 

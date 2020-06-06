@@ -50,7 +50,7 @@ public class RidesListener implements Listener {
                 //Clicked sign was a ride sign.
                 if (e.getPlayer().hasPermission("ccrides.user")) {
                     //IF player has permission, put them on the ride!
-                    String rideID = conf.rideSigns.get(e.getClickedBlock().getLocation());
+                    String rideID = conf.rideSigns.get(e.getClickedBlock().getState().getLocation());
                     Ride ride = conf.rides.get(rideID);
                     ride.addPlayer(e.getPlayer());
                 }
