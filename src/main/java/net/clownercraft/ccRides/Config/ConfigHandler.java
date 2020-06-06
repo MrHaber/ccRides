@@ -171,6 +171,7 @@ public class ConfigHandler {
        for (Location loc:rideSigns.keySet()) {
            signsConfig.set(i+".location",loc);
            signsConfig.set(i+".ride",rideSigns.get(loc));
+           i++;
        }
 
        //save the file
