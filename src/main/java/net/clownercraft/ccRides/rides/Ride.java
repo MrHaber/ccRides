@@ -52,7 +52,7 @@ public abstract class Ride implements Listener {
     Integer START_WAIT_TIME = 30; // How long to wait after the minimum passes for more players
     Integer PRICE = 0; //The cost in tokens
     boolean JOIN_AFTER_START = false; //Whether players can join once the ride has started.
-    boolean ENABLED = true; //Whether the ride is enabled/disabled.
+    boolean ENABLED = false; //Whether the ride is enabled/disabled.
 
     /* Running Data */
     boolean RUNNING = false; //Whether the ride is operating or not

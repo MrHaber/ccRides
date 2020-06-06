@@ -115,7 +115,9 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                 }
 
                 try {
-                    conf.rides.put(rideName, Ride.RideTypes.get(rideType).getConstructor(new Class[]{String.class}).newInstance(rideName));
+                    Ride r = Ride.RideTypes.get(rideType).getConstructor(new Class[]{String.class}).newInstance(rideName);
+                    conf.rides.put(rideName, r);
+                    r.init();
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_create_ride.replaceAll("\\{ride}", rideName).replaceAll("\\{type}",rideType)));
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
