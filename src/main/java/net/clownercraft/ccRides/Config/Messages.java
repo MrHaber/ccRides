@@ -1,6 +1,5 @@
 package net.clownercraft.ccRides.Config;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.ArrayList;
@@ -8,7 +7,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Messages {
-    static final int expectedVersion = 1;
+    static final int expectedVersion = 2;
 
     /*
     Default options are defined here, and will be saved to the file if the version is newer
@@ -62,8 +61,14 @@ public class Messages {
     public static String command_admin_ride_disable = "&9{ride} has been disabled";
     public static String command_admin_ride_invalid_sub = "&cUnrecognised sub-command, options are info, reload, enable, disable, setting";
 
-    @Deprecated
-    public static String command_admin_ride_info ="&bccRides: &9{ride} Info\n";
+    public static String command_admin_ride_setting_GENERAL_success = "&9{OPTION} set to &b{VALUE}";
+    public static String command_admin_ride_setting_GENERAL_mustBeInt = "&4Invalid Value.&c {OPTION} must be an integer";
+    public static String command_admin_ride_setting_GENERAL_mustBeBool = "&4Invalid Value.&c {OPTION} must be true/false";
+    public static String command_admin_ride_setting_GENERAL_mustBeDoub =  "&4Invalid Value.&c {OPTION} must be a floating point number";
+
+    public static String command_admin_ride_setting_LOCATION_player = "&9{OPTION} set to &byour current position.";
+    public static String command_admin_ride_setting_LOCATION_coords = "&9{OPTION} set to &bx{X} y{Y} z{Z}";
+    public static String command_admin_ride_setting_LOCATION_fail = "&4Incorrect Value: &c{OPTION} Must be three doubles, or blank to use your current location.";
 
     public static String command_admin_ride_info_general = "&4&m---- &c&l ccRides: &c{ID} Info &4&m----\n" +
             "&4         -- &cGeneral Info &4--\n" +
@@ -144,7 +149,15 @@ public class Messages {
         command_admin_ride_info_carousel = conf.getString("Command.Admin.ride.info.carousel",command_admin_ride_info_carousel);
         command_admin_ride_info_ferrisWheel = conf.getString("Command.Admin.ride.info.ferrisWheel",command_admin_ride_info_ferrisWheel);
         command_admin_ride_setting_list = conf.getString("Command.Admin.ride.setting.list",command_admin_ride_setting_list);
-        //TODO setting errors
+
+        command_admin_ride_setting_GENERAL_success = conf.getString("Command.Admin.ride.setting.GENERAL.success",command_admin_ride_setting_GENERAL_success);
+        command_admin_ride_setting_GENERAL_mustBeInt = conf.getString("Command.Admin.ride.setting.GENERAL.mustBeInt",command_admin_ride_setting_GENERAL_mustBeInt);
+        command_admin_ride_setting_GENERAL_mustBeBool = conf.getString("Command.Admin.ride.setting.GENERAL.mustBeBool",command_admin_ride_setting_GENERAL_mustBeBool);
+        command_admin_ride_setting_GENERAL_mustBeDoub = conf.getString("Command.Admin.ride.setting.GENERAL.mustBeDoub",command_admin_ride_setting_GENERAL_mustBeDoub);
+        command_admin_ride_setting_LOCATION_player = conf.getString("Command.Admin.ride.setting.LOCATION.player",command_admin_ride_setting_LOCATION_player);
+        command_admin_ride_setting_LOCATION_coords = conf.getString("Command.Admin.ride.setting.LOCATION.coords",command_admin_ride_setting_LOCATION_coords);
+        command_admin_ride_setting_LOCATION_fail = conf.getString("Command.Admin.ride.setting.LOCATION.fail",command_admin_ride_setting_LOCATION_fail);
+
         command_admin_ride_invalid_sub = conf.getString("Command.Admin.ride.invalidSub",command_admin_ride_invalid_sub);
         command_admin_linksign_syntax = conf.getString("Command.Admin.linksign.syntax",command_admin_linksign_syntax);
         command_admin_linksign_click = conf.getString("Command.Admin.linksign.click",command_admin_linksign_click);

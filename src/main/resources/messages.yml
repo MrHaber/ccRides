@@ -1,5 +1,5 @@
 #No touchey
-messagesVersion: 1
+messagesVersion: 2
 
 #Added to the start of most messages
 Prefix: "&9&lccRides &b» "
@@ -83,6 +83,16 @@ Command:
                   &4&m------------------------------------------------"
       setting:
         list: "&9Available Settings for this ride: \n{settings}"
+        GENERAL:
+          success: "&9{OPTION} set to &b{VALUE}"
+          mustBeInt: "&4Invalid Value.&c {OPTION} must be an integer"
+          mustBeBool: "&4Invalid Value.&c {OPTION} must be true/false"
+          mustBeDoub: "&4Invalid Value.&c {OPTION} must be a floating point number"
+        LOCATION:
+          player: "&9{OPTION} set to &byour current position."
+          coords: "&9{OPTION} set to &bx{X} y{Y} z{Z}"
+          fail: "&4Incorrect Value: &c {OPTION} Must be three doubles, or blank to use your current location."
+
       invalidSub: "&cUnrecognised sub-command, options are info, reload, enable, disable, setting."
       linksign:
         syntax: "&cPlease specify a ride to link the sign to\n

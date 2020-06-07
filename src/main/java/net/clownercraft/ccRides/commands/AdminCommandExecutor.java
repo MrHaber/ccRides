@@ -182,28 +182,17 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
 
                     if (args.length<2) {
                         // Show Ride Info
-                        StringBuilder out = new StringBuilder(Messages.command_admin_ride_info);
-                        HashMap<String,String> info = ride.getRideInfo();
-                        for (String str:info.keySet()) {
-                            out.append("&9").append(str).append(": &b").append(info.get(str)).append("\n");
-                        }
-                        out = new StringBuilder(ChatColor.translateAlternateColorCodes('&', out.toString()));
-                        commandSender.sendMessage(out.toString());
+                        String out = ride.getRideInfoStr();
+                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',out));
+
                     } else {
                         switch (args[1]) {
                             case "info":
                                 // Show ride info
-                                StringBuilder out = new StringBuilder(Messages.command_admin_ride_info);
-                                HashMap<String,String> info = ride.getRideInfo();
+                                String out = ride.getRideInfoStr();
+                                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',out));
 
-                                for (String str:info.keySet()) {
-                                    out.append("&9").append(str).append(": &b").append(info.get(str)).append("\n");
-                                }
-
-                                out = new StringBuilder(ChatColor.translateAlternateColorCodes('&', out.toString()));
-                                commandSender.sendMessage(out.toString());
-
-                                break;
+                                return true;
                             case "reload":
                                 //reloadRide sends messages
                                 conf.reloadRide(rideName3,commandSender);
@@ -222,8 +211,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                                 return true;
                             case "setting":
                                 //Check if a setting is given
-                                if (args.length<4) {
-                                    //Not enough arguments
+                                if (args.length<3) {
 
                                     //Show available settings
                                     List<String> options = ride.getConfigOptions();
@@ -240,26 +228,26 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                                 if (ride.getConfigOptions().contains(settingKey.toUpperCase())) {
                                     //Valid option, try setting the value
                                     StringBuilder value = new StringBuilder();
-                                    for (int i=3;i<args.length;i++) {
-                                        value.append(args[i]).append(" ");
-                                    }
-
+                                    if (args.length>4) {
+                                        for (int i=3;i<args.length;i++) {
+                                            value.append(args[i]).append(" ");
+                                        }
+                                    } else value.append(" ");
                                     String result = ride.setConfigOption(settingKey.toUpperCase(), value.toString(), (Player) commandSender);
                                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + result));
-                                    return true;
                                 } else {
                                     //invalid setting. Print options.
                                     //Show available settings
                                     List<String> options = ride.getConfigOptions();
                                     StringBuilder optionStr = new StringBuilder();
                                     for (String str:options) {
-                                        optionStr.append("&9").append(str).append("&1, ");
+                                        optionStr.append("&b").append(str).append("&9, ");
                                     }
                                     String optionStr2 = optionStr.toString().substring(0,optionStr.length()-4);
                                     String message = Messages.prefix + Messages.command_admin_ride_setting_list.replaceAll("\\{settings}",optionStr2);
                                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',message));
-                                    return true;
                                 }
+                                return true;
                             default:
                                 //Invalid sub command
                                 commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_ride_invalid_sub));

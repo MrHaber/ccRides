@@ -1,5 +1,6 @@
 package net.clownercraft.ccRides.rides;
 
+import net.clownercraft.ccRides.Config.Messages;
 import net.clownercraft.ccRides.RidesPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class FerrisWheel extends Ride {
-    Integer radius;//the radius of the FerrisWheel seats
+    Double radius;//the radius of the FerrisWheel seats
     Integer rotatespeed; //number of ticks per full rotation of the FerrisWheel
     Integer length; //number of full rotations per ride.
     boolean axis = false; //false = xy, true=zy
@@ -39,7 +40,7 @@ public class FerrisWheel extends Ride {
         super.setRideOptions(conf);
 
         //load FerrisWheel specific options
-        radius = conf.getInt("FerrisWheel.Radius");
+        radius = conf.getDouble("FerrisWheel.Radius");
         rotatespeed = conf.getInt("FerrisWheel.Rotation.Ticks_Per_Full_Rotation");
         length = conf.getInt("FerrisWheel.Rotation.Num_Cycles");
         axis = conf.getBoolean("FerrisWheel.axis");
@@ -188,10 +189,10 @@ public class FerrisWheel extends Ride {
 
                 case "RADIUS": //integer, in number of blocks
                     try{
-                        radius = Integer.parseInt(values[0]);
+                        radius = Double.parseDouble(values[0]);
                         out = "Radius set to " + radius + " blocks.";
                     } catch (NumberFormatException e) {
-                        out = "Radius must be an integer number of blocks.";
+                        out = "Radius must be a number of blocks, decimals allowed.";
                     }
                     break;
                 case "ROTATE_SPEED": //integer, ticks per full rotation
@@ -295,20 +296,44 @@ public class FerrisWheel extends Ride {
     }
 
     /**
-     * @return a map of the ride's settings with a human friendly name
+     *
+     * @return a formatted string with the ride info in human readable format
      */
     @Override
-    public HashMap<String, String> getRideInfo() {
-        HashMap<String,String> out = super.getRideInfo();
+    public String getRideInfoStr() {
+        String out = super.getRideInfoStr();
+        out = out + Messages.command_admin_ride_info_ferrisWheel;
 
-        if (radius==null||radius==0) out.put("RADIUS &o(blocks)","NOT SET"); else out.put("RADIUS &o(Blocks)",Integer.toString(radius));
-        if (rotatespeed==null||rotatespeed==0)  out.put("ROTATE_SPEED &o(Ticks per rotation)","NOT SET"); else  out.put("ROTATE_SPEED &o(Ticks per rotation)",Integer.toString(rotatespeed));
-        if (length==null||length==0) out.put("RIDE_LENGTH &o(Rotations per ride)", "NOT SET"); else out.put("RIDE_LENGTH &o(Rotations per ride)",Integer.toString(length));
+        //leaving these here just incase they get put in the FerrisWheel specific message too
+        out = out.replaceAll("\\{ID}",ID);
+        out = out.replaceAll("\\{ENABLED}",Boolean.toString(ENABLED));
+        out = out.replaceAll("\\{PRICE}",Integer.toString(PRICE));
+        out = out.replaceAll("\\{RUNNING}",Boolean.toString(RUNNING));
+        out = out.replaceAll("\\{RIDER_COUNT}",Integer.toString(riders.size()));
+        out = out.replaceAll("\\{QUEUE_COUNT}",Integer.toString(QUEUE.size()));
+        out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS));
+        out = out.replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME));
+        out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
+        out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
 
-        //These are set by default, so can't be null
-        out.put("CART_WIDTH &o(How many carts next to eachother)",Integer.toString(cartWidth));
-        out.put("AXIS &o(Which direction the wheel faces)",Boolean.toString(axis));
+        String exit,base;
+        if (EXIT_LOCATION==null) exit = "NOT SET"; else exit = EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ();
+        if (BASE_LOCATION==null) base = "NOT SET"; else base = BASE_LOCATION.getWorld().getName() + " x"+BASE_LOCATION.getX() + " y"+BASE_LOCATION.getY() + " z" + BASE_LOCATION.getZ();
+        out = out.replaceAll("\\{EXIT_LOCATION}",exit);
+        out = out.replaceAll("\\{BASE_LOCATION}",base);
 
+        //FerrisWheel specific stuff
+        if (radius==null || radius==0)  out = out.replaceAll("\\{RADIUS}","NOT SET");
+        else out = out.replaceAll("\\{RADIUS}",Double.toString(radius));
+
+        if (rotatespeed==null || rotatespeed==0) out = out.replaceAll("\\{ROTATE_SPEED}","NOT SET");
+        else out = out.replaceAll("\\{ROTATE_SPEED}",Integer.toString(rotatespeed));
+
+        if(length==null||length==0) out = out.replaceAll("\\{RIDE_LENGTH}","NOT SET");
+        else out = out.replaceAll("\\{RIDE_LENGTH}",Integer.toString(length));
+
+        out = out.replaceAll("\\{SEAT_WIDTH}",Integer.toString(cartWidth));
+        out = out.replaceAll("\\{AXIS}",Boolean.toString(axis));
 
         return out;
     }

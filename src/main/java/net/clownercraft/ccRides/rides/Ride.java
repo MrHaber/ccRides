@@ -193,10 +193,12 @@ public abstract class Ride implements Listener {
 
         if (isFull()) {
             if (COUNTDOWN_STARTED) countdownTask.cancel();
-            messageRiders(ChatColor.BLUE + "All Seats filled! Enjoy the ride!");
+            messageRiders(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.ride_starting_seatsFUll));
             startRide();
         }
         else if (riders.size()>=MIN_START_PLAYERS && !COUNTDOWN_STARTED) startCountdown();
+        else messageRiders(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.ride_starting_needMoreRiders.replaceAll("\\{count}",Integer.toString(MIN_START_PLAYERS-riders.size()))));
+
 
     }
 
@@ -215,12 +217,12 @@ public abstract class Ride implements Listener {
         COUNTDOWN_STARTED = true;
 
         //Send messages to riders
-        messageRiders(ChatColor.BLUE + "The ride will start in " + START_WAIT_TIME + "Seconds.");
+        messageRiders(Messages.prefix + Messages.ride_starting_countdown.replaceAll("\\{time}",Integer.toString(START_WAIT_TIME)));
         if (START_WAIT_TIME>10) {
             Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), new Runnable() {
                 @Override
                 public void run() {
-                    messageRiders(ChatColor.BLUE + "Ride Starting in 10 Seconds!");
+                    messageRiders(Messages.prefix + Messages.ride_starting_countdown.replaceAll("\\{time}",Integer.toString(10)));
                 }
             },(START_WAIT_TIME-10)*20);
         }
@@ -228,7 +230,7 @@ public abstract class Ride implements Listener {
             Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), new Runnable() {
                 @Override
                 public void run() {
-                    messageRiders(ChatColor.BLUE + "Ride Starting in 5 Seconds!");
+                    messageRiders(Messages.prefix + Messages.ride_starting_countdown.replaceAll("\\{time}",Integer.toString(START_WAIT_TIME)));
                 }
             },(START_WAIT_TIME-5)*20);
         }
@@ -412,21 +414,21 @@ public abstract class Ride implements Listener {
             case "ENABLED":
                 //Value should be true/false
                 if (Boolean.parseBoolean(values[0])) {
-                    if (enable()) {out = "Ride Enabled.";} else {
-                        out = "Could Not Enable Ride. Check All Options are set.";
+                    if (enable()) {out = Messages.command_admin_ride_enable.replaceAll("\\{ride}",ID);} else {
+                        out = Messages.command_admin_ride_enable_fail.replaceAll("\\{ride}",ID);
                     }
                 }
                 else {
                     disable();
-                    out = "Ride Disabled.";
+                    out = Messages.command_admin_ride_disable.replaceAll("\\{ride}",ID);
                 }
                 break;
             case "BASE_LOCATION":
                 //value should be blank or "x y z"
                 Location location = sender.getLocation().clone();
-                if (value.equalsIgnoreCase("")) {
+                if (value.equalsIgnoreCase(" ")) {
                     BASE_LOCATION = location;
-                    out = "BASE_LOCATION set to your current position";
+                    out = Messages.command_admin_ride_setting_LOCATION_player;
                 } else {
                     double x,y,z;
                     try{
@@ -438,9 +440,12 @@ public abstract class Ride implements Listener {
                         location.setY(y);
                         location.setZ(z);
                         BASE_LOCATION = location;
-                        out = "BASE_LOCATION set to x: " + x + " y: " + y + " z: " + z;
+                        out = Messages.command_admin_ride_setting_LOCATION_coords
+                                .replaceAll("\\{X}",Double.toString(x))
+                                .replaceAll("\\{Y}",Double.toString(y))
+                                .replaceAll("\\{Z}",Double.toString(z));
                     } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                        out = "Incorrect Value: BASE_LOCATION Must be three doubles, or leave blank to use your current location.";
+                        out = Messages.command_admin_ride_setting_LOCATION_fail;
                     }
                 }
                 break;
@@ -448,18 +453,17 @@ public abstract class Ride implements Listener {
                 try{
                     int cap = Integer.parseInt(values[0]);
                     CAPACITY = cap;
-                    out = "CAPACITY set to " + cap + " seats";
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",cap + " seats");;
                 } catch (NumberFormatException e) {
-                    out = "Incorrect Value: CAPACITY must be an integer.";
+                    out = Messages.command_admin_ride_setting_GENERAL_mustBeInt;
                 }
-
                 break;
             case "EXIT_LOCATION":
                 //value should be blank or "x y z"
                 Location loc2 = sender.getLocation().clone();
-                if (value.equalsIgnoreCase("")) {
+                if (value.equalsIgnoreCase(" ")) {
                     EXIT_LOCATION = loc2;
-                    out = "EXIT_LOCATION set to your current position";
+                    out = Messages.command_admin_ride_setting_LOCATION_player;
                 } else {
                     double x,y,z;
                     try{
@@ -471,9 +475,12 @@ public abstract class Ride implements Listener {
                         loc2.setY(y);
                         loc2.setZ(z);
                         EXIT_LOCATION = loc2;
-                        out = "EXIT_LOCATION set to x: " + x + " y: " + y + " z: " + z;
+                        out = Messages.command_admin_ride_setting_LOCATION_coords
+                                .replaceAll("\\{X}",Double.toString(x))
+                                .replaceAll("\\{Y}",Double.toString(y))
+                                .replaceAll("\\{Z}",Double.toString(z));
                     } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                        out = "Incorrect Value: EXIT_LOCATION Must be three doubles, or leave blank to use your current location.";
+                        out = Messages.command_admin_ride_setting_LOCATION_fail;
                     }
                 }
                 break;
@@ -481,9 +488,9 @@ public abstract class Ride implements Listener {
                 try{
                     int startPl = Integer.parseInt(values[0]);
                     MIN_START_PLAYERS = startPl;
-                    out = "Minimum START_PLAYERS set to " + startPl;
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Integer.toString(startPl));
                 } catch (NumberFormatException e) {
-                    out = "Incorrect Value: START_PLAYERS must be an integer.";
+                    out = Messages.command_admin_ride_setting_GENERAL_mustBeInt;
                 }
 
                 break;
@@ -491,9 +498,9 @@ public abstract class Ride implements Listener {
                 try{
                     int delay = Integer.parseInt(values[0]);
                     START_WAIT_TIME = delay;
-                    out = "START_DELAY set to " + delay + " seconds";
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Integer.toString(delay));
                 } catch (NumberFormatException e) {
-                    out = "Incorrect Value: START_DELAY must be an integer (number of seconds).";
+                    out = Messages.command_admin_ride_setting_GENERAL_mustBeInt;
                 }
 
                 break;
@@ -501,25 +508,25 @@ public abstract class Ride implements Listener {
                 //Value should be true/false
                 if (Boolean.parseBoolean(values[0])) {
                     JOIN_AFTER_START = true;
-                    out = "JOIN_AFTER_START set to true. Players can now join the ride even if it has started.";
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","TRUE");
                 } else {
                     JOIN_AFTER_START = false;
-                    out = "JOIN_AFTER_START set to false. Players will join queue if the ride is running.";
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","FALSE");
                 }
                 break;
             case "PRICE":
                 try{
                     int price = Integer.parseInt(values[0]);
                     PRICE = price;
-                    out = "PRICE set to " + price + " tokens";
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Integer.toString(price));
                 } catch (NumberFormatException e) {
-                    out = "Incorrect Value: Price must be an integer.";
+                    out = Messages.command_admin_ride_setting_GENERAL_mustBeInt;
                 }
 
                 break;
         }
 
-        return out;
+        return out.replaceAll("\\{OPTION}",key).replaceAll("\\{RIDE}",ID);
     }
 
     /**
@@ -555,29 +562,29 @@ public abstract class Ride implements Listener {
     }
 
     /**
-     * @return a map of the ride's settings with a human friendly name
+     *
+     * @return a formatted string with the ride info in human readable format
      */
-    public HashMap<String,String> getRideInfo() {
-        HashMap<String,String> out = new HashMap<>();
-        out.put("Ride Name",ID);
-        out.put("Ride Type",TYPE);
-        out.put("ENABLED",Boolean.toString(ENABLED));
-        out.put("START_PLAYERS &o(Minimum riders)",Integer.toString(MIN_START_PLAYERS));
-        out.put("START_DELAY &o(Seconds)",Integer.toString(START_WAIT_TIME));
-        out.put("JOIN_AFTER_START",Boolean.toString(JOIN_AFTER_START));
-        out.put("PRICE &o(Cost to ride)",Integer.toString(PRICE));
-        out.put("RUNNING",Boolean.toString(RUNNING));
-
-        //Nullable
-        if (CAPACITY==null||CAPACITY==0) out.put("CAPACITY &o(Number of seats)","NOT SET"); else out.put("CAPACITY &o(Number of seats)",Integer.toString(CAPACITY));
-        if (BASE_LOCATION==null) out.put("BASE_LOCATION &o(Centre of ride)","NOT SET"); else out.put("BASE_LOCATION &o(Centre of ride)",BASE_LOCATION.getWorld().getName() + " x"+BASE_LOCATION.getX() + " y"+BASE_LOCATION.getY() + " z" + BASE_LOCATION.getZ());
-        if (EXIT_LOCATION==null) out.put("EXIT_LOCATION","NOT SET"); else out.put("EXIT_LOCATION",EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ());
-        return out;
-    }
-
     public String getRideInfoStr() {
-        //TODO insert values into Messages.command_admin_ride_info_generic
-        return "";
+        String out = Messages.command_admin_ride_info_general;
+        out = out.replaceAll("\\{ID}",ID);
+        out = out.replaceAll("\\{ENABLED}",Boolean.toString(ENABLED));
+        out = out.replaceAll("\\{PRICE}",Integer.toString(PRICE));
+        out = out.replaceAll("\\{RUNNING}",Boolean.toString(RUNNING));
+        out = out.replaceAll("\\{RIDER_COUNT}",Integer.toString(riders.size()));
+        out = out.replaceAll("\\{QUEUE_COUNT}",Integer.toString(QUEUE.size()));
+        out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS));
+        out = out.replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME));
+        out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
+        out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
+
+        String exit,base;
+        if (EXIT_LOCATION==null) exit = "NOT SET"; else exit = EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ();
+        if (BASE_LOCATION==null) base = "NOT SET"; else base = BASE_LOCATION.getWorld().getName() + " x"+BASE_LOCATION.getX() + " y"+BASE_LOCATION.getY() + " z" + BASE_LOCATION.getZ();
+        out = out.replaceAll("\\{EXIT_LOCATION}",exit);
+        out = out.replaceAll("\\{BASE_LOCATION}",base);
+
+        return out;
     }
 
     /* EVENT LISTENERS */
