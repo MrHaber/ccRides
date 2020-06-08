@@ -3,10 +3,7 @@ package net.clownercraft.ccRides;
 import net.clownercraft.ccRides.Config.ConfigHandler;
 import net.clownercraft.ccRides.commands.AdminCommandExecutor;
 import net.clownercraft.ccRides.commands.PlayerCommandExecutor;
-import net.clownercraft.ccRides.rides.Carousel;
-import net.clownercraft.ccRides.rides.DropTower;
-import net.clownercraft.ccRides.rides.FerrisWheel;
-import net.clownercraft.ccRides.rides.Ride;
+import net.clownercraft.ccRides.rides.*;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -65,6 +62,7 @@ public class RidesPlugin extends JavaPlugin {
        Ride.registerType("CAROUSEL", Carousel.class);
        Ride.registerType("DROP_TOWER", DropTower.class);
        Ride.registerType("FERRIS_WHEEL", FerrisWheel.class);
+       Ride.registerType("CHAIRSWING", Chairswing.class);
 
        //Load Configs
        configHandler = new ConfigHandler();

@@ -61,25 +61,33 @@ Command:
               &cPlease Check all it's settings are correct. "
       disable: "&9{ride} has been disabled"
       info:
-        general: "&4&m---- &c&l ccRides: &c{ride} Info &4&m----
-                  &4         -- &cGeneral Info &4--
-                  &9Enabled: {ENABLED} &8// &9Running: {RUNNING} &8// &9Price: {PRICE}
-                  &9Current Riders: {RIDER_COUNT} &8// &9Queue Size: {QUEUE_COUNT}
-                  &9Start Players: {START_PLAYERS} &8// &9Start Delay: {START_DELAY} &9seconds
-                  &9Join After Start: {JOIN_AFTER_START}
-                  &9Exit Location: {EXIT_LOCATION}
+        general: "&4&m---- &c&l ccRides: &c{ID} Info &4&m----\n
+                   &4         -- &cGeneral Info &4--\n
+                   &9Enabled: &b{ENABLED} &8// &9Running: &b{RUNNING} &8// &9Price: &b{PRICE}\n
+                   &9Current Riders: &b{RIDER_COUNT}  &8// &9Queue Size: &b{QUEUE_COUNT}\n
+                   &9Start Players: &b{START_PLAYERS} &8// &9Start Delay: &b{START_DELAY} seconds\n
+                   &9Join After Start: &b{JOIN_AFTER_START}\n
+                   &9Exit Location: &b{EXIT_LOCATION}\n
+                   &4&m------------------------------------------------\n"
+        carousel: "&4  -- &cCAROUSEL Specific Info &4--\n
+                  &9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n
+                  &9Base Location: &b{BASE_LOCATION}\n
+                  &9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n
+                  &9Height Variation: &b±{HEIGHT_VAR} blocks &8// &9Height Speed: &b{HEIGHT_SPEED} &9cycles/rotation\n
+                  &9Horse mode: &b{HORSE_MODE} &9(false = minecart seats)\n
                   &4&m------------------------------------------------"
-        carousel: "&4  -- &cCAROUSEL Specific Info &4--
-                  &9Radius: {RADIUS} &8// &9Capacity: {CAPACITY} &9seats
-                  &9Base Location: {BASE_LOCATION}
-                  &9Rotate Speed: {ROTATE_SPEED} &9ticks per rotation &8// &9Ride Length {RIDE_LENGTH} &9rotations
-                  &9Height Variation: ±{HEIGHT_VAR} &9blocks &8// &9Height Speed: {HEIGHT_SPEED} &9height cycles per rotation
-                  &9Horse mode: {HORSE_MODE} &9(false = minecart seats)
+        ferrisWheel: "&4  -- &cFERRIS_WHEEL Specific Info &4--\n
+                  &9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} seats &8// &9Seat Width: &b{SEAT_WIDTH}\n
+                  &9Base Location: &b{BASE_LOCATION}\n
+                  &9Axis: &b{AXIS} &9(false = xy, true=zy) &8// &9Ride Length &b{RIDE_LENGTH} rotations\n
+                  &9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation\n
                   &4&m------------------------------------------------"
-        ferrisWheel: "&4  -- &cFERRIS_WHEEL Specific Info &4--
-                  &9Radius: {RADIUS} &8// &9Capacity: {CAPACITY} &9seats &8// &9Seat Width: {SEAT_WIDTH}
-                  &9Base Location: {BASE_LOCATION} &8// &9Axis: {AXIS} &9(false = xy, true=zy)
-                  &9Rotate Speed: {ROTATE_SPEED} &9ticks per rotation &8// &9Ride Length {RIDE_LENGTH} &9rotations
+        chairswing: "&4  -- &cCHAIRSWING Specific Info &4--\n
+                  &9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} seats &8// &9Show Leads: &b{SHOW_LEADS}\n
+                  &9Base Location: &b{BASE_LOCATION}\n
+                  &9Chain Length: &b{CHAIN_HEIGHT} blocks &8// &9Maximum Swing: &b{MAX_SWING_ANGLE} degrees\n
+                  &9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n
+                  &9Accelerate Speed: &b{ACCELERATE_LENGTH} rotations
                   &4&m------------------------------------------------"
       setting:
         list: "&9Available Settings for this ride: \n{settings}"

@@ -228,7 +228,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                                 if (ride.getConfigOptions().contains(settingKey.toUpperCase())) {
                                     //Valid option, try setting the value
                                     StringBuilder value = new StringBuilder();
-                                    if (args.length>4) {
+                                    if (args.length>=4) {
                                         for (int i=3;i<args.length;i++) {
                                             value.append(args[i]).append(" ");
                                         }

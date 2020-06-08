@@ -62,6 +62,7 @@ public class Messages {
     public static String command_admin_ride_invalid_sub = "&cUnrecognised sub-command, options are info, reload, enable, disable, setting";
 
     public static String command_admin_ride_setting_GENERAL_success = "&9{OPTION} set to &b{VALUE}";
+    public static String command_admin_ride_setting_GENERAL_notFound = "&4{OPTION} &cis not a valid option for this ride. ";
     public static String command_admin_ride_setting_GENERAL_mustBeInt = "&4Invalid Value.&c {OPTION} must be an integer";
     public static String command_admin_ride_setting_GENERAL_mustBeBool = "&4Invalid Value.&c {OPTION} must be true/false";
     public static String command_admin_ride_setting_GENERAL_mustBeDoub =  "&4Invalid Value.&c {OPTION} must be a floating point number";
@@ -70,25 +71,41 @@ public class Messages {
     public static String command_admin_ride_setting_LOCATION_coords = "&9{OPTION} set to &bx{X} y{Y} z{Z}";
     public static String command_admin_ride_setting_LOCATION_fail = "&4Incorrect Value: &c{OPTION} Must be three doubles, or blank to use your current location.";
 
+    public static String command_admin_ride_setting_RADIUS_success = "&9RADIUS set to &b{VALUE} blocks";
+    public static String command_admin_ride_setting_ROTATE_SPEED_success = "&9ROTATE_SPEED set to &b{VALUE} ticks per rotation";
+    public static String command_admin_ride_setting_RIDE_LENGTH_success = "&9RIDE_LENGTH set to &b{VALUE} full cycles";
+
+    public static String command_admin_ride_setting_RADIUS_fail = "&4Invalid Value: &cRADIUS must be a floating point number of blocks";
+    public static String command_admin_ride_setting_ROTATE_SPEED_fail = "&4Invalid Value: &cROTATE_SPEED must be an integer number of ticks per rotation (20 ticks = 1 second)";
+    public static String command_admin_ride_setting_RIDE_LENGTH_fail = "&4Invalid Value: &cRIDE_LENGTH must be an integer number of cycles";
+
     public static String command_admin_ride_info_general = "&4&m---- &c&l ccRides: &c{ID} Info &4&m----\n" +
             "&4         -- &cGeneral Info &4--\n" +
-            "&9Enabled: {ENABLED} &8// &9Running: {RUNNING} &8// &9Price: {PRICE}\n" +
-            "&9Current Riders: {RIDER_COUNT} &8// &9Queue Size: {QUEUE_COUNT}\n" +
-            "&9Start Players: {START_PLAYERS} &8// &9Start Delay: {START_DELAY} &9seconds\n" +
-            "&9Join After Start: {JOIN_AFTER_START}\n" +
-            "&9Exit Location: {EXIT_LOCATION}\n" +
-            "&4&m------------------------------------------------";
+            "&9Enabled: &b{ENABLED} &8// &9Running: &b{RUNNING} &8// &9Price: &b{PRICE}\n" +
+            "&9Current Riders: &b{RIDER_COUNT}  &8// &9Queue Size: &b{QUEUE_COUNT}\n" +
+            "&9Start Players: &b{START_PLAYERS} &8// &9Start Delay: &b{START_DELAY} seconds\n" +
+            "&9Join After Start: &b{JOIN_AFTER_START}\n" +
+            "&9Exit Location: &b{EXIT_LOCATION}\n" +
+            "&4&m------------------------------------------------\n";
     public static String command_admin_ride_info_carousel = "&4  -- &cCAROUSEL Specific Info &4--\n" +
-            "&9Radius: {RADIUS} &8// &9Capacity: {CAPACITY} &9seats\n" +
-            "&9Base Location: {BASE_LOCATION}\n" +
-            "&9Rotate Speed: {ROTATE_SPEED} &9ticks per rotation &8// &9Ride Length {RIDE_LENGTH} &9rotations\n" +
-            "&9Height Variation: ±{HEIGHT_VAR} &9blocks &8// &9Height Speed: {HEIGHT_SPEED} &9height cycles per rotation\n" +
-            "&9Horse mode: {HORSE_MODE} &9(false = minecart seats)\n" +
+            "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n" +
+            "&9Base Location: &b{BASE_LOCATION}\n" +
+            "&9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n" +
+            "&9Height Variation: &b±{HEIGHT_VAR} blocks &8// &9Height Speed: &b{HEIGHT_SPEED} &9cycles/rotation\n" +
+            "&9Horse mode: &b{HORSE_MODE} &9(false = minecart seats)\n" +
             "&4&m------------------------------------------------";
     public static String command_admin_ride_info_ferrisWheel = "&4  -- &cFERRIS_WHEEL Specific Info &4--\n" +
-            "&9Radius: {RADIUS} &8// &9Capacity: {CAPACITY} &9seats &8// &9Seat Width: {SEAT_WIDTH}\n" +
-            "&9Base Location: {BASE_LOCATION} &8// &9Axis: {AXIS} &9(false = xy, true=zy)\n" +
-            "&9Rotate Speed: {ROTATE_SPEED} &9ticks per rotation &8// &9Ride Length {RIDE_LENGTH} &9rotations\n" +
+            "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} seats &8// &9Seat Width: &b{SEAT_WIDTH}\n" +
+            "&9Base Location: &b{BASE_LOCATION}\n" +
+            "&9Axis: &b{AXIS} &9(false = xy, true=zy) &8// &9Ride Length &b{RIDE_LENGTH} rotations\n" +
+            "&9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation\n" +
+            "&4&m------------------------------------------------";
+    public static String command_admin_ride_info_chairswing = "&4  -- &cCHAIRSWING Specific Info &4--\n" +
+            "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} seats &8// &9Show Leads: &b{SHOW_LEADS}\n" +
+            "&9Base Location: &b{BASE_LOCATION}\n" +
+            "&9Chain Length: &b{CHAIN_HEIGHT} blocks &8// &9Maximum Swing: &b{MAX_SWING_ANGLE} degrees\n" +
+            "&9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n" +
+            "&9Accelerate Length: &b{ACCELERATE_LENGTH} rotations\n" +
             "&4&m------------------------------------------------";
     public static String command_admin_ride_setting_list = "&9Available Settings for this ride: \n{settings}";
     public static String command_admin_linksign_syntax = "&cPlease specify a ride to link the sign to\n&cUsage: &7/rideadm linksign &8<&7rideName&8>";
@@ -148,8 +165,9 @@ public class Messages {
         command_admin_ride_info_general = conf.getString("Command.Admin.ride.info.general",command_admin_ride_info_general);
         command_admin_ride_info_carousel = conf.getString("Command.Admin.ride.info.carousel",command_admin_ride_info_carousel);
         command_admin_ride_info_ferrisWheel = conf.getString("Command.Admin.ride.info.ferrisWheel",command_admin_ride_info_ferrisWheel);
-        command_admin_ride_setting_list = conf.getString("Command.Admin.ride.setting.list",command_admin_ride_setting_list);
+        command_admin_ride_info_chairswing = conf.getString("Command.Admin.ride.info.chairswing",command_admin_ride_info_chairswing);
 
+        command_admin_ride_setting_list = conf.getString("Command.Admin.ride.setting.list",command_admin_ride_setting_list);
         command_admin_ride_setting_GENERAL_success = conf.getString("Command.Admin.ride.setting.GENERAL.success",command_admin_ride_setting_GENERAL_success);
         command_admin_ride_setting_GENERAL_mustBeInt = conf.getString("Command.Admin.ride.setting.GENERAL.mustBeInt",command_admin_ride_setting_GENERAL_mustBeInt);
         command_admin_ride_setting_GENERAL_mustBeBool = conf.getString("Command.Admin.ride.setting.GENERAL.mustBeBool",command_admin_ride_setting_GENERAL_mustBeBool);
@@ -157,6 +175,7 @@ public class Messages {
         command_admin_ride_setting_LOCATION_player = conf.getString("Command.Admin.ride.setting.LOCATION.player",command_admin_ride_setting_LOCATION_player);
         command_admin_ride_setting_LOCATION_coords = conf.getString("Command.Admin.ride.setting.LOCATION.coords",command_admin_ride_setting_LOCATION_coords);
         command_admin_ride_setting_LOCATION_fail = conf.getString("Command.Admin.ride.setting.LOCATION.fail",command_admin_ride_setting_LOCATION_fail);
+        //TODO radius, rotation speed, ride length
 
         command_admin_ride_invalid_sub = conf.getString("Command.Admin.ride.invalidSub",command_admin_ride_invalid_sub);
         command_admin_linksign_syntax = conf.getString("Command.Admin.linksign.syntax",command_admin_linksign_syntax);

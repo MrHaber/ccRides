@@ -103,7 +103,7 @@ public abstract class Ride implements Listener {
         }
     }
 
-    public void teleportWithPassenger(Vehicle v, Location loc) {
+    public void teleportWithPassenger(Entity v, Location loc) {
         try {
             methods[1].invoke(methods[0].invoke(v), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
 
@@ -576,7 +576,8 @@ public abstract class Ride implements Listener {
         out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS));
         out = out.replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME));
         out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
-        out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
+        if (CAPACITY==null||CAPACITY==0)         out = out.replaceAll("\\{CAPACITY}","NOT SET");
+        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
 
         String exit,base;
         if (EXIT_LOCATION==null) exit = "NOT SET"; else exit = EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ();
