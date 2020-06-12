@@ -188,7 +188,10 @@ public abstract class Ride implements Listener {
         seats.get(i).addPassenger(player);
 
         //charge them the price
-        player.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.ride_paid.replaceAll("\\{price}",Integer.toString(PRICE)).replaceAll("\\{ride}",ID)));
+        player.sendMessage(Messages.prefix +
+                Messages.ride_paid
+                        .replaceAll("\\{price}",Integer.toString(PRICE))
+                        .replaceAll("\\{ride}",ID));
         RidesPlugin.getInstance().takePayment(player,PRICE);
 
         if (isFull()) {
@@ -197,8 +200,10 @@ public abstract class Ride implements Listener {
             startRide();
         }
         else if (riders.size()>=MIN_START_PLAYERS && !COUNTDOWN_STARTED) startCountdown();
-        else messageRiders(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.ride_starting_needMoreRiders.replaceAll("\\{count}",Integer.toString(MIN_START_PLAYERS-riders.size()))));
-
+        else messageRiders(Messages.prefix +
+                    Messages.ride_starting_needMoreRiders
+                            .replaceAll("\\{count}",
+                                    Integer.toString(MIN_START_PLAYERS-riders.size())));
 
     }
 
@@ -208,31 +213,29 @@ public abstract class Ride implements Listener {
     public void startCountdown() {
 
         //schedule the ride to start after the wait time
-        countdownTask = Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), new Runnable() {
-            @Override
-            public void run() {
-                startRide();
-            }
-        },START_WAIT_TIME*20);
+        countdownTask = Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(),
+                () -> startRide(),START_WAIT_TIME*20);
+
         COUNTDOWN_STARTED = true;
 
         //Send messages to riders
-        messageRiders(Messages.prefix + Messages.ride_starting_countdown.replaceAll("\\{time}",Integer.toString(START_WAIT_TIME)));
+        messageRiders(Messages.prefix +
+                Messages.ride_starting_countdown
+                        .replaceAll("\\{time}",Integer.toString(START_WAIT_TIME)));
+
         if (START_WAIT_TIME>10) {
-            Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), new Runnable() {
-                @Override
-                public void run() {
-                    messageRiders(Messages.prefix + Messages.ride_starting_countdown.replaceAll("\\{time}",Integer.toString(10)));
-                }
-            },(START_WAIT_TIME-10)*20);
+            Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(),
+                    () -> messageRiders(Messages.prefix +
+                            Messages.ride_starting_countdown
+                                    .replaceAll("\\{time}",Integer.toString(10))),
+                    (START_WAIT_TIME-10)*20);
         }
         if (START_WAIT_TIME>5) {
-            Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), new Runnable() {
-                @Override
-                public void run() {
-                    messageRiders(Messages.prefix + Messages.ride_starting_countdown.replaceAll("\\{time}",Integer.toString(START_WAIT_TIME)));
-                }
-            },(START_WAIT_TIME-5)*20);
+            Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(),
+                    () -> messageRiders(Messages.prefix +
+                            Messages.ride_starting_countdown
+                                    .replaceAll("\\{time}",Integer.toString(5))),
+                    (START_WAIT_TIME-5)*20);
         }
     }
 
@@ -241,6 +244,7 @@ public abstract class Ride implements Listener {
      * @param message the message to send
      */
     public void messageRiders(String message) {
+        message = ChatColor.translateAlternateColorCodes('&',message);
         for (Player p:riders) {
             p.sendMessage(message);
         }

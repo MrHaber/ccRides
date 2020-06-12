@@ -7,6 +7,8 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
@@ -33,7 +35,8 @@ public class Chairswing extends Ride {
     Double currentSwing = 0.0; //Current swing angle of the chairswing in radians
     BukkitTask updateTask;
 
-    List<Entity> leads = new ArrayList<>();
+    List<Entity> leadStarts = new ArrayList<>();
+    List<Entity> leadEnds = new ArrayList<>();
 
 
 
@@ -191,6 +194,8 @@ public class Chairswing extends Ride {
         y1 = 0;
 
         locTop.add(x1,y1,z1);
+        locTop.setYaw((float) Math.toDegrees(angle));
+
 
         return locTop;
     }
@@ -205,13 +210,21 @@ public class Chairswing extends Ride {
             Location loc = getPosition(i);
             //Teleport cart
             teleportWithPassenger(v,loc);
+
+            if (showLeads) {
+                Entity e = leadEnds.get(i);
+                teleportWithPassenger(e,loc);
+            }
         }
-        for (int i=0;i<leads.size();i++) {
-            Entity e = leads.get(i);
-            Location loc = getLeadPosition(i);
-            //Teleport cart
-            teleportWithPassenger(e,loc);
+        if (showLeads){
+            for (int i=0;i<leadStarts.size();i++) {
+                Entity e = leadStarts.get(i);
+                Location loc = getLeadPosition(i);
+                //Teleport cart
+                teleportWithPassenger(e,loc);
+            }
         }
+
     }
 
     /**
@@ -221,7 +234,51 @@ public class Chairswing extends Ride {
     public void respawnSeats() {
         super.respawnSeats();
 
-        //Todo add leads
+        if (showLeads) {
+            for (int i = 0; i < CAPACITY; i++) {
+                Location LocLeadE = getPosition(i);
+                Location LocLeadS = getLeadPosition(i);
+
+                //remove any minecarts within a few blocks of each location in case there's duplicates in the world.
+                for (Entity e : LocLeadE.getWorld().getNearbyEntities(LocLeadE, 3, 3, 3)) {
+                    if (e.getType().equals(EntityType.PARROT)
+                            && !leadEnds.contains(e)) e.remove();
+                }
+                for (Entity e : LocLeadS.getWorld().getNearbyEntities(LocLeadS, 3, 3, 3)) {
+                    if (e.getType().equals(EntityType.PARROT)
+                            && !leadStarts.contains(e)) e.remove();
+                }
+                //Spawn new lead
+                Parrot leadStart = (Parrot) LocLeadS.getWorld().spawnEntity(LocLeadS, EntityType.PARROT);
+                Parrot leadEnd = (Parrot) LocLeadE.getWorld().spawnEntity(LocLeadE, EntityType.PARROT);
+
+                //Make carts invulnerable, not affected by gravity and have no velocity
+
+                leadStart.setInvulnerable(true);
+                leadStart.setGravity(false);
+                leadStart.setAI(false);
+                leadStart.setVelocity(new Vector(0, 0, 0));
+                leadStart.setSilent(true);
+                leadStart.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,Integer.MAX_VALUE,1,false,false));
+                leadStart.setCustomName("Chairswing Parrot");
+                leadStart.setCustomNameVisible(false);
+
+                leadEnd.setInvulnerable(true);
+                leadEnd.setGravity(false);
+                leadEnd.setAI(false);
+                leadEnd.setVelocity(new Vector(0, 0, 0));
+                leadEnd.setSilent(true);
+                leadEnd.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,Integer.MAX_VALUE,1,false,false));
+                leadEnd.setCustomName("Chairswing Parrot");
+                leadEnd.setCustomNameVisible(false);
+
+                leadEnd.setLeashHolder(leadStart);
+
+
+                leadStarts.add(leadStart);
+                leadEnds.add(leadEnd);
+            }
+        }
     }
 
     /**
@@ -231,7 +288,14 @@ public class Chairswing extends Ride {
     public void despawnSeats() {
         super.despawnSeats();
 
-        //TODO leads
+        for (Entity e : leadStarts) {
+            e.remove();
+        }
+        for (Entity e : leadEnds) {
+            e.remove();
+        }
+        leadStarts.clear();
+        leadEnds.clear();
     }
 
     /**
