@@ -35,6 +35,7 @@ import java.util.Objects;
 public class Jets extends Ride {
     Double radius;//the radius of the jets seats
     Integer rotatespeed; //number of ticks per full rotation of the jets
+    Double accelerateLength = 1d; //TODO make config
     Integer length; //number of full rotations per ride.
 
     Double angleMax = Math.toRadians(30.0); //The maximum angle of each 'jet' in radians
@@ -50,6 +51,7 @@ public class Jets extends Ride {
     Running data
      */
     Double currentRotation = 0.0; //Current rotation of the jets in radians
+    double currRotStep = 0.005; //Current rotation step size, used to allow for acceleration
     ArrayList<Double> seatAngles = new ArrayList<>();
     BukkitTask updateTask;
 
@@ -112,10 +114,34 @@ public class Jets extends Ride {
     public void startRide() {
         //RidesPlugin.getInstance().getLogger().info("Starting Jets " + ID);
         double rotationStep = 2*Math.PI / rotatespeed;
+
+        double rotationAccel;
+        if (accelerateLength==0) {
+            rotationAccel = rotationStep;
+        } else {
+            rotationAccel = rotationStep / (2 * rotatespeed * accelerateLength);
+        }
+
+
+
         updateTask = Bukkit.getScheduler().runTaskTimer(RidesPlugin.getInstance(), () -> {
-            currentRotation += rotationStep;
+            currentRotation += currRotStep;
+
+            if (currentRotation <= Math.PI*2*accelerateLength) {
+                currRotStep += rotationAccel;
+
+                if (currRotStep > rotationStep) currRotStep = rotationStep;
+            }
+
+            if (currentRotation >= Math.PI*2*(length-accelerateLength)) {
+                currRotStep -= rotationAccel;
+
+                if (currRotStep < 0.005) currRotStep = 0.005;
+            }
+
             tickPositions();
             if (currentRotation>=2*Math.PI*length) stopRide();
+
         },1l,1l);
         RUNNING = true;
         COUNTDOWN_STARTED = false;

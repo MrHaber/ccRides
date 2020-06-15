@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 public class Carousel extends Ride {
     Double radius;//the radius of the carousel seats
     Integer rotatespeed; //number of ticks per full rotation of the carousel
+    Double accelerateLength = 1d; //TODO make config
     Integer length; //number of full rotations per ride.
     Double heightVariation = 0.0; //The maximum change in height while riding (this is +/-)
     Double heightSpeed = 1.0; //How many full sine waves per rotation
@@ -28,6 +29,7 @@ public class Carousel extends Ride {
     Running data
      */
     Double currentRotation = 0.0; //Current rotation of the carousel in radians
+    double currRotStep = 0.005; //Current rotation step size, used to allow for acceleration
     BukkitTask updateTask;
 
 
@@ -78,11 +80,35 @@ public class Carousel extends Ride {
     public void startRide() {
         //RidesPlugin.getInstance().getLogger().info("Starting Carousel " + ID);
         double rotationStep = 2*Math.PI / rotatespeed;
+        double rotationAccel;
+        if (accelerateLength==0) {
+            rotationAccel = rotationStep;
+        } else {
+            rotationAccel = rotationStep / (2 * rotatespeed * accelerateLength);
+        }
+
+
+
         updateTask = Bukkit.getScheduler().runTaskTimer(RidesPlugin.getInstance(), () -> {
-            currentRotation += rotationStep;
+            currentRotation += currRotStep;
+
+            if (currentRotation <= Math.PI*2*accelerateLength) {
+                currRotStep += rotationAccel;
+
+                if (currRotStep > rotationStep) currRotStep = rotationStep;
+            }
+
+            if (currentRotation >= Math.PI*2*(length-accelerateLength)) {
+                currRotStep -= rotationAccel;
+
+                if (currRotStep < 0.005) currRotStep = 0.005;
+            }
+
             tickPositions();
             if (currentRotation>=2*Math.PI*length) stopRide();
+
         },1l,1l);
+
         RUNNING = true;
         COUNTDOWN_STARTED = false;
     }
