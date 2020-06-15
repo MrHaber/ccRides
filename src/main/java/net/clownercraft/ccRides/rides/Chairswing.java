@@ -1,7 +1,8 @@
 package net.clownercraft.ccRides.rides;
 
-import net.clownercraft.ccRides.Config.Messages;
+import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.RidesPlugin;
+import net.clownercraft.ccRides.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -12,12 +13,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import java.lang.reflect.Method;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class Chairswing extends Ride {
     Double radius;//the radius of the chairswing seats
@@ -47,7 +44,7 @@ public class Chairswing extends Ride {
      */
     public Chairswing(YamlConfiguration conf) {
         //Set the type to CHAIRSWING
-        super.TYPE = "CHAIRSWING";
+        super.type = "CHAIRSWING";
 
         //load generic options
         super.setRideOptions(conf);
@@ -61,7 +58,7 @@ public class Chairswing extends Ride {
         showLeads = conf.getBoolean("Chairswing.ShowLeads");
         MaxSwingAngle = conf.getDouble("Chairswing.MaxSwingAngle");
 
-        if (ENABLED) enable();
+        if (enabled) enable();
     }
 
     /**
@@ -70,8 +67,8 @@ public class Chairswing extends Ride {
      */
     public Chairswing(String name) {
         //Setyp basic settings
-        super.TYPE = "CHAIRSWING";
-        super.ID = name;
+        super.type = "CHAIRSWING";
+        super.rideID = name;
 
         //Save a default config
         RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
@@ -83,7 +80,7 @@ public class Chairswing extends Ride {
         RidesPlugin.getInstance().getServer().getPluginManager().registerEvents(this,RidesPlugin.getInstance());
 
         //Spawn Seats if enabled
-        if (ENABLED) respawnSeats();
+        if (enabled) respawnSeats();
     }
 
     public void startRide() {
@@ -121,8 +118,8 @@ public class Chairswing extends Ride {
             if (currentRotation>=2*Math.PI*length) stopRide();
 
         },1l,1l);
-        RUNNING = true;
-        COUNTDOWN_STARTED = false;
+        running = true;
+        countdownStarted = false;
     }
 
     public void stopRide() {
@@ -133,14 +130,14 @@ public class Chairswing extends Ride {
         currRotStep = 0.005;
         currentSwing = 0.0;
 
-        COUNTDOWN_STARTED = false;
-        RUNNING = false;
+        countdownStarted = false;
+        running = false;
         //Eject Players
         for (Player p:riders.keySet()) {
             ejectPlayer(p);
         }
 
-        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (ENABLED) checkQueue();},10l);
+        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (enabled) checkQueue();},10l);
     }
 
 
@@ -152,9 +149,9 @@ public class Chairswing extends Ride {
      * @return = the location the seat should currently be
      */
     public Location getPosition(int seatNum) {
-        double angle = currentRotation + (seatNum/(double)CAPACITY)*2*Math.PI;
+        double angle = currentRotation + (seatNum/(double) capacity)*2*Math.PI;
 
-        Location locTop = BASE_LOCATION.clone();
+        Location locTop = baseLocation.clone();
         double x1,y1,z1;
 
         x1 = radius * Math.cos(angle);
@@ -185,9 +182,9 @@ public class Chairswing extends Ride {
      * @return = the location the lead should currently be
      */
     public Location getLeadPosition(int seatNum) {
-        double angle = currentRotation + (seatNum/(double)CAPACITY)*2*Math.PI;
+        double angle = currentRotation + (seatNum/(double) capacity)*2*Math.PI;
 
-        Location locTop = BASE_LOCATION.clone();
+        Location locTop = baseLocation.clone();
         double x1,y1,z1;
 
         x1 = radius * Math.cos(angle);
@@ -236,7 +233,7 @@ public class Chairswing extends Ride {
         super.respawnSeats();
 
         if (showLeads) {
-            for (int i = 0; i < CAPACITY; i++) {
+            for (int i = 0; i < capacity; i++) {
                 Location LocLeadE = getPosition(i);
                 Location LocLeadS = getLeadPosition(i);
 
@@ -367,25 +364,25 @@ public class Chairswing extends Ride {
                 case "RADIUS": //integer, in number of blocks
                     try{
                         radius = Double.parseDouble(values[0]);
-                        out = Messages.command_admin_ride_setting_RADIUS_success.replaceAll("\\{VALUE}",Double.toString(radius));
+                        out = Messages.command_admin_ride_setting_GENERAL_success_blocks.replaceAll("\\{VALUE}",Double.toString(radius));
                     } catch (NumberFormatException e) {
-                        out = Messages.command_admin_ride_setting_RADIUS_fail;
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks;
                     }
                     break;
                 case "ROTATE_SPEED": //integer, ticks per full rotation
                     try{
                         rotatespeed = Integer.parseInt(values[0]);
-                        out = Messages.command_admin_ride_setting_ROTATE_SPEED_success.replaceAll("\\{VALUE}",Integer.toString(rotatespeed));
+                        out = Messages.command_admin_ride_setting_GENERAL_success_ticks.replaceAll("\\{VALUE}",Integer.toString(rotatespeed));
                     } catch (NumberFormatException e) {
-                        out = Messages.command_admin_ride_setting_ROTATE_SPEED_fail;
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeIntTicks;
                     }
                     break;
                 case "RIDE_LENGTH": //integer, number of full rotations per ride
                     try{
                         length = Integer.parseInt(values[0]);
-                        out = Messages.command_admin_ride_setting_RIDE_LENGTH_success.replaceAll("\\{VALUE}",Integer.toString(length));
+                        out = Messages.command_admin_ride_setting_GENERAL_success_cycles.replaceAll("\\{VALUE}",Integer.toString(length));
                     } catch (NumberFormatException e) {
-                        out = Messages.command_admin_ride_setting_RIDE_LENGTH_fail;
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeIntCycles;
                     }
                     break;
                 case "CHAIN_HEIGHT":
@@ -394,7 +391,7 @@ public class Chairswing extends Ride {
                         out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Double.toString(chainHeight));
 
                     } catch (NumberFormatException e) {
-                        out = Messages.command_admin_ride_setting_GENERAL_mustBeDoub;
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoub;
                     }
                     break;
                 case "ACCELERATE_LENGTH":
@@ -403,7 +400,7 @@ public class Chairswing extends Ride {
                         out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Double.toString(accelerateLength));
 
                     } catch (NumberFormatException e) {
-                        out = Messages.command_admin_ride_setting_GENERAL_mustBeDoub;
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoub;
                     }
                     break;
                 case "SHOW_LEADS":
@@ -412,16 +409,16 @@ public class Chairswing extends Ride {
                         out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Boolean.toString(showLeads));
 
                     } catch (NumberFormatException e) {
-                        out = Messages.command_admin_ride_setting_GENERAL_mustBeBool;
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeBool;
                     }
                     break;
                 case "MAX_SWING_ANGLE":
                     try{
                         MaxSwingAngle = Math.toRadians(Double.parseDouble(values[0]));
-                        out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Double.toString(Math.toDegrees(MaxSwingAngle)));
+                        out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}", Utils.formatDouble(Math.toDegrees(MaxSwingAngle),3));
 
                     } catch (NumberFormatException e) {
-                        out = Messages.command_admin_ride_setting_GENERAL_mustBeDoub;
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoub;
                     }
                     break;
             }
@@ -430,12 +427,12 @@ public class Chairswing extends Ride {
 
         //If out is still empty, we didn't recognise the option key
         //if this isn't the case, save the changes
-        if (out.equals("")) out = Messages.command_admin_ride_setting_GENERAL_notFound;
+        if (out.equals("")) out = Messages.command_admin_ride_setting_GENERAL_fail_notFound;
         else RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
 
 
         //return the message
-        return out.replaceAll("\\{OPTION}",key).replaceAll("\\{RIDE}",ID);
+        return out.replaceAll("\\{OPTION}",key).replaceAll("\\{RIDE}", rideID);
     }
 
     /**
@@ -447,15 +444,15 @@ public class Chairswing extends Ride {
     public boolean enable() {
         //Check if all settings are set
         if (
-                BASE_LOCATION == null
-                        || EXIT_LOCATION == null
-                        || CAPACITY == null
-                        || ID == null
-                        || TYPE == null
+                baseLocation == null
+                        || exitLocation == null
+                        || capacity == null
+                        || rideID == null
+                        || type == null
                         || radius == null
                         || rotatespeed == null
                         || length == null
-                        || CAPACITY == 0
+                        || capacity == 0
                         || radius == 0
                         || rotatespeed == 0
                         || length == 0
@@ -466,7 +463,7 @@ public class Chairswing extends Ride {
 
         //Enable the ride and spawn in seats
         respawnSeats();
-        ENABLED = true;
+        enabled = true;
 
         return true;
     }
@@ -481,11 +478,11 @@ public class Chairswing extends Ride {
 
         despawnSeats();
 
-        for (Player p:QUEUE) {
+        for (Player p: queue) {
             removeFromQueue(p);
         }
 
-        ENABLED = false;
+        enabled = false;
     }
 
     /**
@@ -497,22 +494,22 @@ public class Chairswing extends Ride {
         String out = super.getRideInfoStr();
         out = out + Messages.command_admin_ride_info_chairswing;
         //leaving these here just incase they get put in the chairswing specific message too
-        out = out.replaceAll("\\{ID}",ID);
-        out = out.replaceAll("\\{ENABLED}",Boolean.toString(ENABLED));
-        out = out.replaceAll("\\{PRICE}",Integer.toString(PRICE));
-        out = out.replaceAll("\\{RUNNING}",Boolean.toString(RUNNING));
+        out = out.replaceAll("\\{ID}", rideID);
+        out = out.replaceAll("\\{ENABLED}",Boolean.toString(enabled));
+        out = out.replaceAll("\\{PRICE}",Integer.toString(price));
+        out = out.replaceAll("\\{RUNNING}",Boolean.toString(running));
         out = out.replaceAll("\\{RIDER_COUNT}",Integer.toString(riders.size()));
-        out = out.replaceAll("\\{QUEUE_COUNT}",Integer.toString(QUEUE.size()));
-        out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS));
-        out = out.replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME));
-        out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
+        out = out.replaceAll("\\{QUEUE_COUNT}",Integer.toString(queue.size()));
+        out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(minStartPlayers));
+        out = out.replaceAll("\\{START_DELAY}",Integer.toString(startWaitTime));
+        out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(joinAfterStart));
 
-        if (CAPACITY==null||CAPACITY==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
-        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
+        if (capacity ==null|| capacity ==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
+        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(capacity));
 
         String exit,base;
-        if (EXIT_LOCATION==null) exit = "NOT SET"; else exit = EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ();
-        if (BASE_LOCATION==null) base = "NOT SET"; else base = BASE_LOCATION.getWorld().getName() + " x"+BASE_LOCATION.getX() + " y"+BASE_LOCATION.getY() + " z" + BASE_LOCATION.getZ();
+        if (exitLocation ==null) exit = "NOT SET"; else exit = exitLocation.getWorld().getName() + " x"+ exitLocation.getX() + " y"+ exitLocation.getY() + " z" + exitLocation.getZ();
+        if (baseLocation ==null) base = "NOT SET"; else base = baseLocation.getWorld().getName() + " x"+ baseLocation.getX() + " y"+ baseLocation.getY() + " z" + baseLocation.getZ();
         out = out.replaceAll("\\{EXIT_LOCATION}",exit);
         out = out.replaceAll("\\{BASE_LOCATION}",base);
 
@@ -530,7 +527,7 @@ public class Chairswing extends Ride {
         else out = out.replaceAll("\\{ACCELERATE_LENGTH}",Double.toString(accelerateLength));
 
         if(MaxSwingAngle==null) out = out.replaceAll("\\{MAX_SWING_ANGLE}","NOT SET");
-        else out = out.replaceAll("\\{MAX_SWING_ANGLE}",Double.toString(Math.toDegrees(MaxSwingAngle)));
+        else out = out.replaceAll("\\{MAX_SWING_ANGLE}",Utils.formatDouble(Math.toDegrees(MaxSwingAngle),3));
 
         if(chainHeight==null) out = out.replaceAll("\\{CHAIN_HEIGHT}","NOT SET");
         else out = out.replaceAll("\\{CHAIN_HEIGHT}",Double.toString(chainHeight));

@@ -1,7 +1,7 @@
 package net.clownercraft.ccRides.commands;
 
-import net.clownercraft.ccRides.Config.ConfigHandler;
-import net.clownercraft.ccRides.Config.Messages;
+import net.clownercraft.ccRides.config.ConfigHandler;
+import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.RidesListener;
 import net.clownercraft.ccRides.RidesPlugin;
 import net.clownercraft.ccRides.rides.Ride;

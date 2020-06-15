@@ -1,7 +1,7 @@
 package net.clownercraft.ccRides.rides;
 
-import net.clownercraft.ccRides.Config.ConfigHandler;
-import net.clownercraft.ccRides.Config.Messages;
+import net.clownercraft.ccRides.config.ConfigHandler;
+import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.RidesPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,7 +16,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.vehicle.*;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
@@ -34,7 +33,7 @@ public abstract class Ride implements Listener {
      * Gets the method to set a vehicle's position by NMS.
      * Necessary to allow vehicles to move with their passengers.
      */
-    private final Method[] methods = ((Supplier<Method[]>) () -> {
+    private final Method[] setPositionRotationMethod = ((Supplier<Method[]>) () -> {
         try {
             Method getHandle = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".entity.CraftEntity").getDeclaredMethod("getHandle");
             return new Method[] {
@@ -46,23 +45,23 @@ public abstract class Ride implements Listener {
     }).get();
 
     /* SETTINGS */
-    public String TYPE; //Which type of ride this is
-    public String ID; //A Unique ID/Name for the ride. Used in Commands
-    Integer CAPACITY; //The number of available seats
-    Location BASE_LOCATION; //Center location for the ride layout
-    Location EXIT_LOCATION; //The Location to teleport players to when they exit or the ride is over.
-    Integer MIN_START_PLAYERS = 1; //How many players need to join the ride before it starts
-    Integer START_WAIT_TIME = 30; // How long to wait after the minimum passes for more players
-    Integer PRICE = 0; //The cost in tokens
-    boolean JOIN_AFTER_START = false; //Whether players can join once the ride has started.
-    boolean ENABLED = false; //Whether the ride is enabled/disabled.
+    public String type; //Which type of ride this is
+    public String rideID; //A Unique ID/Name for the ride. Used in Commands
+    Integer capacity; //The number of available seats
+    Location baseLocation; //Center location for the ride layout
+    Location exitLocation; //The Location to teleport players to when they exit or the ride is over.
+    Integer minStartPlayers = 1; //How many players need to join the ride before it starts
+    Integer startWaitTime = 30; // How long to wait after the minimum passes for more players
+    Integer price = 0; //The cost in tokens
+    boolean joinAfterStart = false; //Whether players can join once the ride has started.
+    boolean enabled = false; //Whether the ride is enabled/disabled.
 
     /* Running Data */
-    boolean RUNNING = false; //Whether the ride is operating or not
-    boolean COUNTDOWN_STARTED = false;
+    boolean running = false; //Whether the ride is operating or not
+    boolean countdownStarted = false;
     ArrayList<Vehicle> seats = new ArrayList<>(); //stores vehicle entities for the seats
     HashMap<Player,Integer> riders = new HashMap<>(); //Players mapped to their seat numbers
-    ArrayList<Player> QUEUE = new ArrayList<>(); //The queue for players waiting to join the ride when it next runs
+    ArrayList<Player> queue = new ArrayList<>(); //The queue for players waiting to join the ride when it next runs
     BukkitTask countdownTask;
 
     /**
@@ -73,7 +72,7 @@ public abstract class Ride implements Listener {
         RidesPlugin.getInstance().getServer().getPluginManager().registerEvents(this,RidesPlugin.getInstance());
 
         //Spawn Seats if enabled
-        if (ENABLED) respawnSeats();
+        if (enabled) respawnSeats();
     }
 
     /**
@@ -106,19 +105,16 @@ public abstract class Ride implements Listener {
         }
     }
 
+    /**
+     * Teleport an entity using CraftEntity method, to move with passenger.
+     * @param v vehicle/entity to teleport
+     * @param loc location to teleport to
+     */
     public void teleportWithPassenger(Entity v, Location loc) {
-        try {
-            methods[1].invoke(methods[0].invoke(v), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-
-
-//            for (Entity ent:v.getPassengers()) {
-//                methods[1].invoke(methods[0].invoke(ent), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-//            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        try { setPositionRotationMethod[1].invoke(setPositionRotationMethod[0].invoke(v), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
+
     /**
      * despawns all this rides minecarts, to prevent duplicates appearing after a shutdown
      */
@@ -130,12 +126,12 @@ public abstract class Ride implements Listener {
     }
 
     /**
-     * Forces the ride to remove all it's vehicles/seats and respawn them.
+     * Makes the ride spawn in it's seats. Removes existing first to prevent duplicate entities.
      */
     public void respawnSeats() {
         despawnSeats();
 
-        for (int i=0;i<CAPACITY;i++){
+        for (int i = 0; i< capacity; i++){
             Location loc2 = getPosition(i);
 
             //remove any minecarts within a few blocks of each location in case there's duplicates in the world.
@@ -156,14 +152,13 @@ public abstract class Ride implements Listener {
         }
     }
 
+    /**
+     * @return the first empty seat on the ride. 0 if the ride is full or completely empty.
+     */
     public int firstAvailableSeat() {
         Collection<Integer> taken = riders.values();
-        for (int i=0;i<CAPACITY;i++) {
-            if (taken.contains(riders)) {
-                continue;
-            } else {
-                return i;
-            }
+        for (int i = 0; i< capacity; i++) {
+            if (!taken.contains(i)) return i;
         }
         return 0; //If we don't find a seat, return 0.
     }
@@ -175,11 +170,11 @@ public abstract class Ride implements Listener {
      */
     public void addPlayer(Player player) {
         //Check if the fude is enabled
-        if (!ENABLED) return;
+        if (!enabled) return;
 
         //Check if player can afford to ride
-        if (!RidesPlugin.getInstance().canAfford(player,PRICE)) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.ride_cant_afford.replaceAll("\\{price}",Integer.toString(PRICE))));
+        if (!RidesPlugin.getInstance().canAfford(player, price)) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.ride_cant_afford.replaceAll("\\{price}",Integer.toString(price))));
             return;
         }
 
@@ -189,7 +184,7 @@ public abstract class Ride implements Listener {
             addToQueue(player);
             return;
         }
-        if (isRunning() && !JOIN_AFTER_START) {
+        if (isRunning() && !joinAfterStart) {
             addToQueue(player);
             return;
         }
@@ -198,30 +193,30 @@ public abstract class Ride implements Listener {
 
         //Otherwise, add them to riders and put them in a seat.
         riders.put(player,seatnum);
-        RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player,ID);
+        RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player, rideID);
 
         seats.get(seatnum).addPassenger(player);
 
         //charge them the price
-        if (PRICE!=0) {
+        if (price !=0) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     Messages.prefix + Messages.ride_paid
-                        .replaceAll("\\{price}",Integer.toString(PRICE))
-                        .replaceAll("\\{ride}",ID)));
-            RidesPlugin.getInstance().takePayment(player,PRICE);
+                        .replaceAll("\\{price}",Integer.toString(price))
+                        .replaceAll("\\{ride}", rideID)));
+            RidesPlugin.getInstance().takePayment(player, price);
         }
 
 
         if (isFull()) {
-            if (COUNTDOWN_STARTED) countdownTask.cancel();
+            if (countdownStarted) countdownTask.cancel();
             messageRiders(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.ride_starting_seatsFUll));
             startRide();
         }
-        else if (riders.size()>=MIN_START_PLAYERS && !COUNTDOWN_STARTED) startCountdown();
+        else if (riders.size()>= minStartPlayers && !countdownStarted) startCountdown();
         else messageRiders(Messages.prefix +
                     Messages.ride_starting_needMoreRiders
                             .replaceAll("\\{count}",
-                                    Integer.toString(MIN_START_PLAYERS-riders.size())));
+                                    Integer.toString(minStartPlayers -riders.size())));
 
     }
 
@@ -232,28 +227,28 @@ public abstract class Ride implements Listener {
 
         //schedule the ride to start after the wait time
         countdownTask = Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(),
-                () -> startRide(),START_WAIT_TIME*20);
+                () -> startRide(), startWaitTime *20);
 
-        COUNTDOWN_STARTED = true;
+        countdownStarted = true;
 
         //Send messages to riders
         messageRiders(Messages.prefix +
                 Messages.ride_starting_countdown
-                        .replaceAll("\\{time}",Integer.toString(START_WAIT_TIME)));
+                        .replaceAll("\\{time}",Integer.toString(startWaitTime)));
 
-        if (START_WAIT_TIME>10) {
+        if (startWaitTime >10) {
             Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(),
                     () -> messageRiders(Messages.prefix +
                             Messages.ride_starting_countdown
                                     .replaceAll("\\{time}",Integer.toString(10))),
-                    (START_WAIT_TIME-10)*20);
+                    (startWaitTime -10)*20);
         }
-        if (START_WAIT_TIME>5) {
+        if (startWaitTime >5) {
             Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(),
                     () -> messageRiders(Messages.prefix +
                             Messages.ride_starting_countdown
                                     .replaceAll("\\{time}",Integer.toString(5))),
-                    (START_WAIT_TIME-5)*20);
+                    (startWaitTime -5)*20);
         }
     }
 
@@ -287,7 +282,7 @@ public abstract class Ride implements Listener {
             Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), new Runnable() {
                 @Override
                 public void run() {
-                    player.teleport(EXIT_LOCATION);
+                    player.teleport(exitLocation);
                 }
             },2l);
         }
@@ -297,8 +292,8 @@ public abstract class Ride implements Listener {
      * Called at the end of the ride to check if theres people in the queue
      */
     public void checkQueue() {
-        if (QUEUE.size()>0) {
-            for (Player p:(List<Player>) QUEUE.clone()) {
+        if (queue.size()>0) {
+            for (Player p:(List<Player>) queue.clone()) {
                 removeFromQueue(p);
                 addPlayer(p);
             }
@@ -312,16 +307,16 @@ public abstract class Ride implements Listener {
         FileConfiguration out = new YamlConfiguration();
 
         try{
-            out.set("Generic.RideType",TYPE);
-            out.set("Generic.Enabled",ENABLED);
-            out.set("Generic.ID",ID);
-            out.set("Generic.CAPACITY",CAPACITY);
-            out.set("Generic.BASE_LOCATION",BASE_LOCATION);
-            out.set("Generic.EXIT_LOCATION",EXIT_LOCATION);
-            out.set("Generic.Start.MIN_PLAYERS",MIN_START_PLAYERS);
-            out.set("Generic.Start.WAIT_TIME",START_WAIT_TIME);
-            out.set("Generic.Start.ALLOW_JOIN_AFTER_START",JOIN_AFTER_START);
-            out.set("Generic.Price",PRICE);
+            out.set("Generic.RideType", type);
+            out.set("Generic.Enabled", enabled);
+            out.set("Generic.ID", rideID);
+            out.set("Generic.CAPACITY", capacity);
+            out.set("Generic.BASE_LOCATION", baseLocation);
+            out.set("Generic.EXIT_LOCATION", exitLocation);
+            out.set("Generic.Start.MIN_PLAYERS", minStartPlayers);
+            out.set("Generic.Start.WAIT_TIME", startWaitTime);
+            out.set("Generic.Start.ALLOW_JOIN_AFTER_START", joinAfterStart);
+            out.set("Generic.Price", price);
         } catch (NullPointerException ignored) {}
 
 
@@ -346,23 +341,23 @@ public abstract class Ride implements Listener {
      * @return whether all seats are taken on the ride
      */
     public boolean isFull() {
-        return riders.size() >= CAPACITY;
+        return riders.size() >= capacity;
     }
 
     /**
      * @return if the ride is already running
      */
     public boolean isRunning() {
-        return RUNNING;
+        return running;
     }
 
     public void addToQueue(Player player) {
 
         //Check if player already in the queue
-        if (QUEUE.contains(player)) {
+        if (queue.contains(player)) {
             String message = ChatColor.translateAlternateColorCodes('&', Messages.ride_queue_already);
-            message = message.replaceAll("\\{place}",Integer.toString(QUEUE.indexOf(player)));
-            message = message.replaceAll("\\{total}",Integer.toString(QUEUE.size()));
+            message = message.replaceAll("\\{place}",Integer.toString(queue.indexOf(player)));
+            message = message.replaceAll("\\{total}",Integer.toString(queue.size()));
             player.sendMessage(message);
             return;
         }
@@ -384,22 +379,22 @@ public abstract class Ride implements Listener {
         }
 
         //add to the queue
-        QUEUE.add(player);
-        RidesPlugin.getInstance().getConfigHandler().queueingPlayers.put(player,ID);
+        queue.add(player);
+        RidesPlugin.getInstance().getConfigHandler().queueingPlayers.put(player, rideID);
 
         String message = ChatColor.translateAlternateColorCodes('&',Messages.ride_queue_joined);
-        message = message.replaceAll("\\{ride}",ID);
-        message = message.replaceAll("\\{place}",Integer.toString(QUEUE.indexOf(player)));
+        message = message.replaceAll("\\{ride}", rideID);
+        message = message.replaceAll("\\{place}",Integer.toString(queue.indexOf(player)));
         player.sendMessage(message);
 
     }
 
     public void removeFromQueue(Player player) {
         //remove from the queue
-        QUEUE.remove(player);
+        queue.remove(player);
         RidesPlugin.getInstance().getConfigHandler().queueingPlayers.remove(player);
         String message = ChatColor.translateAlternateColorCodes('&',Messages.ride_queue_left);
-        message = message.replaceAll("\\{ride}",ID);
+        message = message.replaceAll("\\{ride}", rideID);
         player.sendMessage(message);
     }
 
@@ -436,20 +431,20 @@ public abstract class Ride implements Listener {
             case "ENABLED":
                 //Value should be true/false
                 if (Boolean.parseBoolean(values[0])) {
-                    if (enable()) {out = Messages.command_admin_ride_enable.replaceAll("\\{ride}",ID);} else {
-                        out = Messages.command_admin_ride_enable_fail.replaceAll("\\{ride}",ID);
+                    if (enable()) {out = Messages.command_admin_ride_enable.replaceAll("\\{ride}", rideID);} else {
+                        out = Messages.command_admin_ride_enable_fail.replaceAll("\\{ride}", rideID);
                     }
                 }
                 else {
                     disable();
-                    out = Messages.command_admin_ride_disable.replaceAll("\\{ride}",ID);
+                    out = Messages.command_admin_ride_disable.replaceAll("\\{ride}", rideID);
                 }
                 break;
             case "BASE_LOCATION":
                 //value should be blank or "x y z"
                 Location location = sender.getLocation().clone();
                 if (value.equalsIgnoreCase(" ")) {
-                    BASE_LOCATION = location;
+                    baseLocation = location;
                     out = Messages.command_admin_ride_setting_LOCATION_player;
                 } else {
                     double x,y,z;
@@ -461,7 +456,7 @@ public abstract class Ride implements Listener {
                         location.setX(x);
                         location.setY(y);
                         location.setZ(z);
-                        BASE_LOCATION = location;
+                        baseLocation = location;
                         out = Messages.command_admin_ride_setting_LOCATION_coords
                                 .replaceAll("\\{X}",Double.toString(x))
                                 .replaceAll("\\{Y}",Double.toString(y))
@@ -474,17 +469,17 @@ public abstract class Ride implements Listener {
             case "CAPACITY":
                 try{
                     int cap = Integer.parseInt(values[0]);
-                    CAPACITY = cap;
+                    capacity = cap;
                     out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",cap + " seats");;
                 } catch (NumberFormatException e) {
-                    out = Messages.command_admin_ride_setting_GENERAL_mustBeInt;
+                    out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeInt;
                 }
                 break;
             case "EXIT_LOCATION":
                 //value should be blank or "x y z"
                 Location loc2 = sender.getLocation().clone();
                 if (value.equalsIgnoreCase(" ")) {
-                    EXIT_LOCATION = loc2;
+                    exitLocation = loc2;
                     out = Messages.command_admin_ride_setting_LOCATION_player;
                 } else {
                     double x,y,z;
@@ -496,7 +491,7 @@ public abstract class Ride implements Listener {
                         loc2.setX(x);
                         loc2.setY(y);
                         loc2.setZ(z);
-                        EXIT_LOCATION = loc2;
+                        exitLocation = loc2;
                         out = Messages.command_admin_ride_setting_LOCATION_coords
                                 .replaceAll("\\{X}",Double.toString(x))
                                 .replaceAll("\\{Y}",Double.toString(y))
@@ -509,46 +504,46 @@ public abstract class Ride implements Listener {
             case "START_PLAYERS":
                 try{
                     int startPl = Integer.parseInt(values[0]);
-                    MIN_START_PLAYERS = startPl;
+                    minStartPlayers = startPl;
                     out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Integer.toString(startPl));
                 } catch (NumberFormatException e) {
-                    out = Messages.command_admin_ride_setting_GENERAL_mustBeInt;
+                    out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeInt;
                 }
 
                 break;
             case "START_DELAY":
                 try{
                     int delay = Integer.parseInt(values[0]);
-                    START_WAIT_TIME = delay;
+                    startWaitTime = delay;
                     out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Integer.toString(delay));
                 } catch (NumberFormatException e) {
-                    out = Messages.command_admin_ride_setting_GENERAL_mustBeInt;
+                    out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeInt;
                 }
 
                 break;
             case "JOIN_AFTER_START":
                 //Value should be true/false
                 if (Boolean.parseBoolean(values[0])) {
-                    JOIN_AFTER_START = true;
+                    joinAfterStart = true;
                     out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","TRUE");
                 } else {
-                    JOIN_AFTER_START = false;
+                    joinAfterStart = false;
                     out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","FALSE");
                 }
                 break;
             case "PRICE":
                 try{
                     int price = Integer.parseInt(values[0]);
-                    PRICE = price;
+                    this.price = price;
                     out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Integer.toString(price));
                 } catch (NumberFormatException e) {
-                    out = Messages.command_admin_ride_setting_GENERAL_mustBeInt;
+                    out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeInt;
                 }
 
                 break;
         }
 
-        return out.replaceAll("\\{OPTION}",key).replaceAll("\\{RIDE}",ID);
+        return out.replaceAll("\\{OPTION}",key).replaceAll("\\{RIDE}", rideID);
     }
 
     /**
@@ -572,15 +567,15 @@ public abstract class Ride implements Listener {
     }
 
     public void setRideOptions(FileConfiguration conf) {
-        ENABLED = conf.getBoolean("Generic.Enabled");
-        ID = conf.getString("Generic.ID");
-        CAPACITY = conf.getInt("Generic.CAPACITY");
-        BASE_LOCATION = conf.getLocation("Generic.BASE_LOCATION");
-        EXIT_LOCATION = conf.getLocation("Generic.EXIT_LOCATION");
-        MIN_START_PLAYERS = conf.getInt("Generic.Start.MIN_PLAYERS");
-        START_WAIT_TIME = conf.getInt("Generic.Start.WAIT_TIME");
-        JOIN_AFTER_START = conf.getBoolean("Generic.Start.ALLOW_JOIN_AFTER_START");
-        PRICE = conf.getInt("Generic.Price");
+        enabled = conf.getBoolean("Generic.Enabled");
+        rideID = conf.getString("Generic.ID");
+        capacity = conf.getInt("Generic.CAPACITY");
+        baseLocation = conf.getLocation("Generic.BASE_LOCATION");
+        exitLocation = conf.getLocation("Generic.EXIT_LOCATION");
+        minStartPlayers = conf.getInt("Generic.Start.MIN_PLAYERS");
+        startWaitTime = conf.getInt("Generic.Start.WAIT_TIME");
+        joinAfterStart = conf.getBoolean("Generic.Start.ALLOW_JOIN_AFTER_START");
+        price = conf.getInt("Generic.Price");
     }
 
     /**
@@ -589,22 +584,22 @@ public abstract class Ride implements Listener {
      */
     public String getRideInfoStr() {
         String out = Messages.command_admin_ride_info_general;
-        out = out.replaceAll("\\{ID}",ID);
-        out = out.replaceAll("\\{ENABLED}",Boolean.toString(ENABLED));
-        out = out.replaceAll("\\{PRICE}",Integer.toString(PRICE));
-        out = out.replaceAll("\\{RUNNING}",Boolean.toString(RUNNING));
+        out = out.replaceAll("\\{ID}", rideID);
+        out = out.replaceAll("\\{ENABLED}",Boolean.toString(enabled));
+        out = out.replaceAll("\\{PRICE}",Integer.toString(price));
+        out = out.replaceAll("\\{RUNNING}",Boolean.toString(running));
         out = out.replaceAll("\\{RIDER_COUNT}",Integer.toString(riders.size()));
-        out = out.replaceAll("\\{QUEUE_COUNT}",Integer.toString(QUEUE.size()));
-        out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS));
-        out = out.replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME));
-        out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
+        out = out.replaceAll("\\{QUEUE_COUNT}",Integer.toString(queue.size()));
+        out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(minStartPlayers));
+        out = out.replaceAll("\\{START_DELAY}",Integer.toString(startWaitTime));
+        out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(joinAfterStart));
 
-        if (CAPACITY==null||CAPACITY==0)         out = out.replaceAll("\\{CAPACITY}","NOT SET");
-        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
+        if (capacity ==null|| capacity ==0)         out = out.replaceAll("\\{CAPACITY}","NOT SET");
+        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(capacity));
 
         String exit,base;
-        if (EXIT_LOCATION==null) exit = "NOT SET"; else exit = EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ();
-        if (BASE_LOCATION==null) base = "NOT SET"; else base = BASE_LOCATION.getWorld().getName() + " x"+BASE_LOCATION.getX() + " y"+BASE_LOCATION.getY() + " z" + BASE_LOCATION.getZ();
+        if (exitLocation ==null) exit = "NOT SET"; else exit = exitLocation.getWorld().getName() + " x"+ exitLocation.getX() + " y"+ exitLocation.getY() + " z" + exitLocation.getZ();
+        if (baseLocation ==null) base = "NOT SET"; else base = baseLocation.getWorld().getName() + " x"+ baseLocation.getX() + " y"+ baseLocation.getY() + " z" + baseLocation.getZ();
         out = out.replaceAll("\\{EXIT_LOCATION}",exit);
         out = out.replaceAll("\\{BASE_LOCATION}",base);
 
@@ -693,7 +688,7 @@ public abstract class Ride implements Listener {
         }
 
         //If in the ride queue
-        if (QUEUE.contains(e.getPlayer())) {
+        if (queue.contains(e.getPlayer())) {
             removeFromQueue(e.getPlayer());
         }
     }

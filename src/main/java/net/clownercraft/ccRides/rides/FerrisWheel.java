@@ -1,6 +1,6 @@
 package net.clownercraft.ccRides.rides;
 
-import net.clownercraft.ccRides.Config.Messages;
+import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.RidesPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -9,7 +9,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FerrisWheel extends Ride {
@@ -32,7 +31,7 @@ public class FerrisWheel extends Ride {
      */
     public FerrisWheel(YamlConfiguration conf) {
         //Set the type to FerrisWheel
-        super.TYPE = "FERRIS_WHEEL";
+        super.type = "FERRIS_WHEEL";
 
         //load generic options
         super.setRideOptions(conf);
@@ -44,7 +43,7 @@ public class FerrisWheel extends Ride {
         axis = conf.getBoolean("FerrisWheel.axis");
         cartWidth = conf.getInt("FerrisWheel.cartWidth");
 
-        if (ENABLED) enable();
+        if (enabled) enable();
     }
 
     /**
@@ -53,8 +52,8 @@ public class FerrisWheel extends Ride {
      */
     public FerrisWheel(String name) {
         //Setyp basic settings
-        super.TYPE = "FERRIS_WHEEL";
-        super.ID = name;
+        super.type = "FERRIS_WHEEL";
+        super.rideID = name;
 
         //Save a default config
         RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
@@ -66,19 +65,19 @@ public class FerrisWheel extends Ride {
         RidesPlugin.getInstance().getServer().getPluginManager().registerEvents(this,RidesPlugin.getInstance());
 
         //Spawn Seats if enabled
-        if (ENABLED) respawnSeats();
+        if (enabled) respawnSeats();
     }
 
     public void startRide() {
-        RidesPlugin.getInstance().getLogger().info("Starting FerrisWheel " + ID);
+        RidesPlugin.getInstance().getLogger().info("Starting FerrisWheel " + rideID);
         double rotationStep = 2*Math.PI / rotatespeed;
         updateTask = Bukkit.getScheduler().runTaskTimer(RidesPlugin.getInstance(), () -> {
             currentRotation += rotationStep;
             tickPositions();
             if (currentRotation>=2*Math.PI*length) stopRide();
         },1l,1l);
-        RUNNING = true;
-        COUNTDOWN_STARTED = false;
+        running = true;
+        countdownStarted = false;
     }
 
     public void stopRide() {
@@ -87,15 +86,15 @@ public class FerrisWheel extends Ride {
 
         currentRotation = 0.0;
 
-        COUNTDOWN_STARTED = false;
-        RUNNING = false;
+        countdownStarted = false;
+        running = false;
 
         //Eject Players
         for (Player p:riders.keySet()) {
             ejectPlayer(p);
         }
 
-        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (ENABLED) checkQueue();},10l);
+        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (enabled) checkQueue();},10l);
     }
 
 
@@ -109,10 +108,10 @@ public class FerrisWheel extends Ride {
      */
     public Location getPosition(int seatNum) {
         int positionNum = seatNum/cartWidth;
-        int positionCap = CAPACITY/cartWidth;
+        int positionCap = capacity /cartWidth;
         double angle = currentRotation + ((positionNum/(double)positionCap))*2*Math.PI - Math.PI/2;
 
-        Location loc = BASE_LOCATION.clone();
+        Location loc = baseLocation.clone();
         double xvec = radius * Math.cos(angle);
         double yvec = radius * Math.sin(angle);
         double zvec = seatNum%cartWidth;
@@ -185,6 +184,7 @@ public class FerrisWheel extends Ride {
 
             //The setting wasn't one of the defaults, so let's set FerrisWheel specific ones.
             switch (key) {
+                //TODO redo messages
 
                 case "RADIUS": //integer, in number of blocks
                     try{
@@ -239,7 +239,7 @@ public class FerrisWheel extends Ride {
 
 
         //If enabled re-enable the ride to introduce setting
-        if (ENABLED) enable();
+        if (enabled) enable();
 
         //return the message
         return out;
@@ -254,16 +254,16 @@ public class FerrisWheel extends Ride {
     public boolean enable() {
         //Check if all settings are set
         if (
-                BASE_LOCATION == null
-                        || EXIT_LOCATION == null
-                        || CAPACITY == null
-                        || ID == null
-                        || TYPE == null
+                baseLocation == null
+                        || exitLocation == null
+                        || capacity == null
+                        || rideID == null
+                        || type == null
                         || radius == null
                         || rotatespeed == null
                         || length == null
                         || cartWidth == null
-                        || CAPACITY == 0
+                        || capacity == 0
                         || radius == 0
                         || rotatespeed == 0
                         || length == 0
@@ -275,7 +275,7 @@ public class FerrisWheel extends Ride {
 
         //Enable the ride and spawn in seats
         respawnSeats();
-        ENABLED = true;
+        enabled = true;
 
         return true;
     }
@@ -290,11 +290,11 @@ public class FerrisWheel extends Ride {
 
         despawnSeats();
 
-        for (Player p:QUEUE) {
+        for (Player p: queue) {
             removeFromQueue(p);
         }
 
-        ENABLED = false;
+        enabled = false;
     }
 
     /**
@@ -307,22 +307,22 @@ public class FerrisWheel extends Ride {
         out = out + Messages.command_admin_ride_info_ferrisWheel;
 
         //leaving these here just incase they get put in the FerrisWheel specific message too
-        out = out.replaceAll("\\{ID}",ID);
-        out = out.replaceAll("\\{ENABLED}",Boolean.toString(ENABLED));
-        out = out.replaceAll("\\{PRICE}",Integer.toString(PRICE));
-        out = out.replaceAll("\\{RUNNING}",Boolean.toString(RUNNING));
+        out = out.replaceAll("\\{ID}", rideID);
+        out = out.replaceAll("\\{ENABLED}",Boolean.toString(enabled));
+        out = out.replaceAll("\\{PRICE}",Integer.toString(price));
+        out = out.replaceAll("\\{RUNNING}",Boolean.toString(running));
         out = out.replaceAll("\\{RIDER_COUNT}",Integer.toString(riders.size()));
-        out = out.replaceAll("\\{QUEUE_COUNT}",Integer.toString(QUEUE.size()));
-        out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS));
-        out = out.replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME));
-        out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
+        out = out.replaceAll("\\{QUEUE_COUNT}",Integer.toString(queue.size()));
+        out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(minStartPlayers));
+        out = out.replaceAll("\\{START_DELAY}",Integer.toString(startWaitTime));
+        out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(joinAfterStart));
 
-        if (CAPACITY==null||CAPACITY==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
-        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
+        if (capacity ==null|| capacity ==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
+        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(capacity));
 
         String exit,base;
-        if (EXIT_LOCATION==null) exit = "NOT SET"; else exit = EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ();
-        if (BASE_LOCATION==null) base = "NOT SET"; else base = BASE_LOCATION.getWorld().getName() + " x"+BASE_LOCATION.getX() + " y"+BASE_LOCATION.getY() + " z" + BASE_LOCATION.getZ();
+        if (exitLocation ==null) exit = "NOT SET"; else exit = exitLocation.getWorld().getName() + " x"+ exitLocation.getX() + " y"+ exitLocation.getY() + " z" + exitLocation.getZ();
+        if (baseLocation ==null) base = "NOT SET"; else base = baseLocation.getWorld().getName() + " x"+ baseLocation.getX() + " y"+ baseLocation.getY() + " z" + baseLocation.getZ();
         out = out.replaceAll("\\{EXIT_LOCATION}",exit);
         out = out.replaceAll("\\{BASE_LOCATION}",base);
 

@@ -1,20 +1,15 @@
 package net.clownercraft.ccRides;
 
-import net.clownercraft.ccRides.Config.ConfigHandler;
-import net.clownercraft.ccRides.Config.Messages;
+import net.clownercraft.ccRides.config.ConfigHandler;
+import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.rides.Ride;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.vehicle.VehicleEnterEvent;
-import org.bukkit.event.vehicle.VehicleExitEvent;
-import org.bukkit.event.world.WorldUnloadEvent;
 
 public class RidesListener implements Listener {
     public static boolean waitingSignClick = false; //Whether we're waiting for a player to click a sign for a command

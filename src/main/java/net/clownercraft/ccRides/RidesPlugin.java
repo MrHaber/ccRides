@@ -1,6 +1,6 @@
 package net.clownercraft.ccRides;
 
-import net.clownercraft.ccRides.Config.ConfigHandler;
+import net.clownercraft.ccRides.config.ConfigHandler;
 import net.clownercraft.ccRides.commands.AdminCommandExecutor;
 import net.clownercraft.ccRides.commands.PlayerCommandExecutor;
 import net.clownercraft.ccRides.rides.*;
@@ -76,7 +76,7 @@ public class RidesPlugin extends JavaPlugin {
 
        for (Ride r: configHandler.rides.values()) {
            r.init();
-           getLogger().info("Started " + r.ID + " Ride!");
+           getLogger().info("Started " + r.rideID + " Ride!");
        }
 
        //Link PAPI
@@ -135,7 +135,7 @@ public class RidesPlugin extends JavaPlugin {
 
        //Disable the rides to throw players out & despawn vehicles
        for (Ride r:configHandler.rides.values()) {
-           getLogger().info("Stopping " + r.ID + " ride.");
+           getLogger().info("Stopping " + r.rideID + " ride.");
            r.disable();
        }
 

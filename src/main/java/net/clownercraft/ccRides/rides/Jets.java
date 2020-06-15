@@ -1,8 +1,8 @@
 package net.clownercraft.ccRides.rides;
 
-import net.clownercraft.ccRides.Config.Messages;
+import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.RidesPlugin;
-import net.clownercraft.ccRides.Utils.StackEnchant;
+import net.clownercraft.ccRides.utils.Utils;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -14,13 +14,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
@@ -28,14 +24,13 @@ import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
 public class Jets extends Ride {
     Double radius;//the radius of the jets seats
     Integer rotatespeed; //number of ticks per full rotation of the jets
-    Double accelerateLength = 1d; //TODO make config
+    Double accelerateLength = 0.3d;
     Integer length; //number of full rotations per ride.
 
     Double angleMax = Math.toRadians(30.0); //The maximum angle of each 'jet' in radians
@@ -54,6 +49,7 @@ public class Jets extends Ride {
     double currRotStep = 0.005; //Current rotation step size, used to allow for acceleration
     ArrayList<Double> seatAngles = new ArrayList<>();
     BukkitTask updateTask;
+    boolean canAdjustHeight = false;
 
     /*
     Extra Entities
@@ -70,7 +66,7 @@ public class Jets extends Ride {
      */
     public Jets(YamlConfiguration conf) {
         //Set the type to JETS
-        super.TYPE = "JETS";
+        super.type = "JETS";
 
         //load generic options
         super.setRideOptions(conf);
@@ -85,9 +81,9 @@ public class Jets extends Ride {
         showBanners = conf.getBoolean("Jets.Decoration.ShowBanners");
         oddDecoration = Material.getMaterial(Objects.requireNonNull(conf.getString("Jets.Decoration.OddMaterial", oddDecoration.name())));
         evenDecoration = Material.getMaterial(Objects.requireNonNull(conf.getString("Jets.Decoration.EvenMaterial", evenDecoration.name())));
+        accelerateLength = conf.getDouble("Jets.Rotation.AccelerateLength");
 
-
-        if (ENABLED) enable();
+        if (enabled) enable();
     }
 
     /**
@@ -96,8 +92,8 @@ public class Jets extends Ride {
      */
     public Jets(String name) {
         //Setyp basic settings
-        super.TYPE = "JETS";
-        super.ID = name;
+        super.type = "JETS";
+        super.rideID = name;
         //Save a default config
         RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
     }
@@ -108,21 +104,21 @@ public class Jets extends Ride {
         RidesPlugin.getInstance().getServer().getPluginManager().registerEvents(this,RidesPlugin.getInstance());
 
         //Spawn Seats if enabled
-        if (ENABLED) respawnSeats();
+        if (enabled) respawnSeats();
     }
 
     public void startRide() {
         //RidesPlugin.getInstance().getLogger().info("Starting Jets " + ID);
         double rotationStep = 2*Math.PI / rotatespeed;
 
-        double rotationAccel;
+        double rotationAccel,lowerSpeed;
         if (accelerateLength==0) {
             rotationAccel = rotationStep;
+            lowerSpeed = angleMax;
         } else {
             rotationAccel = rotationStep / (2 * rotatespeed * accelerateLength);
+            lowerSpeed = angleMax / (accelerateLength * rotatespeed);
         }
-
-
 
         updateTask = Bukkit.getScheduler().runTaskTimer(RidesPlugin.getInstance(), () -> {
             currentRotation += currRotStep;
@@ -134,7 +130,17 @@ public class Jets extends Ride {
             }
 
             if (currentRotation >= Math.PI*2*(length-accelerateLength)) {
+                if (canAdjustHeight) canAdjustHeight = false;
                 currRotStep -= rotationAccel;
+
+                //lower all seats on slow down
+                for (int i=0;i<seatAngles.size();i++) {
+                    double angle = seatAngles.get(i);
+                    angle -= lowerSpeed;
+                    if (angle<0) angle = 0;
+                    seatAngles.set(i,angle);
+                }
+
 
                 if (currRotStep < 0.005) currRotStep = 0.005;
             }
@@ -143,8 +149,9 @@ public class Jets extends Ride {
             if (currentRotation>=2*Math.PI*length) stopRide();
 
         },1l,1l);
-        RUNNING = true;
-        COUNTDOWN_STARTED = false;
+        running = true;
+        canAdjustHeight = true;
+        countdownStarted = false;
     }
 
     public void stopRide() {
@@ -158,8 +165,8 @@ public class Jets extends Ride {
 
         tickPositions();
 
-        COUNTDOWN_STARTED = false;
-        RUNNING = false;
+        countdownStarted = false;
+        running = false;
 
         //Eject Players
         for (Player p:riders.keySet()) {
@@ -167,7 +174,7 @@ public class Jets extends Ride {
         }
 
 
-        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (ENABLED) checkQueue();},10l);
+        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (enabled) checkQueue();},10l);
     }
 
     /**
@@ -223,7 +230,7 @@ public class Jets extends Ride {
     @Override
     public void respawnSeats() {
         seatAngles.clear();
-        for (int i=0;i<CAPACITY;i++){
+        for (int i = 0; i< capacity; i++){
             seatAngles.add(0.0);
         }
 
@@ -231,12 +238,12 @@ public class Jets extends Ride {
 
         //If show leads enabled spawn the lead holder
         if (showLeads) {
-            for (Entity e:BASE_LOCATION.getWorld().getNearbyEntities(BASE_LOCATION.clone().add(0,1,0),3,3,3)) {
+            for (Entity e: baseLocation.getWorld().getNearbyEntities(baseLocation.clone().add(0,1,0),3,3,3)) {
                 if (e.getType().equals(EntityType.PARROT)
                         && leashHolder != e && !leashEnds.contains(e)) e.remove();
             }
 
-            Parrot leadStart = (Parrot) BASE_LOCATION.getWorld().spawnEntity(BASE_LOCATION.clone().add(0,1,0),EntityType.PARROT);
+            Parrot leadStart = (Parrot) baseLocation.getWorld().spawnEntity(baseLocation.clone().add(0,1,0),EntityType.PARROT);
             leadStart.setInvulnerable(true);
             leadStart.setGravity(false);
             leadStart.setAI(false);
@@ -245,11 +252,11 @@ public class Jets extends Ride {
             leadStart.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,Integer.MAX_VALUE,1,false,false));
             leadStart.setCustomName("Jets Parrot");
             leadStart.setCustomNameVisible(false);
-            teleportWithPassenger(leadStart,BASE_LOCATION);
+            teleportWithPassenger(leadStart, baseLocation);
             leashHolder = leadStart;
         }
 
-        for (int i=0;i<CAPACITY;i++){
+        for (int i = 0; i< capacity; i++){
             Location loc2 = getPosition(i);
             Location leadLoc = loc2.clone().subtract(0,1,0);
 
@@ -345,13 +352,13 @@ public class Jets extends Ride {
      * @return = the location the seat should currently be
      */
     public Location getPosition(int seatNum) {
-        double angle = currentRotation + (seatNum/(double)CAPACITY)*2*Math.PI;
+        double angle = currentRotation + (seatNum/(double) capacity)*2*Math.PI;
         double seatAngle = 0;
         if (seatAngles.size()>seatNum) {
             seatAngle = seatAngles.get(seatNum);
         }
 
-        Location locTop = BASE_LOCATION.clone();
+        Location locTop = baseLocation.clone();
 
         Location locSeat = locTop.clone();
 
@@ -376,7 +383,7 @@ public class Jets extends Ride {
      * @return = the location the seat should currently be
      */
     public Location getDecorPos(int seatNum) {
-        double angle = currentRotation + (seatNum/(double)CAPACITY)*2*Math.PI;
+        double angle = currentRotation + (seatNum/(double) capacity)*2*Math.PI;
         angle -= 0.3/radius;
 
         double seatAngle = 0;
@@ -384,7 +391,7 @@ public class Jets extends Ride {
             seatAngle = seatAngles.get(seatNum);
         }
 
-        Location locTop = BASE_LOCATION.clone();
+        Location locTop = baseLocation.clone();
 
         Location locSeat = locTop.clone();
 
@@ -421,6 +428,8 @@ public class Jets extends Ride {
             out.set("Jets.Decoration.ShowBanners",showBanners);
             out.set("Jets.Decoration.OddMaterial",oddDecoration.name());
             out.set("Jets.Decoration.EvenMaterial",evenDecoration.name());
+            out.set("Jets.Rotation.AccelerateLength",accelerateLength);
+
         } catch (NullPointerException ignored) {}
 
         return out;
@@ -439,10 +448,14 @@ public class Jets extends Ride {
         out.add("RADIUS");
         out.add("ROTATE_SPEED");
         out.add("RIDE_LENGTH");
+        out.add("ACCELERATE_LENGTH");
         out.add("ANGLE_MAX");
         out.add("ANGLE_STEP");
         out.add("SHOW_LEADS");
         out.add("SHOW_BANNERS");
+        out.add("DECOR_MATERIAL_ODD");
+        out.add("DECOR_MATERIAL_EVEN");
+
 
         return out;
     }
@@ -464,66 +477,83 @@ public class Jets extends Ride {
         String out = super.setConfigOption(key,value,sender);
         String[] values = value.split(" ");
         if (out.equals("")) {
-            //TODO redo messages & add odd/even decoration options
+
             //The setting wasn't one of the defaults, so let's set jets specific ones.
             switch (key) {
 
                 case "RADIUS": //integer, in number of blocks
                     try{
                         radius = Double.parseDouble(values[0]);
-                    out = "Radius set to " + radius + " blocks.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_blocks.replaceAll("\\{VALUE}",Double.toString(radius));
                     } catch (NumberFormatException e) {
-                        out = "Radius must be a number of blocks. Decimals Allowed";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks;
                     }
                     break;
                 case "ROTATE_SPEED": //integer, ticks per full rotation
                     try{
                         rotatespeed = Integer.parseInt(values[0]);
-                        out = "Rotate_Speed set to " + rotatespeed + " ticks per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_ticks.replaceAll("\\{VALUE}",Integer.toString(rotatespeed));
                     } catch (NumberFormatException e) {
-                        out = "Rotate_Speed must be an integer number of ticks per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeIntTicks;
                     }
                     break;
                 case "RIDE_LENGTH": //integer, number of full rotations per ride
                     try{
                         length = Integer.parseInt(values[0]);
-                        out = "RIDE_LENGTH set to " + length + " rotations.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_cycles.replaceAll("\\{VALUE}",Integer.toString(length));
                     } catch (NumberFormatException e) {
-                        out = "RIDE_LENGTH must be an integer number of rotations.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeIntCycles;
                     }
                     break;
                 case "ANGLE_MAX": //double, the max +/- height variation in blocks
                     try{
                         angleMax = Math.toRadians(Double.parseDouble(values[0]));
-                        out = "HEIGHT_VAR set to ±" + values[0] + " degrees.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_degree.replaceAll("\\{VALUE}",Utils.formatDouble(Math.toDegrees(angleMax),3));
                     } catch (NumberFormatException e) {
-                        out = "HEIGHT_VAR must be an double number of blocks.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoubDegrees;
                     }
                     break;
                 case "ANGLE_STEP": //double, the number of full height cycles per rotation
                     try{
                         angleSpeed = Math.toRadians(Double.parseDouble(values[0]));
-                        out = "HEIGHT_SPEED set to " + values[0] + " degrees per tick.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_degree.replaceAll("\\{VALUE}",Utils.formatDouble(Math.toDegrees(angleSpeed),3));
                     } catch (NumberFormatException e) {
-                        out = "HEIGHT_VAR must be an double number of cycles per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoubDegrees;
                     }
                     break;
                 case "SHOW_LEADS": //boolean
-                    if (Boolean.parseBoolean(values[0])) {
-                        showLeads = true;
-                        out = "SHOW_LEADS set to true.";
-                    } else {
-                        showLeads = false;
-                        out = "SHOW_LEADS set to false.";
-                    }
+                    showLeads = Boolean.parseBoolean(values[0]);
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Boolean.toString(showLeads));
                     break;
                 case "SHOW_BANNERS": //boolean
-                    if (Boolean.parseBoolean(values[0])) {
-                        showBanners = true;
-                        out = "SHOW_BANNERS set to true.";
+                    showBanners = Boolean.parseBoolean(values[0]);
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Boolean.toString(showBanners));
+                    break;
+                case "ACCELERATE_LENGTH":
+                    try{
+                        accelerateLength = Double.parseDouble(values[0]);
+                        out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Double.toString(accelerateLength));
+
+                    } catch (NumberFormatException e) {
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoub;
+                    }
+                    break;
+                case "DECOR_MATERIAL_ODD":
+                    Material matO = Material.getMaterial(values[0]);
+                    if (matO != null && matO != Material.AIR) {
+                        oddDecoration = matO;
+                        out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",matO.name());
                     } else {
-                        showBanners = false;
-                        out = "SHOW_BANNERS set to false.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeMaterial;
+                    }
+                    break;
+                case "DECOR_MATERIAL_EVEN":
+                    Material matE = Material.getMaterial(values[0]);
+                    if (matE != null && matE != Material.AIR) {
+                        evenDecoration = matE;
+                        out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",matE.name());
+                    } else {
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeMaterial;
                     }
                     break;
             }
@@ -532,14 +562,14 @@ public class Jets extends Ride {
 
         //If out is still empty, we didn't recognise the option key
         //if this isn't the case, save the changes
-        if (out.equals("")) out = key + " not found as an option";
+        if (out.equals("")) out = Messages.command_admin_ride_setting_GENERAL_fail_notFound;
         else RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
 
         //If enabled re-enable the ride to introduce setting
-        if (ENABLED) enable();
+        if (enabled) enable();
 
         //return the message
-        return out.replaceAll("\\{OPTION}",key);
+        return out.replaceAll("\\{OPTION}",key).replaceAll("\\{RIDE}", rideID);
     }
 
     /**
@@ -551,17 +581,17 @@ public class Jets extends Ride {
     public boolean enable() {
         //Check if all settings are set
         if (
-                BASE_LOCATION == null
-                || EXIT_LOCATION == null
-                || CAPACITY == null
-                || ID == null
-                || TYPE == null
+                baseLocation == null
+                || exitLocation == null
+                || capacity == null
+                || rideID == null
+                || type == null
                 || radius == null
                 || rotatespeed == null
                 || length == null
                 || angleMax == null
                 || angleSpeed == null
-                || CAPACITY == 0
+                || capacity == 0
                 || radius == 0
                 || rotatespeed == 0
                 || length == 0
@@ -573,7 +603,7 @@ public class Jets extends Ride {
 
         //Enable the ride and spawn in seats
         respawnSeats();
-        ENABLED = true;
+        enabled = true;
 
         return true;
     }
@@ -588,11 +618,11 @@ public class Jets extends Ride {
 
         despawnSeats();
 
-        for (Player p:QUEUE) {
+        for (Player p: queue) {
             removeFromQueue(p);
         }
 
-        ENABLED = false;
+        enabled = false;
     }
 
     /**
@@ -605,22 +635,22 @@ public class Jets extends Ride {
         out = out + Messages.command_admin_ride_info_jets;
 
         //leaving these here just incase they get put in the jets specific message too
-        out = out.replaceAll("\\{ID}",ID)
-                .replaceAll("\\{ENABLED}",Boolean.toString(ENABLED))
-                .replaceAll("\\{PRICE}",Integer.toString(PRICE))
-                .replaceAll("\\{RUNNING}",Boolean.toString(RUNNING))
+        out = out.replaceAll("\\{ID}", rideID)
+                .replaceAll("\\{ENABLED}",Boolean.toString(enabled))
+                .replaceAll("\\{PRICE}",Integer.toString(price))
+                .replaceAll("\\{RUNNING}",Boolean.toString(running))
                 .replaceAll("\\{RIDER_COUNT}",Integer.toString(riders.size()))
-                .replaceAll("\\{QUEUE_COUNT}",Integer.toString(QUEUE.size()))
-                .replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS))
-                .replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME))
-                .replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
+                .replaceAll("\\{QUEUE_COUNT}",Integer.toString(queue.size()))
+                .replaceAll("\\{START_PLAYERS}",Integer.toString(minStartPlayers))
+                .replaceAll("\\{START_DELAY}",Integer.toString(startWaitTime))
+                .replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(joinAfterStart));
 
-        if (CAPACITY==null||CAPACITY==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
-        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
+        if (capacity ==null|| capacity ==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
+        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(capacity));
 
         String exit,base;
-        if (EXIT_LOCATION==null) exit = "NOT SET"; else exit = EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ();
-        if (BASE_LOCATION==null) base = "NOT SET"; else base = BASE_LOCATION.getWorld().getName() + " x"+BASE_LOCATION.getX() + " y"+BASE_LOCATION.getY() + " z" + BASE_LOCATION.getZ();
+        if (exitLocation ==null) exit = "NOT SET"; else exit = exitLocation.getWorld().getName() + " x"+ exitLocation.getX() + " y"+ exitLocation.getY() + " z" + exitLocation.getZ();
+        if (baseLocation ==null) base = "NOT SET"; else base = baseLocation.getWorld().getName() + " x"+ baseLocation.getX() + " y"+ baseLocation.getY() + " z" + baseLocation.getZ();
         out = out.replaceAll("\\{EXIT_LOCATION}",exit)
                 .replaceAll("\\{BASE_LOCATION}",base);
 
@@ -635,15 +665,20 @@ public class Jets extends Ride {
         else out = out.replaceAll("\\{RIDE_LENGTH}",Integer.toString(length));
 
         if(angleSpeed==null||angleSpeed==0) out = out.replaceAll("\\{ANGLE_STEP}","NOT SET");
-        else out = out.replaceAll("\\{ANGLE_STEP}",Double.toString(Math.toDegrees(angleSpeed)));
+        else out = out.replaceAll("\\{ANGLE_STEP}", Utils.formatDouble(Math.toDegrees(angleSpeed),3));
 
-        out = out.replaceAll("\\{ANGLE_MAX}",Double.toString(Math.toDegrees(angleMax)))
+        out = out.replaceAll("\\{ANGLE_MAX}",Utils.formatDouble(Math.toDegrees(angleMax),3))
                 .replaceAll("\\{SHOW_LEADS}",Boolean.toString(showLeads))
-                .replaceAll("\\{SHOW_BANNERS}",Boolean.toString(showBanners));
+                .replaceAll("\\{SHOW_BANNERS}",Boolean.toString(showBanners))
+                .replaceAll("\\{ACCELERATE_LENGTH}",Double.toString(accelerateLength))
+                .replaceAll("\\{DECOR_MATERIAL_ODD}",oddDecoration.name())
+                .replaceAll("\\{DECOR_MATERIAL_EVEN}",evenDecoration.name());
 
         return out;
     }
 
+
+    /*    EVENT LISTENERS     */
 
     /**
      * Detect player changing their hotbar slot to control the seat height.
@@ -657,7 +692,7 @@ public class Jets extends Ride {
             int jump = newslot-oldslot;
             event.setCancelled(true);
 
-            if (RUNNING) {
+            if (canAdjustHeight) {
                 if (oldslot==8 && newslot == 0) {
                     jump = 1;
                 } else if (oldslot==0 && newslot == 8) {

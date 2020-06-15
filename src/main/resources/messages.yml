@@ -107,13 +107,39 @@ Command:
                   &9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n
                   &9Accelerate Speed: &b{ACCELERATE_LENGTH} rotations
                   &4&m------------------------------------------------"
+        jets: "&4      -- &cJETS Specific Info &4--\n
+              &9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n
+              &9Base Location: &b{BASE_LOCATION}\n
+              &9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n
+              &9Accelerate Length: &b{ACCELERATE_LENGTH} rotations\n
+              &9Angle Max: &b{ANGLE_MAX} degrees &8// &9Angle Step: &b{ANGLE_STEP} &9degrees/click\n
+              &9Show Leads: &b{SHOW_LEADS} &8// &9Show Banners: &b{SHOW_BANNERS}\n
+              &9Decorations: &oOdd &b{DECOR_MATERIAL_ODD} &9&oEven &b{DECOR_MATERIAL_EVEN}\n
+              &4&m------------------------------------------------"
+
       setting:
         list: "&9Available Settings for this ride: \n{settings}"
+
         GENERAL:
-          success: "&9{OPTION} set to &b{VALUE}"
-          mustBeInt: "&4Invalid Value.&c {OPTION} must be an integer"
-          mustBeBool: "&4Invalid Value.&c {OPTION} must be true/false"
-          mustBeDoub: "&4Invalid Value.&c {OPTION} must be a floating point number"
+          success:
+            default: "&9{OPTION} set to &b{VALUE}"
+            degree: "&9{OPTION} set to &b{VALUE} degrees"
+            blocks: "&9{OPTION} set to &b{VALUE} blocks"
+            ticks: "&9{OPTION} set to &b{VALUE} ticks"
+            cycles: "&9{OPTION} set to &b{VALUE} cycles"
+
+          fail:
+            notFound: "&4{OPTION} &cis not a valid option for this ride."
+            mustBeInt: "&4Invalid Value.&c {OPTION} must be an integer"
+            mustBeIntBlocks: "&4Invalid Value.&c {OPTION} must be an integer number of blocks"
+            mustBeIntTicks: "&4Invalid Value: &c{OPTION} must be an integer number of ticks (20 ticks = 1 second)"
+            mustBeIntCycles: "&4Invalid Value: &c{OPTION} must be an integer number of cycles"
+            mustBeBool: "&4Invalid Value.&c {OPTION} must be true/false"
+            mustBeDoub: "&4Invalid Value.&c {OPTION} must be a floating point number"
+            mustBeDoubDegrees: "&4Invalid Value.&c {OPTION} must be a floating point number of degrees"
+            mustBeDoubBlocks: "&4Invalid Value.&c {OPTION} must be a floating point number of blocks"
+            mustBeMaterial: "&4Invalid Value.&c {OPTION} must be a Material type"
+
         LOCATION:
           player: "&9{OPTION} set to &byour current position."
           coords: "&9{OPTION} set to &bx{X} y{Y} z{Z}"
@@ -128,5 +154,3 @@ Command:
       unlinksign:
         click: "&9Please right click the sign to unlink it"
         unlinked: "&9Sign no longer linked to a ride"
-
-

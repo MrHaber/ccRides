@@ -1,4 +1,4 @@
-package net.clownercraft.ccRides.Config;
+package net.clownercraft.ccRides.config;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -13,6 +13,23 @@ public class Messages {
     Default options are defined here, and will be saved to the file if the version is newer
      */
     public static String prefix = "&b&lccRides &1» ";
+
+    //Ride Messages
+    public static String ride_queue_joined = "&9You joined {ride}'s queue. &b{place} &9players are ahead of you.\n&9Use &7/ride lq&9 to abandon the queueing";
+    public static String ride_queue_already = "&9You are already in the Queue. \n&9You are in place &b{place} of {total}";
+    public static String ride_queue_other_queue = "&9You're already queuing for {ride}. \n&9Use &7/ride lq &9to abandon queueing.";
+    public static String ride_queue_other_riding = "&9You can't join a queue while on a ride. \n&9Use &7/ride exit&9 to leave the ride";
+    public static String ride_queue_left = "&9You left {ride}'s queue.";
+
+    public static String ride_cant_afford = "&cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens.";
+    public static String ride_paid = "&9You paid &6{price} tokens&9 to ride on {ride}";
+
+
+    public static String ride_starting_needMoreRiders = "&9Waiting for {count} more players to start.";
+    public static String ride_starting_countdown = "&9The ride will start in {time} seconds.";
+    public static String ride_starting_seatsFUll = "&9All seats are filled! Ride starting.";
+
+    public static String ride_jets_controlMessage = "&b&lJets Ride &1&l» &b&lControl height with your scroll wheel.";
 
     //General command messages
     public static String command_not_player = "&cThis command must be run by a player.";
@@ -62,22 +79,26 @@ public class Messages {
     public static String command_admin_ride_invalid_sub = "&cUnrecognised sub-command, options are info, reload, enable, disable, setting";
 
     public static String command_admin_ride_setting_GENERAL_success = "&9{OPTION} set to &b{VALUE}";
-    public static String command_admin_ride_setting_GENERAL_notFound = "&4{OPTION} &cis not a valid option for this ride. ";
-    public static String command_admin_ride_setting_GENERAL_mustBeInt = "&4Invalid Value.&c {OPTION} must be an integer";
-    public static String command_admin_ride_setting_GENERAL_mustBeBool = "&4Invalid Value.&c {OPTION} must be true/false";
-    public static String command_admin_ride_setting_GENERAL_mustBeDoub =  "&4Invalid Value.&c {OPTION} must be a floating point number";
+    public static String command_admin_ride_setting_GENERAL_success_degree = "&9{OPTION} set to &b{VALUE} degrees";
+    public static String command_admin_ride_setting_GENERAL_success_blocks = "&9{OPTION} set to &b{VALUE} blocks";
+    public static String command_admin_ride_setting_GENERAL_success_ticks = "&9{OPTION} set to &b{VALUE} ticks";
+    public static String command_admin_ride_setting_GENERAL_success_cycles = "&9{OPTION} set to &b{VALUE} cycles";
+
+    public static String command_admin_ride_setting_GENERAL_fail_notFound = "&4{OPTION} &cis not a valid option for this ride.";
+    public static String command_admin_ride_setting_GENERAL_fail_mustBeInt = "&4Invalid Value.&c {OPTION} must be an integer";
+    public static String command_admin_ride_setting_GENERAL_fail_mustBeIntBlocks = "&4Invalid Value.&c {OPTION} must be an integer number of blocks";
+    public static String command_admin_ride_setting_GENERAL_fail_mustBeBool = "&4Invalid Value.&c {OPTION} must be true/false";
+    public static String command_admin_ride_setting_GENERAL_fail_mustBeDoub =  "&4Invalid Value.&c {OPTION} must be a floating point number";
+    public static String command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks =  "&4Invalid Value.&c {OPTION} must be a floating point number of blocks";
+    public static String command_admin_ride_setting_GENERAL_fail_mustBeMaterial =  "&4Invalid Value.&c {OPTION} must be a Material type";
+    public static String command_admin_ride_setting_GENERAL_fail_mustBeDoubDegrees =  "&4Invalid Value.&c {OPTION} must be a floating point number of degrees";
 
     public static String command_admin_ride_setting_LOCATION_player = "&9{OPTION} set to &byour current position.";
     public static String command_admin_ride_setting_LOCATION_coords = "&9{OPTION} set to &bx{X} y{Y} z{Z}";
     public static String command_admin_ride_setting_LOCATION_fail = "&4Incorrect Value: &c{OPTION} Must be three doubles, or blank to use your current location.";
 
-    public static String command_admin_ride_setting_RADIUS_success = "&9RADIUS set to &b{VALUE} blocks";
-    public static String command_admin_ride_setting_ROTATE_SPEED_success = "&9ROTATE_SPEED set to &b{VALUE} ticks per rotation";
-    public static String command_admin_ride_setting_RIDE_LENGTH_success = "&9RIDE_LENGTH set to &b{VALUE} full cycles";
-
-    public static String command_admin_ride_setting_RADIUS_fail = "&4Invalid Value: &cRADIUS must be a floating point number of blocks";
-    public static String command_admin_ride_setting_ROTATE_SPEED_fail = "&4Invalid Value: &cROTATE_SPEED must be an integer number of ticks per rotation (20 ticks = 1 second)";
-    public static String command_admin_ride_setting_RIDE_LENGTH_fail = "&4Invalid Value: &cRIDE_LENGTH must be an integer number of cycles";
+    public static String command_admin_ride_setting_GENERAL_fail_mustBeIntTicks = "&4Invalid Value: &c{OPTION} must be an integer number of ticks (20 ticks = 1 second)";
+    public static String command_admin_ride_setting_GENERAL_fail_mustBeIntCycles = "&4Invalid Value: &c{OPTION} must be an integer number of cycles";
 
     public static String command_admin_ride_info_general = "&4&m---- &c&l ccRides: &c{ID} Info &4&m----\n" +
             "&4         -- &cGeneral Info &4--\n" +
@@ -111,10 +132,11 @@ public class Messages {
             "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n" +
             "&9Base Location: &b{BASE_LOCATION}\n" +
             "&9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n" +
-            "&9Angle Max: &b{ANGLE_MAX} degrees &8// &9Angle Step: &b{ANGLE_STEP} &9degrees/tick\n" +
-            "&9Show Leads: &b{SHOW_LEADS} &8// &9Show Banners: &b{SHOW_BANNERS}" +
-            "\n" +
-            "&4&m------------------------------------------------"; //TODO update default messages.yml
+            "&9Accelerate Length: &b{ACCELERATE_LENGTH} rotations\n" +
+            "&9Angle Max: &b{ANGLE_MAX} degrees &8// &9Angle Step: &b{ANGLE_STEP} &9degrees/click\n" +
+            "&9Show Leads: &b{SHOW_LEADS} &8// &9Show Banners: &b{SHOW_BANNERS}\n" +
+            "&9Decorations: &oOdd &b{DECOR_MATERIAL_ODD} &9&oEven &b{DECOR_MATERIAL_EVEN}\n" +
+            "&4&m------------------------------------------------";
     public static String command_admin_ride_setting_list = "&9Available Settings for this ride: \n{settings}";
     public static String command_admin_linksign_syntax = "&cPlease specify a ride to link the sign to\n&cUsage: &7/rideadm linksign &8<&7rideName&8>";
     public static String command_admin_linksign_click = "&9Please right click the sign to link it";
@@ -123,22 +145,7 @@ public class Messages {
     public static String command_admin_unlinksign_unlinked = "&9Sign no longer linked to a ride";
 
 
-    //Ride Messages
-    public static String ride_queue_joined = "&9You joined {ride}'s queue. &b{place} &9players are ahead of you.\n&9Use &7/ride lq&9 to abandon the queueing";
-    public static String ride_queue_already = "&9You are already in the Queue. \n&9You are in place &b{place} of {total}";
-    public static String ride_queue_other_queue = "&9You're already queuing for {ride}. \n&9Use &7/ride lq &9to abandon queueing.";
-    public static String ride_queue_other_riding = "&9You can't join a queue while on a ride. \n&9Use &7/ride exit&9 to leave the ride";
-    public static String ride_queue_left = "&9You left {ride}'s queue.";
 
-    public static String ride_cant_afford = "&cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens.";
-    public static String ride_paid = "&9You paid &6{price} tokens&9 to ride on {ride}";
-
-
-    public static String ride_starting_needMoreRiders = "&9Waiting for {count} more players to start.";
-    public static String ride_starting_countdown = "&9The ride will start in {time} seconds.";
-    public static String ride_starting_seatsFUll = "&9All seats are filled! Ride starting.";
-
-    public static String ride_jets_controlMessage = "&b&lJets Ride &1&l» &b&lControl height with your scroll wheel.";
 
     /**
      * Loads messages fields based on given config file
@@ -148,6 +155,20 @@ public class Messages {
         int confVersion = conf.getInt("MessagesVersion");
         //Misc/General Messages
         prefix = conf.getString("Prefix",prefix);
+
+        //Ride Messagea
+        ride_queue_joined = conf.getString("Ride.queue.joined",ride_queue_joined);
+        ride_queue_already = conf.getString("Ride.queue.already",ride_queue_already);
+        ride_queue_other_queue = conf.getString("Ride.queue.alreadyOther",ride_queue_other_queue);
+        ride_queue_other_riding = conf.getString("Ride.queue.onRide",ride_queue_other_riding);
+        ride_queue_left = conf.getString("Ride.queue.left",ride_queue_left);
+        ride_cant_afford = conf.getString("Ride.cantAfford",ride_cant_afford);
+        ride_paid = conf.getString("Ride.paid",ride_paid);
+        ride_starting_needMoreRiders = conf.getString("Ride.starting.needMoreRiders",ride_starting_needMoreRiders);
+        ride_starting_countdown = conf.getString("Ride.starting.countdown",ride_starting_countdown);
+        ride_starting_seatsFUll = conf.getString("Ride.starting.seatsFull",ride_starting_seatsFUll);
+
+        ride_jets_controlMessage = conf.getString("Ride.Jets.controlMessage",ride_jets_controlMessage);
 
         //General Command messages
         command_not_player = conf.getString("Command.notPlayer",command_not_player);
@@ -180,14 +201,27 @@ public class Messages {
         command_admin_ride_info_jets = conf.getString("Command.Admin.ride.info.jets",command_admin_ride_info_jets);
 
         command_admin_ride_setting_list = conf.getString("Command.Admin.ride.setting.list",command_admin_ride_setting_list);
-        command_admin_ride_setting_GENERAL_success = conf.getString("Command.Admin.ride.setting.GENERAL.success",command_admin_ride_setting_GENERAL_success);
-        command_admin_ride_setting_GENERAL_mustBeInt = conf.getString("Command.Admin.ride.setting.GENERAL.mustBeInt",command_admin_ride_setting_GENERAL_mustBeInt);
-        command_admin_ride_setting_GENERAL_mustBeBool = conf.getString("Command.Admin.ride.setting.GENERAL.mustBeBool",command_admin_ride_setting_GENERAL_mustBeBool);
-        command_admin_ride_setting_GENERAL_mustBeDoub = conf.getString("Command.Admin.ride.setting.GENERAL.mustBeDoub",command_admin_ride_setting_GENERAL_mustBeDoub);
+        command_admin_ride_setting_GENERAL_success = conf.getString("Command.Admin.ride.setting.GENERAL.success.default",command_admin_ride_setting_GENERAL_success);
+        command_admin_ride_setting_GENERAL_success_blocks = conf.getString("Command.Admin.ride.setting.GENERAL.success.blocks",command_admin_ride_setting_GENERAL_success_blocks);
+        command_admin_ride_setting_GENERAL_success_degree = conf.getString("Command.Admin.ride.setting.GENERAL.success.degree",command_admin_ride_setting_GENERAL_success_degree);
+        command_admin_ride_setting_GENERAL_success_ticks = conf.getString("Command.Admin.ride.setting.GENERAL.success.ticks",command_admin_ride_setting_GENERAL_success_ticks);
+        command_admin_ride_setting_GENERAL_success_cycles = conf.getString("Command.Admin.ride.setting.GENERAL.success.cycles",command_admin_ride_setting_GENERAL_success_cycles);
+
+        command_admin_ride_setting_GENERAL_fail_notFound = conf.getString("Command.Admin.ride.setting.GENERAL.fail.notFound", command_admin_ride_setting_GENERAL_fail_notFound);
+        command_admin_ride_setting_GENERAL_fail_mustBeInt = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeInt", command_admin_ride_setting_GENERAL_fail_mustBeInt);
+        command_admin_ride_setting_GENERAL_fail_mustBeIntBlocks = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeIntBlocks", command_admin_ride_setting_GENERAL_fail_mustBeIntBlocks);
+        command_admin_ride_setting_GENERAL_fail_mustBeIntTicks = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeIntTicks", command_admin_ride_setting_GENERAL_fail_mustBeIntTicks);
+        command_admin_ride_setting_GENERAL_fail_mustBeIntCycles = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeIntCycles", command_admin_ride_setting_GENERAL_fail_mustBeIntCycles);
+        command_admin_ride_setting_GENERAL_fail_mustBeBool = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeBool", command_admin_ride_setting_GENERAL_fail_mustBeBool);
+        command_admin_ride_setting_GENERAL_fail_mustBeDoub = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeDoub", command_admin_ride_setting_GENERAL_fail_mustBeDoub);
+        command_admin_ride_setting_GENERAL_fail_mustBeDoubDegrees = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeDoubDegrees", command_admin_ride_setting_GENERAL_fail_mustBeDoubDegrees);
+        command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeDoubBlocks", command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks);
+        command_admin_ride_setting_GENERAL_fail_mustBeMaterial = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeMaterial", command_admin_ride_setting_GENERAL_fail_mustBeMaterial);
+
         command_admin_ride_setting_LOCATION_player = conf.getString("Command.Admin.ride.setting.LOCATION.player",command_admin_ride_setting_LOCATION_player);
         command_admin_ride_setting_LOCATION_coords = conf.getString("Command.Admin.ride.setting.LOCATION.coords",command_admin_ride_setting_LOCATION_coords);
         command_admin_ride_setting_LOCATION_fail = conf.getString("Command.Admin.ride.setting.LOCATION.fail",command_admin_ride_setting_LOCATION_fail);
-        //TODO radius, rotation speed, ride length
+
 
         command_admin_ride_invalid_sub = conf.getString("Command.Admin.ride.invalidSub",command_admin_ride_invalid_sub);
         command_admin_linksign_syntax = conf.getString("Command.Admin.linksign.syntax",command_admin_linksign_syntax);
@@ -196,19 +230,7 @@ public class Messages {
         command_admin_unlinksign_click = conf.getString("Command.Admin.unlinksign.click",command_admin_unlinksign_click);
         command_admin_unlinksign_unlinked = conf.getString("Command.Admin.unlinksign.unlinked",command_admin_unlinksign_unlinked);
 
-        //Ride Messagea
-        ride_queue_joined = conf.getString("Ride.queue.joined",ride_queue_joined);
-        ride_queue_already = conf.getString("Ride.queue.already",ride_queue_already);
-        ride_queue_other_queue = conf.getString("Ride.queue.alreadyOther",ride_queue_other_queue);
-        ride_queue_other_riding = conf.getString("Ride.queue.onRide",ride_queue_other_riding);
-        ride_queue_left = conf.getString("Ride.queue.left",ride_queue_left);
-        ride_cant_afford = conf.getString("Ride.cantAfford",ride_cant_afford);
-        ride_paid = conf.getString("Ride.paid",ride_paid);
-        ride_starting_needMoreRiders = conf.getString("Ride.starting.needMoreRiders",ride_starting_needMoreRiders);
-        ride_starting_countdown = conf.getString("Ride.starting.countdown",ride_starting_countdown);
-        ride_starting_seatsFUll = conf.getString("Ride.starting.seatsFull",ride_starting_seatsFUll);
 
-        ride_jets_controlMessage = conf.getString("Ride.Jets.controlMessage",ride_jets_controlMessage);
 
         if (expectedVersion>confVersion) updateFile();
     }

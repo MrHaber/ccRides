@@ -1,4 +1,4 @@
-package net.clownercraft.ccRides.Utils;
+package net.clownercraft.ccRides.utils;
 
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;

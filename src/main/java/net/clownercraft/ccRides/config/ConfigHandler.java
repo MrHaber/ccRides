@@ -1,4 +1,4 @@
-package net.clownercraft.ccRides.Config;
+package net.clownercraft.ccRides.config;
 
 import net.clownercraft.ccRides.RidesPlugin;
 import net.clownercraft.ccRides.rides.Ride;
