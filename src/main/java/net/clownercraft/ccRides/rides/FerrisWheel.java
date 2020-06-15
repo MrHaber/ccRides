@@ -8,10 +8,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class FerrisWheel extends Ride {
@@ -89,12 +87,13 @@ public class FerrisWheel extends Ride {
 
         currentRotation = 0.0;
 
-        //Eject Players
-        for (Player p:(ArrayList<Player>) riders.clone()) {
-            ejectPlayer(p);
-        }
         COUNTDOWN_STARTED = false;
         RUNNING = false;
+
+        //Eject Players
+        for (Player p:riders.keySet()) {
+            ejectPlayer(p);
+        }
 
         Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (ENABLED) checkQueue();},10l);
     }
@@ -239,6 +238,9 @@ public class FerrisWheel extends Ride {
         else RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
 
 
+        //If enabled re-enable the ride to introduce setting
+        if (ENABLED) enable();
+
         //return the message
         return out;
     }
@@ -314,7 +316,9 @@ public class FerrisWheel extends Ride {
         out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS));
         out = out.replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME));
         out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
-        out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
+
+        if (CAPACITY==null||CAPACITY==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
+        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
 
         String exit,base;
         if (EXIT_LOCATION==null) exit = "NOT SET"; else exit = EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ();

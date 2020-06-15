@@ -12,7 +12,7 @@ public class Messages {
     /*
     Default options are defined here, and will be saved to the file if the version is newer
      */
-    public static String prefix = "&9&lccRides &b» ";
+    public static String prefix = "&b&lccRides &1» ";
 
     //General command messages
     public static String command_not_player = "&cThis command must be run by a player.";
@@ -107,6 +107,14 @@ public class Messages {
             "&9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n" +
             "&9Accelerate Length: &b{ACCELERATE_LENGTH} rotations\n" +
             "&4&m------------------------------------------------";
+    public static String command_admin_ride_info_jets = "&4      -- &cJETS Specific Info &4--\n" +
+            "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n" +
+            "&9Base Location: &b{BASE_LOCATION}\n" +
+            "&9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n" +
+            "&9Angle Max: &b{ANGLE_MAX} degrees &8// &9Angle Step: &b{ANGLE_STEP} &9degrees/tick\n" +
+            "&9Show Leads: &b{SHOW_LEADS} &8// &9Show Banners: &b{SHOW_BANNERS}" +
+            "\n" +
+            "&4&m------------------------------------------------"; //TODO update default messages.yml
     public static String command_admin_ride_setting_list = "&9Available Settings for this ride: \n{settings}";
     public static String command_admin_linksign_syntax = "&cPlease specify a ride to link the sign to\n&cUsage: &7/rideadm linksign &8<&7rideName&8>";
     public static String command_admin_linksign_click = "&9Please right click the sign to link it";
@@ -129,6 +137,9 @@ public class Messages {
     public static String ride_starting_needMoreRiders = "&9Waiting for {count} more players to start.";
     public static String ride_starting_countdown = "&9The ride will start in {time} seconds.";
     public static String ride_starting_seatsFUll = "&9All seats are filled! Ride starting.";
+
+    public static String ride_jets_controlMessage = "&b&lJets Ride &1&l» &b&lControl height with your scroll wheel.";
+
     /**
      * Loads messages fields based on given config file
      * @param conf a config file containing all messages settings
@@ -166,6 +177,7 @@ public class Messages {
         command_admin_ride_info_carousel = conf.getString("Command.Admin.ride.info.carousel",command_admin_ride_info_carousel);
         command_admin_ride_info_ferrisWheel = conf.getString("Command.Admin.ride.info.ferrisWheel",command_admin_ride_info_ferrisWheel);
         command_admin_ride_info_chairswing = conf.getString("Command.Admin.ride.info.chairswing",command_admin_ride_info_chairswing);
+        command_admin_ride_info_jets = conf.getString("Command.Admin.ride.info.jets",command_admin_ride_info_jets);
 
         command_admin_ride_setting_list = conf.getString("Command.Admin.ride.setting.list",command_admin_ride_setting_list);
         command_admin_ride_setting_GENERAL_success = conf.getString("Command.Admin.ride.setting.GENERAL.success",command_admin_ride_setting_GENERAL_success);
@@ -195,6 +207,8 @@ public class Messages {
         ride_starting_needMoreRiders = conf.getString("Ride.starting.needMoreRiders",ride_starting_needMoreRiders);
         ride_starting_countdown = conf.getString("Ride.starting.countdown",ride_starting_countdown);
         ride_starting_seatsFUll = conf.getString("Ride.starting.seatsFull",ride_starting_seatsFUll);
+
+        ride_jets_controlMessage = conf.getString("Ride.Jets.controlMessage",ride_jets_controlMessage);
 
         if (expectedVersion>confVersion) updateFile();
     }

@@ -10,9 +10,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.vehicle.*;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
@@ -26,7 +30,6 @@ import java.util.function.Supplier;
  */
 public abstract class Ride implements Listener {
     public static HashMap<String,Class<? extends Ride>> RideTypes = new HashMap<>();
-
     /**
      * Gets the method to set a vehicle's position by NMS.
      * Necessary to allow vehicles to move with their passengers.
@@ -58,7 +61,7 @@ public abstract class Ride implements Listener {
     boolean RUNNING = false; //Whether the ride is operating or not
     boolean COUNTDOWN_STARTED = false;
     ArrayList<Vehicle> seats = new ArrayList<>(); //stores vehicle entities for the seats
-    ArrayList<Player> riders = new ArrayList<>(); //The list of player on the ride
+    HashMap<Player,Integer> riders = new HashMap<>(); //Players mapped to their seat numbers
     ArrayList<Player> QUEUE = new ArrayList<>(); //The queue for players waiting to join the ride when it next runs
     BukkitTask countdownTask;
 
@@ -153,6 +156,17 @@ public abstract class Ride implements Listener {
         }
     }
 
+    public int firstAvailableSeat() {
+        Collection<Integer> taken = riders.values();
+        for (int i=0;i<CAPACITY;i++) {
+            if (taken.contains(riders)) {
+                continue;
+            } else {
+                return i;
+            }
+        }
+        return 0; //If we don't find a seat, return 0.
+    }
     /**
      * Put a player onto the ride
      * Will add to the queue if the ride is full or already running
@@ -180,19 +194,23 @@ public abstract class Ride implements Listener {
             return;
         }
 
-        //Otherwise, add them to riders and put them in a seat.
-        riders.add(player);
-        RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player,ID);
-        int i = riders.indexOf(player);
+        int seatnum = firstAvailableSeat();
 
-        seats.get(i).addPassenger(player);
+        //Otherwise, add them to riders and put them in a seat.
+        riders.put(player,seatnum);
+        RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player,ID);
+
+        seats.get(seatnum).addPassenger(player);
 
         //charge them the price
-        player.sendMessage(Messages.prefix +
-                Messages.ride_paid
+        if (PRICE!=0) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    Messages.prefix + Messages.ride_paid
                         .replaceAll("\\{price}",Integer.toString(PRICE))
-                        .replaceAll("\\{ride}",ID));
-        RidesPlugin.getInstance().takePayment(player,PRICE);
+                        .replaceAll("\\{ride}",ID)));
+            RidesPlugin.getInstance().takePayment(player,PRICE);
+        }
+
 
         if (isFull()) {
             if (COUNTDOWN_STARTED) countdownTask.cancel();
@@ -245,7 +263,7 @@ public abstract class Ride implements Listener {
      */
     public void messageRiders(String message) {
         message = ChatColor.translateAlternateColorCodes('&',message);
-        for (Player p:riders) {
+        for (Player p:riders.keySet()) {
             p.sendMessage(message);
         }
     }
@@ -255,23 +273,23 @@ public abstract class Ride implements Listener {
      * @param player the player to eject
      */
     public void ejectPlayer(Player player) {
-        if (riders.contains(player)) {
+        if (riders.containsKey(player)) {
             //Find the player's seat
-            int i = riders.indexOf(player);
+            int i = riders.get(player);
 
             //Eject the player and remove them from riders fields
             riders.remove(player);
 
             RidesPlugin.getInstance().getConfigHandler().ridePlayers.remove(player);
-            seats.get(i).eject();
 
+            seats.get(i).eject();
             //Teleport player to the exit location
             Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), new Runnable() {
                 @Override
                 public void run() {
                     player.teleport(EXIT_LOCATION);
                 }
-            },5l);
+            },2l);
         }
     }
 
@@ -580,6 +598,7 @@ public abstract class Ride implements Listener {
         out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS));
         out = out.replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME));
         out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
+
         if (CAPACITY==null||CAPACITY==0)         out = out.replaceAll("\\{CAPACITY}","NOT SET");
         else out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
 
@@ -595,14 +614,24 @@ public abstract class Ride implements Listener {
     /* EVENT LISTENERS */
 
     /**
-     * Prevent players exiting vehicles that are part of a ride
+     * Prevent players exiting their seat on the ride
      * @param e - the vehicle Exit event
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onCartExit(VehicleExitEvent e) {
         if (seats.contains(e.getVehicle())) {
-            if (riders.contains(e.getExited())) e.setCancelled(true);
-            //e.getExited().sendMessage(ChatColor.DARK_PURPLE + "Carnival: "+ ChatColor.BLUE + "Use "+ChatColor.GRAY+ "/ride exit" + ChatColor.BLUE + "to leave the ride early.");
+
+            if (e.getExited() instanceof Player) {
+                if (riders.containsKey((Player) e.getExited())) {
+
+                    if (seats.indexOf(e.getVehicle()) == riders.get((Player) e.getExited())) {
+
+                        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> e.getVehicle().addPassenger(e.getExited()),0);
+                        //e.setCancelled(true);
+                    }
+                }
+            }
+
         }
     }
 
@@ -610,16 +639,19 @@ public abstract class Ride implements Listener {
      * Prevent players entering vehicles that are part of a ride
      * @param e - the vehicle Enter event
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onCartEnter(VehicleEnterEvent e) {
         if (seats.contains(e.getVehicle())) {
 
-            if (    e.getEntered() instanceof Player
-                    && riders.contains(e.getEntered())
-                    && riders.indexOf(e.getEntered())==seats.indexOf(e.getVehicle())
-            ) { } else e.setCancelled(true);
+            if (e.getEntered() instanceof Player) {
+                if (!riders.containsKey((Player) e.getEntered())) {
+                    e.setCancelled(true);
+                }
+            }
+
         }
     }
+
 
     @EventHandler
     public void onCartBreak(VehicleDamageEvent e) {
@@ -656,7 +688,7 @@ public abstract class Ride implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e){
         //If on this ride
-        if (riders.contains(e.getPlayer())) {
+        if (riders.containsKey(e.getPlayer())) {
             ejectPlayer(e.getPlayer());
         }
 
@@ -666,4 +698,13 @@ public abstract class Ride implements Listener {
         }
     }
 
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent e) {
+        if (riders.containsKey(e.getPlayer())) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent e) {
+        if (riders.containsKey(e.getPlayer())) e.setCancelled(true);
+    }
 }

@@ -6,7 +6,7 @@
 
     <groupId>net.clownercraft</groupId>
     <artifactId>ccRides</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.1</version>
 
     <build>
         <finalName>${project.name}-${project.version}</finalName>

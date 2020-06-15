@@ -18,18 +18,7 @@ public class RidesPlugin extends JavaPlugin {
     //creating variables for class instances
     private static RidesPlugin instance;
     private ConfigHandler configHandler;
-    private AdminCommandExecutor adminCommandExecutor;
     private Economy econ = null;
-
-    /**
-     * @return the player command executor
-     */
-    public PlayerCommandExecutor getPlayerCommandExecutor() {
-        return playerCommandExecutor;
-    }
-
-    private PlayerCommandExecutor playerCommandExecutor;
-    private RidesListener listener;
 
     /**
      *
@@ -45,12 +34,7 @@ public class RidesPlugin extends JavaPlugin {
      */
    public ConfigHandler getConfigHandler() { return configHandler; }
 
-    /**
-     *
-     * @return
-     * Returns an instance of the Command Executor
-     */
-    public AdminCommandExecutor getAdminCommandExecutor() {return adminCommandExecutor; }
+
 
    @Override
    public void onEnable() {
@@ -58,19 +42,19 @@ public class RidesPlugin extends JavaPlugin {
        //Grabbing instances of the classes to pass around
        instance = this;
 
-       //Register rides
+       //Register ride types
        Ride.registerType("CAROUSEL", Carousel.class);
-       Ride.registerType("DROP_TOWER", DropTower.class);
        Ride.registerType("FERRIS_WHEEL", FerrisWheel.class);
        Ride.registerType("CHAIRSWING", Chairswing.class);
+       Ride.registerType("JETS", Jets.class);
 
        //Load Configs
        configHandler = new ConfigHandler();
 
-       adminCommandExecutor = new AdminCommandExecutor();
-       playerCommandExecutor = new PlayerCommandExecutor();
+       AdminCommandExecutor adminCommandExecutor = new AdminCommandExecutor();
+       PlayerCommandExecutor playerCommandExecutor = new PlayerCommandExecutor();
 
-       listener = new RidesListener();
+       RidesListener listener = new RidesListener();
 
        getServer().getPluginManager().registerEvents(listener, instance);
 
@@ -80,13 +64,11 @@ public class RidesPlugin extends JavaPlugin {
 
        //Link Vault
        if (configHandler.LinkVault) {
-           if (Bukkit.getPluginManager().getPlugin("Vault") != null){
-               setupEconomy();
-               getLogger().info("Linked into Vault for Economy");
-           } else {
-               getLogger().warning("Couldn't link Vault - is it installed?");
-               configHandler.LinkVault = false;
-           }
+               if (setupEconomy()) {
+                   getLogger().info("Linked into Vault for Economy");
+               } else {
+                   configHandler.LinkVault = false;
+               }
 
        }
 
@@ -112,14 +94,16 @@ public class RidesPlugin extends JavaPlugin {
 
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            getLogger().warning("Couldn't link to vault - it is not installed.");
             return false;
         }
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
+            getLogger().warning("Couldn't link to vault!");
             return false;
         }
         econ = rsp.getProvider();
-        return econ != null;
+        return true;
     }
 
     /**

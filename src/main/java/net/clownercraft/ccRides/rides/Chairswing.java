@@ -27,6 +27,7 @@ public class Chairswing extends Ride {
     Double accelerateLength = 1d; //Number of rotations to accelerate to full speed
     Boolean showLeads = true; //Enable/Disable decorative leads to look like chains supporting each seat
     Double MaxSwingAngle = Math.toRadians(30.0); //Swing angle in radians
+
     /*
     Running data
      */
@@ -35,8 +36,8 @@ public class Chairswing extends Ride {
     Double currentSwing = 0.0; //Current swing angle of the chairswing in radians
     BukkitTask updateTask;
 
-    List<Entity> leadStarts = new ArrayList<>();
-    List<Entity> leadEnds = new ArrayList<>();
+    ArrayList<Entity> leadStarts = new ArrayList<>();
+    ArrayList<Entity> leadEnds = new ArrayList<>();
 
 
 
@@ -132,12 +133,12 @@ public class Chairswing extends Ride {
         currRotStep = 0.005;
         currentSwing = 0.0;
 
-        //Eject Players
-        for (Player p:(ArrayList<Player>) riders.clone()) {
-            ejectPlayer(p);
-        }
         COUNTDOWN_STARTED = false;
         RUNNING = false;
+        //Eject Players
+        for (Player p:riders.keySet()) {
+            ejectPlayer(p);
+        }
 
         Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (ENABLED) checkQueue();},10l);
     }
@@ -294,6 +295,7 @@ public class Chairswing extends Ride {
         for (Entity e : leadEnds) {
             e.remove();
         }
+
         leadStarts.clear();
         leadEnds.clear();
     }
@@ -504,7 +506,9 @@ public class Chairswing extends Ride {
         out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(MIN_START_PLAYERS));
         out = out.replaceAll("\\{START_DELAY}",Integer.toString(START_WAIT_TIME));
         out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(JOIN_AFTER_START));
-        out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
+
+        if (CAPACITY==null||CAPACITY==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
+        else out = out.replaceAll("\\{CAPACITY}",Integer.toString(CAPACITY));
 
         String exit,base;
         if (EXIT_LOCATION==null) exit = "NOT SET"; else exit = EXIT_LOCATION.getWorld().getName() + " x"+EXIT_LOCATION.getX() + " y"+EXIT_LOCATION.getY() + " z" + EXIT_LOCATION.getZ();

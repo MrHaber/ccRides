@@ -101,7 +101,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 String rideName = args[1];
-                if (conf.rides.keySet().contains(rideName)) {
+                if (conf.rides.containsKey(rideName)) {
                     //Ride already exists
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_create_ride_exists.replaceAll("\\{ride}", rideName)));
 
@@ -128,7 +128,6 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                 if (args.length<2) {
                     //Missing arguments
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_delete_ride_syntax));
-                    return true;
                 } else {
                     String rideName2 = args[1];
                     if (conf.rides.containsKey(rideName2)) {
@@ -148,8 +147,8 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_ride_not_exist));
                         commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_listRides.replaceAll("\\{ridelist}", finalList2)));
                     }
-                    return true;
                 }
+                return true;
             case "linksign":
                 if (args.length<2) {
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_linksign_syntax));
@@ -162,11 +161,10 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                     RidesListener.waitingRideID = rideName2;
                     RidesListener.waitingSender = commandSender;
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_linksign_click.replaceAll("\\{ride}",rideName2)));
-                    return true;
                 } else {
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_ride_not_exist));
-                    return true;
                 }
+                return true;
             case "unlinksign":
                 RidesListener.waitingSignClick = true;
                 RidesListener.waitingUnlink = true;
@@ -199,6 +197,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                                 return true;
                             case "enable":
                                 //Try to enable the ride
+                                //TODO Make this save the config
                                 if (ride.enable()) {
                                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_ride_enable).replaceAll("\\{ride}",rideName3));
                                 } else {
@@ -207,6 +206,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                                 return true;
                             case "disable":
                                 ride.disable();
+                                //TODO make this save the config
                                 commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_ride_disable).replaceAll("\\{ride}",rideName3));
                                 return true;
                             case "setting":
@@ -289,9 +289,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
             out = new ArrayList<>(Arrays.asList("help", "reload", "create", "delete", "linksign","unlinksign", "list"));
 
             //add ride names
-            for (String ride: RidesPlugin.getInstance().getConfigHandler().rides.keySet()) {
-                out.add(ride);
-            }
+            out.addAll(RidesPlugin.getInstance().getConfigHandler().rides.keySet());
 
             //Filter by what they've already typed
             out = Messages.filterList(out,"^"+args[0]);
@@ -301,15 +299,11 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
             switch (subcommand) {
                 case "reload":
                     out.add("all");
-                    for (String ride: RidesPlugin.getInstance().getConfigHandler().rides.keySet()) {
-                        out.add(ride);
-                    }
+                    out.addAll(RidesPlugin.getInstance().getConfigHandler().rides.keySet());
                     break;
                 case "delete":
                 case "linksign":
-                    for (String ride: RidesPlugin.getInstance().getConfigHandler().rides.keySet()) {
-                        out.add(ride);
-                    }
+                    out.addAll(RidesPlugin.getInstance().getConfigHandler().rides.keySet());
                     break;
                 case "help":
                 case "list":

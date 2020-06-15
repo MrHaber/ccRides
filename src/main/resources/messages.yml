@@ -2,7 +2,25 @@
 messagesVersion: 2
 
 #Added to the start of most messages
-Prefix: "&9&lccRides &b» "
+Prefix: "&b&lccRides &1» "
+
+#Ride Messages
+Ride:
+  queue:
+    joined: "&9You joined {ride}'s queue. &b{place} &9players are ahead of you.\n&9Use &7/ride lq&9 to abandon the queueing."
+    already: "&9You are already in the Queue. \n&9You are in place &b{place} of {total}."
+    alreadyOther: "&9You're already queuing for {ride}. \n&9Use &7/ride lq &9to abandon queueing."
+    onRide: "&9You can't join a queue while on a ride. \n&9Use &7/ride exit&9 to leave the ride."
+    left: "&9You left {ride}'s queue."
+  cantAfford: "&cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens."
+  paid: "&9You paid &6{price} tokens&9 to ride on {ride}"
+  starting:
+    needMoreRiders: "&9Waiting for {count} more players to start."
+    countdown: "&9The ride will start in {time} seconds."
+    seatsFull: "&9All seats are filled! Ride starting."
+  Jets:
+    controlMessage: "&b&lJets Ride &1&l» &b&lControl height with your scroll wheel."
+
 
 #Command Messages
 Command:
@@ -111,17 +129,4 @@ Command:
         click: "&9Please right click the sign to unlink it"
         unlinked: "&9Sign no longer linked to a ride"
 
-#Ride Messages
-Ride:
-  queue:
-    joined: "&9You joined {ride}'s queue. &b{place} &9players are ahead of you.\n&9Use &7/ride lq&9 to abandon the queueing."
-    already: "&9You are already in the Queue. \n&9You are in place &b{place} of {total}."
-    alreadyOther: "&9You're already queuing for {ride}. \n&9Use &7/ride lq &9to abandon queueing."
-    onRide: "&9You can't join a queue while on a ride. \n&9Use &7/ride exit&9 to leave the ride."
-    left: "&9You left {ride}'s queue."
-  cantAfford: "&cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens."
-  paid: "&9You paid &6{price} tokens&9 to ride on {ride}"
-  starting:
-    needMoreRiders: "&9Waiting for {count} more players to start."
-    countdown: "&9The ride will start in {time} seconds."
-    seatsFull: "&9All seats are filled! Ride starting."
+
