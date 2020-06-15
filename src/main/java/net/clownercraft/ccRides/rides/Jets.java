@@ -28,7 +28,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class Jets extends Ride {
-    Double radius;//the radius of the jets seats
+    Double armLength;//the radius of the jets seats
+    double centerRadius = 0;
     Integer rotatespeed; //number of ticks per full rotation of the jets
     Double accelerateLength = 0.3d;
     Integer length; //number of full rotations per ride.
@@ -54,7 +55,7 @@ public class Jets extends Ride {
     /*
     Extra Entities
      */
-    Entity leashHolder;
+    ArrayList<Entity> leashHolders = new ArrayList<>();
     ArrayList<Entity> leashEnds = new ArrayList<>();
     ArrayList<ArmorStand> decoration1 = new ArrayList<>();
     ArrayList<ArmorStand> decoration2 = new ArrayList<>();
@@ -72,7 +73,8 @@ public class Jets extends Ride {
         super.setRideOptions(conf);
 
         //load jets specific options
-        radius = conf.getDouble("Jets.Radius");
+        armLength = conf.getDouble("Jets.ArmLength");
+        centerRadius = conf.getDouble("Jets.CentreRadius");
         rotatespeed = conf.getInt("Jets.Rotation.Ticks_Per_Full_Rotation");
         length = conf.getInt("Jets.Rotation.Num_Cycles");
         angleMax = conf.getDouble("Jets.SeatAngles.Maximum");
@@ -112,12 +114,12 @@ public class Jets extends Ride {
         double rotationStep = 2*Math.PI / rotatespeed;
 
         double rotationAccel,lowerSpeed;
-        if (accelerateLength==0) {
+        if (accelerateLength<=0.05) {
             rotationAccel = rotationStep;
             lowerSpeed = angleMax;
         } else {
             rotationAccel = rotationStep / (2 * rotatespeed * accelerateLength);
-            lowerSpeed = angleMax / (accelerateLength * rotatespeed);
+            lowerSpeed = angleMax / (1.75 * accelerateLength * rotatespeed);
         }
 
         updateTask = Bukkit.getScheduler().runTaskTimer(RidesPlugin.getInstance(), () -> {
@@ -211,6 +213,7 @@ public class Jets extends Ride {
             Location loc = getPosition(i);
             if (showLeads) {
                 teleportWithPassenger(leashEnds.get(i),loc.clone().subtract(0,1,0));
+                teleportWithPassenger(leashHolders.get(i), getCentrePosition(i));
             }
             if (showBanners) {
                 Location standLoc = getDecorPos(i).clone().subtract(0,0.25,0);
@@ -236,35 +239,36 @@ public class Jets extends Ride {
 
         super.respawnSeats();
 
-        //If show leads enabled spawn the lead holder
-        if (showLeads) {
-            for (Entity e: baseLocation.getWorld().getNearbyEntities(baseLocation.clone().add(0,1,0),3,3,3)) {
-                if (e.getType().equals(EntityType.PARROT)
-                        && leashHolder != e && !leashEnds.contains(e)) e.remove();
-            }
-
-            Parrot leadStart = (Parrot) baseLocation.getWorld().spawnEntity(baseLocation.clone().add(0,1,0),EntityType.PARROT);
-            leadStart.setInvulnerable(true);
-            leadStart.setGravity(false);
-            leadStart.setAI(false);
-            leadStart.setVelocity(new Vector(0, 0, 0));
-            leadStart.setSilent(true);
-            leadStart.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,Integer.MAX_VALUE,1,false,false));
-            leadStart.setCustomName("Jets Parrot");
-            leadStart.setCustomNameVisible(false);
-            teleportWithPassenger(leadStart, baseLocation);
-            leashHolder = leadStart;
-        }
 
         for (int i = 0; i< capacity; i++){
             Location loc2 = getPosition(i);
-            Location leadLoc = loc2.clone().subtract(0,1,0);
+
 
             //If leads enabled, spawn lead end entity
             if (showLeads) {
+                Location leadLoc = loc2.clone().subtract(0,1,0);
+                Location leadHoldLoc = getCentrePosition(i);
+
+                for (Entity e:leadHoldLoc.getWorld().getNearbyEntities(leadHoldLoc,3,3,3)) {
+                    if (e.getType().equals(EntityType.PARROT)
+                            && !leashEnds.contains(e) && !leashHolders.contains(e)) e.remove();
+                }
+
+                Parrot leadHold = (Parrot) leadHoldLoc.getWorld().spawnEntity(leadHoldLoc,EntityType.PARROT);
+                leadHold.setInvulnerable(true);
+                leadHold.setGravity(false);
+                leadHold.setAI(false);
+                leadHold.setVelocity(new Vector(0, 0, 0));
+                leadHold.setSilent(true);
+                leadHold.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,Integer.MAX_VALUE,1,false,false));
+                leadHold.setCustomName("Jets Parrot");
+                leadHold.setCustomNameVisible(false);
+
+                leashHolders.add(leadHold);
+
                 for (Entity e:leadLoc.getWorld().getNearbyEntities(leadLoc,3,3,3)) {
                     if (e.getType().equals(EntityType.PARROT)
-                            && !leashEnds.contains(e) && e != leashHolder) e.remove();
+                            && !leashEnds.contains(e) && !leashHolders.contains(e)) e.remove();
                 }
 
                 Parrot leadEnd = (Parrot) leadLoc.getWorld().spawnEntity(leadLoc,EntityType.PARROT);
@@ -277,8 +281,10 @@ public class Jets extends Ride {
                 leadEnd.setCustomName("Jets Parrot");
                 leadEnd.setCustomNameVisible(false);
 
-                leadEnd.setLeashHolder(leashHolder);
+                leadEnd.setLeashHolder(leadHold);
                 leashEnds.add(leadEnd);
+
+
             }
 
             //if banner decoration enabled, spawn armor stands
@@ -327,7 +333,11 @@ public class Jets extends Ride {
     public void despawnSeats() {
         super.despawnSeats();
 
-        if (leashHolder!=null) leashHolder.remove();
+        for (Entity e:leashHolders) {
+            e.remove();
+        }
+        leashHolders.clear();
+
         for (Entity e:leashEnds) {
             e.remove();
         }
@@ -358,14 +368,12 @@ public class Jets extends Ride {
             seatAngle = seatAngles.get(seatNum);
         }
 
-        Location locTop = baseLocation.clone();
-
-        Location locSeat = locTop.clone();
+        Location locSeat = getCentrePosition(seatNum).clone();
 
         double x2,y2,z2,c;
-        c = Math.sqrt(radius*radius - (radius * Math.sin(seatAngle))*(radius * Math.sin(seatAngle)));
+        c = Math.sqrt(armLength * armLength - (armLength * Math.sin(seatAngle))*(armLength * Math.sin(seatAngle)));
         x2 = c * Math.cos(angle);
-        y2 = radius * Math.sin(seatAngle);
+        y2 = armLength * Math.sin(seatAngle);
         z2 = c * Math.sin(angle);
 
         locSeat.add(x2,y2,z2);
@@ -377,28 +385,52 @@ public class Jets extends Ride {
     }
 
     /**
-     * gets the position of a seat at the current point in the ride cycle
+     * gets the position of the central point for that seat.
+     * ie. seats leash holder and the point of rotation for vertical movement
+     *
+     * @param seatNum = the index of the seat to check
+     * @return = the location the seat should currently be
+     */
+    public Location getCentrePosition(int seatNum) {
+        double angle = currentRotation + (seatNum/(double) capacity)*2*Math.PI;
+
+        Location locTop = baseLocation.clone();
+        double x1,y1,z1;
+
+        x1 = centerRadius * Math.cos(angle);
+        z1 = centerRadius * Math.sin(angle);
+        y1 = 0;
+
+        locTop.add(x1,y1,z1);
+        locTop.setYaw((float) Math.toDegrees(angle));
+
+
+        return locTop;
+    }
+
+    /**
+     * gets the position of a seats decoration armor stands
      *
      * @param seatNum = the index of the seat to check
      * @return = the location the seat should currently be
      */
     public Location getDecorPos(int seatNum) {
         double angle = currentRotation + (seatNum/(double) capacity)*2*Math.PI;
-        angle -= 0.3/radius;
+        angle -= 0.3/ armLength;
 
         double seatAngle = 0;
         if (seatAngles.size()>seatNum) {
             seatAngle = seatAngles.get(seatNum);
         }
 
-        Location locTop = baseLocation.clone();
+        Location locTop = getCentrePosition(seatNum).clone();
 
         Location locSeat = locTop.clone();
 
         double x2,y2,z2,c;
-        c = Math.sqrt(radius*radius - (radius * Math.sin(seatAngle))*(radius * Math.sin(seatAngle)));
+        c = Math.sqrt(armLength * armLength - (armLength * Math.sin(seatAngle))*(armLength * Math.sin(seatAngle)));
         x2 = c * Math.cos(angle);
-        y2 = radius * Math.sin(seatAngle);
+        y2 = armLength * Math.sin(seatAngle);
         z2 = c * Math.sin(angle);
 
         locSeat.add(x2,y2,z2);
@@ -419,7 +451,8 @@ public class Jets extends Ride {
 
         //Add Jets Specific Options
         try{
-            out.set("Jets.Radius",radius);
+            out.set("Jets.ArmLength", armLength);
+            out.set("Jets.CentreRadius",centerRadius);
             out.set("Jets.Rotation.Ticks_Per_Full_Rotation",rotatespeed);
             out.set("Jets.Rotation.Num_Cycles",length);
             out.set("Jets.SeatAngles.Maximum",angleMax);
@@ -445,7 +478,8 @@ public class Jets extends Ride {
         //Get Default Options
         List<String> out = super.getConfigOptions();
         //Add Jets Specific Options
-        out.add("RADIUS");
+        out.add("ARM_LENGTH");
+        out.add("CENTER_RADIUS");
         out.add("ROTATE_SPEED");
         out.add("RIDE_LENGTH");
         out.add("ACCELERATE_LENGTH");
@@ -481,10 +515,18 @@ public class Jets extends Ride {
             //The setting wasn't one of the defaults, so let's set jets specific ones.
             switch (key) {
 
-                case "RADIUS": //integer, in number of blocks
+                case "ARM_LENGTH": //integer, in number of blocks
                     try{
-                        radius = Double.parseDouble(values[0]);
-                        out = Messages.command_admin_ride_setting_GENERAL_success_blocks.replaceAll("\\{VALUE}",Double.toString(radius));
+                        armLength = Double.parseDouble(values[0]);
+                        out = Messages.command_admin_ride_setting_GENERAL_success_blocks.replaceAll("\\{VALUE}",Double.toString(armLength));
+                    } catch (NumberFormatException e) {
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks;
+                    }
+                    break;
+                case "CENTER_RADIUS": //integer, in number of blocks
+                    try{
+                        centerRadius = Double.parseDouble(values[0]);
+                        out = Messages.command_admin_ride_setting_GENERAL_success_blocks.replaceAll("\\{VALUE}",Double.toString(centerRadius));
                     } catch (NumberFormatException e) {
                         out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks;
                     }
@@ -586,13 +628,13 @@ public class Jets extends Ride {
                 || capacity == null
                 || rideID == null
                 || type == null
-                || radius == null
+                || armLength == null
                 || rotatespeed == null
                 || length == null
                 || angleMax == null
                 || angleSpeed == null
                 || capacity == 0
-                || radius == 0
+                || armLength == 0
                 || rotatespeed == 0
                 || length == 0
                 || angleSpeed == 0
@@ -655,8 +697,8 @@ public class Jets extends Ride {
                 .replaceAll("\\{BASE_LOCATION}",base);
 
         //Jets specific stuff
-        if (radius==null || radius==0)  out = out.replaceAll("\\{RADIUS}","NOT SET");
-            else out = out.replaceAll("\\{RADIUS}",Double.toString(radius));
+        if (armLength ==null || armLength ==0)  out = out.replaceAll("\\{ARM_LENGTH}","NOT SET");
+            else out = out.replaceAll("\\{ARM_LENGTH}",Double.toString(armLength));
 
         if (rotatespeed==null || rotatespeed==0) out = out.replaceAll("\\{ROTATE_SPEED}","NOT SET");
         else out = out.replaceAll("\\{ROTATE_SPEED}",Integer.toString(rotatespeed));
@@ -668,6 +710,7 @@ public class Jets extends Ride {
         else out = out.replaceAll("\\{ANGLE_STEP}", Utils.formatDouble(Math.toDegrees(angleSpeed),3));
 
         out = out.replaceAll("\\{ANGLE_MAX}",Utils.formatDouble(Math.toDegrees(angleMax),3))
+                .replaceAll("\\{CENTER_RADIUS}",Double.toString(centerRadius))
                 .replaceAll("\\{SHOW_LEADS}",Boolean.toString(showLeads))
                 .replaceAll("\\{SHOW_BANNERS}",Boolean.toString(showBanners))
                 .replaceAll("\\{ACCELERATE_LENGTH}",Double.toString(accelerateLength))

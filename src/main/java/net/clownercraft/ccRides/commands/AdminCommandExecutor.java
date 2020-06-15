@@ -196,18 +196,14 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                                 conf.reloadRide(rideName3,commandSender);
                                 return true;
                             case "enable":
+
                                 //Try to enable the ride
-                                //TODO Make this save the config
-                                if (ride.enable()) {
-                                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_ride_enable).replaceAll("\\{ride}",rideName3));
-                                } else {
-                                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_ride_enable_fail).replaceAll("\\{ride}",rideName3));
-                                }
+                                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + ride.setConfigOption("ENABLED","true",(Player) commandSender)));
+
                                 return true;
                             case "disable":
-                                ride.disable();
-                                //TODO make this save the config
-                                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_admin_ride_disable).replaceAll("\\{ride}",rideName3));
+                                //Disable the ride
+                                commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + ride.setConfigOption("ENABLED","false",(Player) commandSender)));
                                 return true;
                             case "setting":
                                 //Check if a setting is given

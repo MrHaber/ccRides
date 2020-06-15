@@ -129,7 +129,7 @@ public class Messages {
             "&9Accelerate Length: &b{ACCELERATE_LENGTH} rotations\n" +
             "&4&m------------------------------------------------";
     public static String command_admin_ride_info_jets = "&4      -- &cJETS Specific Info &4--\n" +
-            "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n" +
+            "&9Arm Length: &b{ARM_LENGTH} &8// &9Center Radius: &b{CENTER_RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n" +
             "&9Base Location: &b{BASE_LOCATION}\n" +
             "&9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n" +
             "&9Accelerate Length: &b{ACCELERATE_LENGTH} rotations\n" +
