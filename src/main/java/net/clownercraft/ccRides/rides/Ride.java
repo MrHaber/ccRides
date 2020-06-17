@@ -22,6 +22,7 @@ import org.bukkit.util.Vector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -54,13 +55,16 @@ public abstract class Ride implements Listener {
     Integer startWaitTime = 30; // How long to wait after the minimum passes for more players
     Integer price = 0; //The cost in tokens
     boolean joinAfterStart = false; //Whether players can join once the ride has started.
+
+
+
     boolean enabled = false; //Whether the ride is enabled/disabled.
 
     /* Running Data */
     boolean running = false; //Whether the ride is operating or not
     boolean countdownStarted = false;
     ArrayList<Vehicle> seats = new ArrayList<>(); //stores vehicle entities for the seats
-    HashMap<Player,Integer> riders = new HashMap<>(); //Players mapped to their seat numbers
+    ConcurrentHashMap<Player,Integer> riders = new ConcurrentHashMap<>(); //Players mapped to their seat numbers
     ArrayList<Player> queue = new ArrayList<>(); //The queue for players waiting to join the ride when it next runs
     BukkitTask countdownTask;
 
@@ -344,12 +348,14 @@ public abstract class Ride implements Listener {
         return riders.size() >= capacity;
     }
 
-    /**
-     * @return if the ride is already running
-     */
-    public boolean isRunning() {
-        return running;
-    }
+    /* Getters for a bunch of status things */
+    public boolean isRunning() { return running; }
+    public boolean isCountdownStarted() { return countdownStarted; }
+    public Integer getCapacity() { return capacity; }
+    public Integer getNumRiders() { return riders.size(); }
+    public Integer getNumQueue() { return queue.size(); }
+    public Integer getPrice() { return price; }
+    public boolean isEnabled() { return enabled; }
 
     public void addToQueue(Player player) {
 

@@ -1,14 +1,17 @@
 package net.clownercraft.ccRides;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import net.clownercraft.ccRides.config.Messages;
+import net.clownercraft.ccRides.rides.Ride;
 import org.bukkit.entity.Player;
 
 public class PlaceholderProvider extends PlaceholderExpansion {
-    private RidesPlugin plugin;
+    private final RidesPlugin plugin;
 
     public PlaceholderProvider(RidesPlugin plugin) {
         this.plugin = plugin;
     }
+
     @Override
     public boolean persist(){
         return true;
@@ -34,22 +37,48 @@ public class PlaceholderProvider extends PlaceholderExpansion {
         if(player == null){
             return "";
         }
-        //%ccRides_[placeholder]%
-        //TODO Decide on some placeholders
 
-//        //%ccTokens_balance%
-//        if (identifier.equals("balance")) {
-//            try{
-//                int bal = TokenEconomy.getBalance(player.getUniqueId());
-//                return Integer.toString(bal);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                return "Error";
-//            }
-//
-//        }
+        //%ccRides_[rideID]_enabled%
+        //%ccRides_[rideID]_running%
+        //%ccRides_[rideID]_maxRiders%
+        //%ccRides_[rideID]_numRiders%
+        //%ccRides_[rideID]_numQueue%
+        //%ccRides_[rideID]_price%
 
-        return null;
+        String[] strings = identifier.split("_");
+        String RideID = strings[0];
+        String placeholder = strings[1];
+
+        if (plugin.getConfigHandler().rides.containsKey(RideID)) {
+            String out = "";
+            Ride ride = plugin.getConfigHandler().rides.get(RideID);
+            switch (placeholder) {
+                case "enabled":
+                    if (ride.isEnabled()) out = Messages.placeholder_enabled;
+                    else out = Messages.placeholder_disabled;
+                    break;
+                case "running":
+                    if (ride.isRunning()) out = Messages.placeholder_running;
+                    else if (ride.isCountdownStarted()) out = Messages.placeholder_startingSoon;
+                    else out = Messages.placeholder_waiting;
+                    break;
+                case "maxRiders":
+                    out = Integer.toString(ride.getCapacity());
+                    break;
+                case "numRiders":
+                    out = Integer.toString(ride.getNumRiders());
+                    break;
+                case "numQueue":
+                    out = Integer.toString(ride.getNumQueue());
+                    break;
+                case "price":
+                    out = Integer.toString(ride.getPrice());
+                    break;
+            }
+            return out;
+        } else {
+            return Messages.placeholder_rideNotExist.replaceAll("\\{RIDE}",RideID);
+        }
     }
 
 }

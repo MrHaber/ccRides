@@ -739,11 +739,11 @@ public class Jets extends Ride {
                 if (oldslot==8 && newslot == 0) {
                     jump = 1;
                 } else if (oldslot==0 && newslot == 8) {
-                    jump = -1;
+                    jump = 1;
                 }
                 int seatnum = riders.get(event.getPlayer());
                 double angle = seatAngles.get(seatnum);
-                angle += jump * angleSpeed;
+                angle -= jump * angleSpeed;
                 if (angle>angleMax) angle = angleMax;
                 if (angle<0) angle = 0;
 

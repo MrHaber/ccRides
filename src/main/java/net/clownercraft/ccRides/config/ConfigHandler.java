@@ -12,27 +12,26 @@ import org.bukkit.event.HandlerList;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigHandler {
 
     //Getting an instance of the main class
-    private RidesPlugin instance;
+    private final RidesPlugin instance;
 
     /*
     Config Objects
      */
     private FileConfiguration mainConfig;
-    private FileConfiguration messagesConfig;
     private FileConfiguration signsConfig;
-    private HashMap<String,FileConfiguration> rideConfigs; //Ride ID, Ride Configuration
 
     private final File mainFile;
-    private final File messagesFile;
     private final File signFile;
+
     File rideFolder;
 
     /* Ride Data */
-    public HashMap<String,Ride> rides = new HashMap<>(); //Ride Name/ID, Ride Object
+    public ConcurrentHashMap<String,Ride> rides = new ConcurrentHashMap<>(); //Ride Name/ID, Ride Object
 
     //Player tracking for commands
     public HashMap<Player,String> ridePlayers = new HashMap<>();
@@ -44,8 +43,8 @@ public class ConfigHandler {
     /*
     Global Config Options
      */
-    public boolean LinkVault = false;
-    public boolean LinkPlaceholderAPI = false;
+    public boolean LinkVault;
+    public boolean LinkPlaceholderAPI;
     //None yet...
 
     /**
@@ -57,7 +56,7 @@ public class ConfigHandler {
 
         //Load Files
         mainFile = new File(instance.getDataFolder(), "config.yml");
-        messagesFile = new File(instance.getDataFolder(), "messages.yml");
+        File messagesFile = new File(instance.getDataFolder(), "messages.yml");
         signFile = new File(instance.getDataFolder(), "signs.yml");
         rideFolder = new File(instance.getDataFolder(),"Rides");
 
@@ -71,7 +70,7 @@ public class ConfigHandler {
 
         //Load Main configurations
         mainConfig = YamlConfiguration.loadConfiguration(mainFile);
-        messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
+        YamlConfiguration messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
         signsConfig = YamlConfiguration.loadConfiguration(signFile);
 
         instance.getLogger().info("Main Configs Loaded");
@@ -81,16 +80,16 @@ public class ConfigHandler {
         LinkPlaceholderAPI = mainConfig.getBoolean("Integrations.placeholderAPI");
 
         //Load Messages
-        Messages.init((YamlConfiguration) messagesConfig);
+        Messages.init(messagesConfig);
 
+        assert rideFiles!=null;
         //Load Ride configurations
-        rideConfigs = new HashMap<>();
         for (File f: rideFiles) {
             YamlConfiguration conf = YamlConfiguration.loadConfiguration(f);
             String Id = conf.getString("Generic.ID");
-            rideConfigs.put(Id,conf);
             instance.getLogger().info("\"" + Id + "\" ride config loaded.");
-            rides.put(Id,Ride.RideFromConfig(conf));
+            assert Id != null;
+            rides.put(Id, Objects.requireNonNull(Ride.RideFromConfig(conf)));
             instance.getLogger().info("\"" + Id + "\" ride config loaded.");
         }
         if (rideFiles.length==0) instance.getLogger().info("No Rides Configured yet.");
@@ -103,7 +102,6 @@ public class ConfigHandler {
     }
 
     /**
-     *
      * @param file
      * The file to test if it exists
      */
@@ -115,14 +113,12 @@ public class ConfigHandler {
         }
     }
 
-
     /**
      * Saves a ride's configuration to disk
      * @param conf = the rides configuration
      */
    public void saveRideConfig(FileConfiguration conf) {
         String ID = conf.getString("Generic.ID");
-        rideConfigs.put(ID,conf);
 
         try {
             conf.save(new File(rideFolder,ID+".yml"));
@@ -130,6 +126,15 @@ public class ConfigHandler {
             e.printStackTrace();
         }
    }
+
+
+    public void saveMessageConfig(FileConfiguration conf) {
+        try {
+            conf.save(new File(instance.getDataFolder(), "messages.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Reload a ride's config
@@ -149,11 +154,9 @@ public class ConfigHandler {
 
        //Load the updated config
        YamlConfiguration conf = YamlConfiguration.loadConfiguration(new File(rideFolder,rideID+".yml"));
-       rideConfigs.put(rideID,conf);
-
 
        //re-init the ride
-       rides.put(rideID,Ride.RideFromConfig(conf));
+       rides.put(rideID, Objects.requireNonNull(Ride.RideFromConfig(conf)));
        rides.get(rideID).init();
        sender.sendMessage("Restarted the ride...");
 
@@ -224,9 +227,8 @@ public class ConfigHandler {
        saveSignConfig();
 
        //delete the ride config
-       rideConfigs.remove(name);
        File rideFile = new File(rideFolder,name+".yml");
-       rideFile.delete();
+       if (!rideFile.delete()) instance.getLogger().warning("Couldn't delete ride config. Please remove manually.");
    }
 
 }

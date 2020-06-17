@@ -184,48 +184,47 @@ public class FerrisWheel extends Ride {
 
             //The setting wasn't one of the defaults, so let's set FerrisWheel specific ones.
             switch (key) {
-                //TODO redo messages
 
                 case "RADIUS": //integer, in number of blocks
-                    try{
+                    try {
                         radius = Double.parseDouble(values[0]);
-                        out = "Radius set to " + radius + " blocks.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_blocks.replaceAll("\\{VALUE}",Double.toString(radius));
                     } catch (NumberFormatException e) {
-                        out = "Radius must be a number of blocks, decimals allowed.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks;
                     }
                     break;
                 case "ROTATE_SPEED": //integer, ticks per full rotation
-                    try{
+                    try {
                         rotatespeed = Integer.parseInt(values[0]);
-                        out = "Rotate_Speed set to " + rotatespeed + " ticks per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_ticks.replaceAll("\\{VALUE}",Integer.toString(rotatespeed));
                     } catch (NumberFormatException e) {
-                        out = "Rotate_Speed must be an integer number of ticks per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeIntTicks;
                     }
                     break;
                 case "RIDE_LENGTH": //integer, number of full rotations per ride
-                    try{
+                    try {
                         length = Integer.parseInt(values[0]);
-                        out = "RIDE_LENGTH set to " + length + " rotations.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_cycles.replaceAll("\\{VALUE}",Integer.toString(length));
                     } catch (NumberFormatException e) {
-                        out = "RIDE_LENGTH must be an integer number of rotations.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeIntCycles;
                     }
                     break;
 
                 case "CART_WIDTH": //double, the number of full height cycles per rotation
-                    try{
+                    try {
                         cartWidth = Integer.parseInt(values[0]);
-                        out = "CART_WIDTH set to " + cartWidth + " cycles per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Integer.toString(cartWidth));
                     } catch (NumberFormatException e) {
-                        out = "CART_WIDTH must be an integer number of carts.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeInt;
                     }
                     break;
                 case "AXIS": //boolean
                     if (Boolean.parseBoolean(values[0])) {
                         axis = true;
-                        out = "AXIS set to true. Using z/y.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_axis_T.replaceAll("\\{VALUE}",Boolean.toString(axis));
                     } else {
                         axis = false;
-                        out = "AXIS set to false. Using x/y.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_axis_F.replaceAll("\\{VALUE}",Boolean.toString(axis));
                     }
                     break;
             }
@@ -234,7 +233,7 @@ public class FerrisWheel extends Ride {
 
         //If out is still empty, we didn't recognise the option key
         //if this isn't the case, save the changes
-        if (out.equals("")) out = key + " not found as an option";
+        if (out.equals("")) out = Messages.command_admin_ride_setting_GENERAL_fail_notFound;
         else RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
 
 
@@ -242,7 +241,7 @@ public class FerrisWheel extends Ride {
         if (enabled) enable();
 
         //return the message
-        return out;
+        return out.replaceAll("\\{OPTION}",key).replaceAll("\\{RIDE}", rideID);
     }
 
     /**
@@ -336,7 +335,7 @@ public class FerrisWheel extends Ride {
         if(length==null||length==0) out = out.replaceAll("\\{RIDE_LENGTH}","NOT SET");
         else out = out.replaceAll("\\{RIDE_LENGTH}",Integer.toString(length));
 
-        out = out.replaceAll("\\{SEAT_WIDTH}",Integer.toString(cartWidth));
+        out = out.replaceAll("\\{CART_WIDTH}",Integer.toString(cartWidth));
         out = out.replaceAll("\\{AXIS}",Boolean.toString(axis));
 
         return out;

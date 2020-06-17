@@ -238,6 +238,7 @@ public class Carousel extends Ride {
         out.add("HEIGHT_VAR");
         out.add("HEIGHT_SPEED");
         out.add("HORSE_MODE");
+        out.add("ACCELERATE_LENGTH");
         return out;
     }
 
@@ -257,58 +258,61 @@ public class Carousel extends Ride {
         String out = super.setConfigOption(key,value,sender);
         String[] values = value.split(" ");
         if (out.equals("")) {
-            //TODO redo messages
             //The setting wasn't one of the defaults, so let's set carousel specific ones.
             switch (key) {
 
-                case "RADIUS": //integer, in number of blocks
+                case "RADIUS": //Double, in number of blocks
                     try{
                         radius = Double.parseDouble(values[0]);
-                    out = "Radius set to " + radius + " blocks.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_blocks.replaceAll("\\{VALUE}",Double.toString(radius));
                     } catch (NumberFormatException e) {
-                        out = "Radius must be a number of blocks. Decimals Allowed";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks;
                     }
                     break;
                 case "ROTATE_SPEED": //integer, ticks per full rotation
                     try{
                         rotatespeed = Integer.parseInt(values[0]);
-                        out = "Rotate_Speed set to " + rotatespeed + " ticks per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_ticks.replaceAll("\\{VALUE}",Integer.toString(rotatespeed));
                     } catch (NumberFormatException e) {
-                        out = "Rotate_Speed must be an integer number of ticks per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeIntTicks;
                     }
                     break;
                 case "RIDE_LENGTH": //integer, number of full rotations per ride
                     try{
                         length = Integer.parseInt(values[0]);
-                        out = "RIDE_LENGTH set to " + length + " rotations.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_cycles.replaceAll("\\{VALUE}",Integer.toString(length));
                     } catch (NumberFormatException e) {
-                        out = "RIDE_LENGTH must be an integer number of rotations.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeIntCycles;
+                    }
+                    break;
+                case "ACCELERATE_LENGTH": //double, number of rotations to take to get up to speed/slow down
+                    try{
+                        accelerateLength = Double.parseDouble(values[0]);
+                        out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Double.toString(accelerateLength));
+
+                    } catch (NumberFormatException e) {
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoub;
                     }
                     break;
                 case "HEIGHT_VAR": //double, the max +/- height variation in blocks
                     try{
                         heightVariation = Double.parseDouble(values[0]);
-                        out = "HEIGHT_VAR set to ±" + heightVariation + " blocks.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_blocks.replaceAll("\\{VALUE}","±" + heightVariation);
                     } catch (NumberFormatException e) {
-                        out = "HEIGHT_VAR must be an double number of blocks.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks;
                     }
                     break;
                 case "HEIGHT_SPEED": //double, the number of full height cycles per rotation
                     try{
                         heightSpeed = Double.parseDouble(values[0]);
-                        out = "HEIGHT_SPEED set to " + heightSpeed + " cycles per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_success_cycles.replaceAll("\\{VALUE}",Double.toString(heightSpeed));
                     } catch (NumberFormatException e) {
-                        out = "HEIGHT_VAR must be an double number of cycles per rotation.";
+                        out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoub;
                     }
                     break;
                 case "HORSE_MODE": //boolean
-                    if (Boolean.parseBoolean(values[0])) {
-                        horseMode = true;
-                        out = "HORSE_MODE set to true. Using Horses as seats.";
-                    } else {
-                        horseMode = false;
-                        out = "HORSE_MODE set to false. Using Minecarts as seats.";
-                    }
+                    horseMode = Boolean.parseBoolean(values[0]);
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Boolean.toString(horseMode));
                     break;
             }
         }
@@ -316,14 +320,14 @@ public class Carousel extends Ride {
 
         //If out is still empty, we didn't recognise the option key
         //if this isn't the case, save the changes
-        if (out.equals("")) out = key + " not found as an option";
+        if (out.equals("")) out = Messages.command_admin_ride_setting_GENERAL_fail_notFound;
         else RidesPlugin.getInstance().getConfigHandler().saveRideConfig(createConfig());
 
         //If enabled re-enable the ride to introduce setting
         if (enabled) enable();
 
         //return the message
-        return out.replaceAll("\\{OPTION}",key);
+        return out.replaceAll("\\{OPTION}",key).replaceAll("\\{RIDE}", rideID);
     }
 
     /**
@@ -421,6 +425,8 @@ public class Carousel extends Ride {
         out = out.replaceAll("\\{HEIGHT_VAR}",Double.toString(heightVariation));
         out = out.replaceAll("\\{HEIGHT_SPEED}",Double.toString(heightSpeed));
         out = out.replaceAll("\\{HORSE_MODE}",Boolean.toString(horseMode));
+        out = out.replaceAll("\\{ACCELERATE_LENGTH}",Double.toString(accelerateLength));
+
 
         return out;
     }

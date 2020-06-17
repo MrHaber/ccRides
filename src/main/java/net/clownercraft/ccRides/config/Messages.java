@@ -1,10 +1,7 @@
 package net.clownercraft.ccRides.config;
 
+import net.clownercraft.ccRides.RidesPlugin;
 import org.bukkit.configuration.file.YamlConfiguration;
-
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class Messages {
     static final int expectedVersion = 2;
@@ -12,6 +9,8 @@ public class Messages {
     /*
     Default options are defined here, and will be saved to the file if the version is newer
      */
+
+    //Misc
     public static String prefix = "&b&lccRides &1» ";
 
     //Ride Messages
@@ -24,12 +23,19 @@ public class Messages {
     public static String ride_cant_afford = "&cYou don't have enough &6tokens&c to ride this ride! \n&cCome back when you have at least &6{price} tokens.";
     public static String ride_paid = "&9You paid &6{price} tokens&9 to ride on {ride}";
 
-
     public static String ride_starting_needMoreRiders = "&9Waiting for {count} more players to start.";
     public static String ride_starting_countdown = "&9The ride will start in {time} seconds.";
     public static String ride_starting_seatsFUll = "&9All seats are filled! Ride starting.";
 
-    public static String ride_jets_controlMessage = "&b&lJets Ride &1&l» &b&lControl height with your scroll wheel.";
+    public static String ride_jets_controlMessage = "&b&lJets &1&l» &b&lControl height with scroll wheel.";
+
+    //PlaceholderAPI messages
+    public static String placeholder_enabled = "Enabled";
+    public static String placeholder_disabled = "Disabled";
+    public static String placeholder_waiting = "Waiting";
+    public static String placeholder_startingSoon = "About to Start";
+    public static String placeholder_running = "Running";
+    public static String placeholder_rideNotExist = "Error: RideID {RIDE} doesn't exist.";
 
     //General command messages
     public static String command_not_player = "&cThis command must be run by a player.";
@@ -83,6 +89,8 @@ public class Messages {
     public static String command_admin_ride_setting_GENERAL_success_blocks = "&9{OPTION} set to &b{VALUE} blocks";
     public static String command_admin_ride_setting_GENERAL_success_ticks = "&9{OPTION} set to &b{VALUE} ticks";
     public static String command_admin_ride_setting_GENERAL_success_cycles = "&9{OPTION} set to &b{VALUE} cycles";
+    public static String command_admin_ride_setting_GENERAL_success_axis_T = "&9{OPTION} set to &b{VALUE}&9. Using z/y";
+    public static String command_admin_ride_setting_GENERAL_success_axis_F = "&9{OPTION} set to &b{VALUE}&9. Using x/y";
 
     public static String command_admin_ride_setting_GENERAL_fail_notFound = "&4{OPTION} &cis not a valid option for this ride.";
     public static String command_admin_ride_setting_GENERAL_fail_mustBeInt = "&4Invalid Value.&c {OPTION} must be an integer";
@@ -112,11 +120,12 @@ public class Messages {
             "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n" +
             "&9Base Location: &b{BASE_LOCATION}\n" +
             "&9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n" +
+            "&9Acceleration length: &b{ACCELERATE_LENGTH}\n" +
             "&9Height Variation: &b±{HEIGHT_VAR} blocks &8// &9Height Speed: &b{HEIGHT_SPEED} &9cycles/rotation\n" +
             "&9Horse mode: &b{HORSE_MODE} &9(false = minecart seats)\n" +
             "&4&m------------------------------------------------";
     public static String command_admin_ride_info_ferrisWheel = "&4  -- &cFERRIS_WHEEL Specific Info &4--\n" +
-            "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} seats &8// &9Seat Width: &b{SEAT_WIDTH}\n" +
+            "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} seats &8// &9Cart Width: &b{CART_WIDTH}\n" +
             "&9Base Location: &b{BASE_LOCATION}\n" +
             "&9Axis: &b{AXIS} &9(false = xy, true=zy) &8// &9Ride Length &b{RIDE_LENGTH} rotations\n" +
             "&9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation\n" +
@@ -167,8 +176,15 @@ public class Messages {
         ride_starting_needMoreRiders = conf.getString("Ride.starting.needMoreRiders",ride_starting_needMoreRiders);
         ride_starting_countdown = conf.getString("Ride.starting.countdown",ride_starting_countdown);
         ride_starting_seatsFUll = conf.getString("Ride.starting.seatsFull",ride_starting_seatsFUll);
-
         ride_jets_controlMessage = conf.getString("Ride.Jets.controlMessage",ride_jets_controlMessage);
+
+        //Placeholder messages
+        placeholder_enabled = conf.getString("Placeholder.enabled",placeholder_enabled);
+        placeholder_disabled = conf.getString("Placeholder.disabled",placeholder_disabled);
+        placeholder_waiting = conf.getString("Placeholder.waiting",placeholder_waiting);
+        placeholder_startingSoon = conf.getString("Placeholder.startingSoon",placeholder_startingSoon);
+        placeholder_running = conf.getString("Placeholder.running",placeholder_running);
+        placeholder_rideNotExist = conf.getString("Placeholder.rideNotExist",placeholder_rideNotExist);
 
         //General Command messages
         command_not_player = conf.getString("Command.notPlayer",command_not_player);
@@ -206,6 +222,8 @@ public class Messages {
         command_admin_ride_setting_GENERAL_success_degree = conf.getString("Command.Admin.ride.setting.GENERAL.success.degree",command_admin_ride_setting_GENERAL_success_degree);
         command_admin_ride_setting_GENERAL_success_ticks = conf.getString("Command.Admin.ride.setting.GENERAL.success.ticks",command_admin_ride_setting_GENERAL_success_ticks);
         command_admin_ride_setting_GENERAL_success_cycles = conf.getString("Command.Admin.ride.setting.GENERAL.success.cycles",command_admin_ride_setting_GENERAL_success_cycles);
+        command_admin_ride_setting_GENERAL_success_axis_T = conf.getString("Command.Admin.ride.setting.GENERAL.success.axis.true",command_admin_ride_setting_GENERAL_success_axis_T);
+        command_admin_ride_setting_GENERAL_success_axis_F = conf.getString("Command.Admin.ride.setting.GENERAL.success.axis.false",command_admin_ride_setting_GENERAL_success_axis_F);
 
         command_admin_ride_setting_GENERAL_fail_notFound = conf.getString("Command.Admin.ride.setting.GENERAL.fail.notFound", command_admin_ride_setting_GENERAL_fail_notFound);
         command_admin_ride_setting_GENERAL_fail_mustBeInt = conf.getString("Command.Admin.ride.setting.GENERAL.fail.mustBeInt", command_admin_ride_setting_GENERAL_fail_mustBeInt);
@@ -221,8 +239,7 @@ public class Messages {
         command_admin_ride_setting_LOCATION_player = conf.getString("Command.Admin.ride.setting.LOCATION.player",command_admin_ride_setting_LOCATION_player);
         command_admin_ride_setting_LOCATION_coords = conf.getString("Command.Admin.ride.setting.LOCATION.coords",command_admin_ride_setting_LOCATION_coords);
         command_admin_ride_setting_LOCATION_fail = conf.getString("Command.Admin.ride.setting.LOCATION.fail",command_admin_ride_setting_LOCATION_fail);
-
-
+        
         command_admin_ride_invalid_sub = conf.getString("Command.Admin.ride.invalidSub",command_admin_ride_invalid_sub);
         command_admin_linksign_syntax = conf.getString("Command.Admin.linksign.syntax",command_admin_linksign_syntax);
         command_admin_linksign_click = conf.getString("Command.Admin.linksign.click",command_admin_linksign_click);
@@ -237,23 +254,97 @@ public class Messages {
 
     private static void updateFile() {
         YamlConfiguration conf = new YamlConfiguration();
+        RidesPlugin.getInstance().getLogger().warning("Updating Messages file...");
+        //v2 Messages
+        conf.set("MessagesVersion",expectedVersion);
+        
+        //Misc/General Messages
+        conf.set("Prefix",prefix);
 
+        //Ride Messagea
+        conf.set("Ride.queue.joined",ride_queue_joined);
+        conf.set("Ride.queue.already",ride_queue_already);
+        conf.set("Ride.queue.alreadyOther",ride_queue_other_queue);
+        conf.set("Ride.queue.onRide",ride_queue_other_riding);
+        conf.set("Ride.queue.left",ride_queue_left);
+        conf.set("Ride.cantAfford",ride_cant_afford);
+        conf.set("Ride.paid",ride_paid);
+        conf.set("Ride.starting.needMoreRiders",ride_starting_needMoreRiders);
+        conf.set("Ride.starting.countdown",ride_starting_countdown);
+        conf.set("Ride.starting.seatsFull",ride_starting_seatsFUll);
+        conf.set("Ride.Jets.controlMessage",ride_jets_controlMessage);
 
-        //TODO set things and save it
+        //Placeholder messages
+        conf.set("Placeholder.enabled",placeholder_enabled);
+        conf.set("Placeholder.disabled",placeholder_disabled);
+        conf.set("Placeholder.waiting",placeholder_waiting);
+        conf.set("Placeholder.startingSoon",placeholder_startingSoon);
+        conf.set("Placeholder.running",placeholder_running);
+        conf.set("Placeholder.rideNotExist",placeholder_rideNotExist);
+
+        //General Command messages
+        conf.set("Command.notPlayer",command_not_player);
+        conf.set("Command.listRides",command_listRides);
+        conf.set("Command.rideNotExist",command_ride_not_exist);
+
+        //Player Command Messages
+        conf.set("Command.Player.help",command_player_help);
+        conf.set("Command.Player.exit.main",command_player_exit);
+        conf.set("Command.Player.exit.notRiding",command_player_exit_notriding);
+        conf.set("Command.Player.leaveQueue.main",command_player_leavequeue);
+        conf.set("Command.Player.leaveQueue.notQueueing",command_player_leavequeue_notqueueing);
+
+        //Admin Command Messages
+        conf.set("Command.Admin.help",command_admin_help);
+        conf.set("Command.Admin.reload.all",command_admin_reload_all);
+        conf.set("Command.Admin.reload.ride",command_admin_reload_ride);
+        conf.set("Command.Admin.createRide.main",command_admin_create_ride);
+        conf.set("Command.Admin.createRide.exists",command_admin_create_ride_exists);
+        conf.set("Command.Admin.createRide.syntax",command_admin_create_ride_syntax);
+        conf.set("Command.Admin.deleteRide.main",command_admin_delete_ride);
+        conf.set("Command.Admin.deleteRide.syntax",command_admin_delete_ride_syntax);
+        conf.set("Command.Admin.ride.enable.main",command_admin_ride_enable);
+        conf.set("Command.Admin.ride.enable.fail",command_admin_ride_enable_fail);
+        conf.set("Command.Admin.ride.disable",command_admin_ride_disable);
+        conf.set("Command.Admin.ride.info.general",command_admin_ride_info_general);
+        conf.set("Command.Admin.ride.info.carousel",command_admin_ride_info_carousel);
+        conf.set("Command.Admin.ride.info.ferrisWheel",command_admin_ride_info_ferrisWheel);
+        conf.set("Command.Admin.ride.info.chairswing",command_admin_ride_info_chairswing);
+        conf.set("Command.Admin.ride.info.jets",command_admin_ride_info_jets);
+
+        conf.set("Command.Admin.ride.setting.list",command_admin_ride_setting_list);
+        conf.set("Command.Admin.ride.setting.GENERAL.success.default",command_admin_ride_setting_GENERAL_success);
+        conf.set("Command.Admin.ride.setting.GENERAL.success.blocks",command_admin_ride_setting_GENERAL_success_blocks);
+        conf.set("Command.Admin.ride.setting.GENERAL.success.degree",command_admin_ride_setting_GENERAL_success_degree);
+        conf.set("Command.Admin.ride.setting.GENERAL.success.ticks",command_admin_ride_setting_GENERAL_success_ticks);
+        conf.set("Command.Admin.ride.setting.GENERAL.success.cycles",command_admin_ride_setting_GENERAL_success_cycles);
+        conf.set("Command.Admin.ride.setting.GENERAL.success.axis.true",command_admin_ride_setting_GENERAL_success_axis_T);
+        conf.set("Command.Admin.ride.setting.GENERAL.success.axis.false",command_admin_ride_setting_GENERAL_success_axis_F);
+
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.notFound", command_admin_ride_setting_GENERAL_fail_notFound);
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.mustBeInt", command_admin_ride_setting_GENERAL_fail_mustBeInt);
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.mustBeIntBlocks", command_admin_ride_setting_GENERAL_fail_mustBeIntBlocks);
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.mustBeIntTicks", command_admin_ride_setting_GENERAL_fail_mustBeIntTicks);
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.mustBeIntCycles", command_admin_ride_setting_GENERAL_fail_mustBeIntCycles);
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.mustBeBool", command_admin_ride_setting_GENERAL_fail_mustBeBool);
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.mustBeDoub", command_admin_ride_setting_GENERAL_fail_mustBeDoub);
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.mustBeDoubDegrees", command_admin_ride_setting_GENERAL_fail_mustBeDoubDegrees);
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.mustBeDoubBlocks", command_admin_ride_setting_GENERAL_fail_mustBeDoubBlocks);
+        conf.set("Command.Admin.ride.setting.GENERAL.fail.mustBeMaterial", command_admin_ride_setting_GENERAL_fail_mustBeMaterial);
+
+        conf.set("Command.Admin.ride.setting.LOCATION.player",command_admin_ride_setting_LOCATION_player);
+        conf.set("Command.Admin.ride.setting.LOCATION.coords",command_admin_ride_setting_LOCATION_coords);
+        conf.set("Command.Admin.ride.setting.LOCATION.fail",command_admin_ride_setting_LOCATION_fail);
+        conf.set("Command.Admin.ride.invalidSub",command_admin_ride_invalid_sub);
+        conf.set("Command.Admin.linksign.syntax",command_admin_linksign_syntax);
+        conf.set("Command.Admin.linksign.click",command_admin_linksign_click);
+        conf.set("Command.Admin.linksign.linked",command_admin_linksign_linked);
+        conf.set("Command.Admin.unlinksign.click",command_admin_unlinksign_click);
+        conf.set("Command.Admin.unlinksign.unlinked",command_admin_unlinksign_unlinked);
+
+        //Save
+        RidesPlugin.getInstance().getConfigHandler().saveMessageConfig(conf);
+    
     }
-
-
-    /**
-     * Used for filtering tab-complete results based on what the user started typing
-     * @param list the full list to filter
-     * @param regex regex to filter by
-     * @return the filtered list
-     */
-    public static ArrayList<String> filterList(ArrayList<String> list, String regex) {
-        Pattern filter = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        return list.stream()
-                .filter(filter.asPredicate()).collect(Collectors.toCollection(ArrayList::new));
-    }
-
 
 }

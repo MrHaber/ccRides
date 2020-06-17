@@ -19,8 +19,16 @@ Ride:
     countdown: "&9The ride will start in {time} seconds."
     seatsFull: "&9All seats are filled! Ride starting."
   Jets:
-    controlMessage: "&b&lJets Ride &1&l» &b&lControl height with your scroll wheel."
+    controlMessage: "&b&lJets &1&l» &b&lControl height with scroll wheel."
 
+#Messages used for PlaceholderAPI messages
+Placeholder:
+  enabled: "Enabled"
+  disabled: "Disabled"
+  waiting: "Waiting"
+  startingSoon: "About to Start"
+  running: "Running"
+  rideNotExist: "Error: RideID {RIDE} doesn't exist."
 
 #Command Messages
 Command:
@@ -91,11 +99,12 @@ Command:
                   &9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n
                   &9Base Location: &b{BASE_LOCATION}\n
                   &9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation &8// &9Ride Length &b{RIDE_LENGTH} rotations\n
+                  &9Acceleration length: &b{ACCELERATE_LENGTH}\n
                   &9Height Variation: &b±{HEIGHT_VAR} blocks &8// &9Height Speed: &b{HEIGHT_SPEED} &9cycles/rotation\n
                   &9Horse mode: &b{HORSE_MODE} &9(false = minecart seats)\n
                   &4&m------------------------------------------------"
         ferrisWheel: "&4  -- &cFERRIS_WHEEL Specific Info &4--\n
-                  &9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} seats &8// &9Seat Width: &b{SEAT_WIDTH}\n
+                  &9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} seats &8// &9Cart Width: &b{CART_WIDTH}\n
                   &9Base Location: &b{BASE_LOCATION}\n
                   &9Axis: &b{AXIS} &9(false = xy, true=zy) &8// &9Ride Length &b{RIDE_LENGTH} rotations\n
                   &9Rotate Speed: &b{ROTATE_SPEED} ticks/rotation\n
@@ -127,7 +136,9 @@ Command:
             blocks: "&9{OPTION} set to &b{VALUE} blocks"
             ticks: "&9{OPTION} set to &b{VALUE} ticks"
             cycles: "&9{OPTION} set to &b{VALUE} cycles"
-
+            axis:
+              true: "&9{OPTION} set to &b{VALUE}&9. Using z/y"
+              false: "&9{OPTION} set to &b{VALUE}&9. Using x/y"
           fail:
             notFound: "&4{OPTION} &cis not a valid option for this ride."
             mustBeInt: "&4Invalid Value.&c {OPTION} must be an integer"

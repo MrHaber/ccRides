@@ -3,6 +3,7 @@ package net.clownercraft.ccRides.commands;
 import net.clownercraft.ccRides.config.ConfigHandler;
 import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.RidesPlugin;
+import net.clownercraft.ccRides.utils.Utils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -85,7 +86,7 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
             } else {
                 // Check if they entered a ride name
                 ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
-                if (conf.rides.keySet().contains(subcommand)) {
+                if (conf.rides.containsKey(subcommand)) {
                     //The arg is a ride name, add the player to it
                     //The addplayer method sends messages depending what it does, so we don't need to here.
                     conf.rides.get(subcommand).addPlayer((Player) commandSender);
@@ -106,7 +107,7 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
             out.addAll(RidesPlugin.getInstance().getConfigHandler().rides.keySet());
 
             //Filter by what they've already typed
-            out = Messages.filterList(out,"^"+args[0]);
+            out = Utils.filterList(out,"^"+args[0]);
         } else {
             out.add("");
         }

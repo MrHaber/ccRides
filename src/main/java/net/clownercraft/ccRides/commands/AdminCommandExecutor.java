@@ -5,6 +5,7 @@ import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.RidesListener;
 import net.clownercraft.ccRides.RidesPlugin;
 import net.clownercraft.ccRides.rides.Ride;
+import net.clownercraft.ccRides.utils.Utils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -288,7 +289,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
             out.addAll(RidesPlugin.getInstance().getConfigHandler().rides.keySet());
 
             //Filter by what they've already typed
-            out = Messages.filterList(out,"^"+args[0]);
+            out = Utils.filterList(out,"^"+args[0]);
         } else if (args.length==2) {
             //Second level options
             String subcommand = args[0];
@@ -312,7 +313,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                     out = new ArrayList<>(Arrays.asList("info", "enable", "disable", "reload", "setting"));
                     break;
             }
-            out = Messages.filterList(out,"^"+args[1]);
+            out = Utils.filterList(out,"^"+args[1]);
         } else if (args.length==3) {
             if (args[0].equalsIgnoreCase("create")) {
                 out = new ArrayList<>(Ride.RideTypes.keySet());
@@ -335,7 +336,7 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                     }
                     break;
             }
-            out = Messages.filterList(out,"^"+args[2]);
+            out = Utils.filterList(out,"^"+args[2]);
         } else if (args.length>3) {
             out.add("");
         }
