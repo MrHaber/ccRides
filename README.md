@@ -1,9 +1,9 @@
 # ccRides
 Premium Spigot Plugin to add Funfair / Theme Park / Carnival Rides to your minecraft server
-[Spigot Plugin Page](#) 
-[Plugin Wiki/Docs]()
 
-Originally built for the [Clownercraft Network](https://clownercraft.net/)
+[Spigot Plugin Page](#) // [Plugin Wiki/Docs]()
+
+**Originally built for the [Clownercraft Network](https://clownercraft.net/)**
 
 Features
 ---------
