@@ -77,7 +77,7 @@ Command:
               &cUsage &7/rideadm create <name> <type>\n
               &cAvailable ride types: {types}"
     deleteRide:
-      main: "&9Deleted ride {test}"
+      main: "&9Deleted ride {ride}"
       syntax: "&cMissing arguments! \n
               &cUsage &7/rideadm delete <name>"
     Ride:

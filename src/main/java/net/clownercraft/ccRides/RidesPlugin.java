@@ -161,11 +161,32 @@ public class RidesPlugin extends JavaPlugin {
        sender.sendMessage("Reloading Configs");
        configHandler = new ConfigHandler();
 
+       //Link Vault
+       if (configHandler.LinkVault) {
+           if (setupEconomy()) {
+               getLogger().info("Linked into Vault for Economy");
+           } else {
+               configHandler.LinkVault = false;
+           }
+
+       }
+
        //init rides
        for (Ride r: configHandler.rides.values()) {
            r.init();
        }
        sender.sendMessage("Re-Started Rides");
+
+       //link Papi
+       if (configHandler.LinkPlaceholderAPI) {
+           if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
+               new PlaceholderProvider(this).register();
+               getLogger().info("Linked PlaceholderAPI");
+           } else {
+               getLogger().warning("Couldn't link PlaceholerAPI - is it installed?");
+               configHandler.LinkPlaceholderAPI = false;
+           }
+       }
    }
 
 

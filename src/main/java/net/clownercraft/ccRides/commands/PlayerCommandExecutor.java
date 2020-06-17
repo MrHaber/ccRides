@@ -12,6 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handles the player rides command
@@ -51,7 +52,7 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                 //Exit the ride
                 Player player = (Player) commandSender;
                 ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
-                HashMap<Player, String> ridePlayers = conf.ridePlayers;
+                ConcurrentHashMap<Player, String> ridePlayers = conf.ridePlayers;
                 if (ridePlayers.containsKey(player)) {
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_player_exit.replaceAll("\\{ride}", ridePlayers.get(player))));
                     conf.rides.get(ridePlayers.get(player)).ejectPlayer(player);
@@ -63,7 +64,7 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                 //leave the ride queue
                 Player player = (Player) commandSender;
                 ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
-                HashMap<Player, String> queue = conf.queueingPlayers;
+                ConcurrentHashMap<Player, String> queue = conf.queueingPlayers;
                 if (queue.containsKey(player)) {
                     conf.rides.get(queue.get(player)).removeFromQueue(player);
                     //Remove from queue sends message to player, we don't need to.

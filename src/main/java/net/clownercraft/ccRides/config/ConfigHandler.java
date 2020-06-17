@@ -34,11 +34,11 @@ public class ConfigHandler {
     public ConcurrentHashMap<String,Ride> rides = new ConcurrentHashMap<>(); //Ride Name/ID, Ride Object
 
     //Player tracking for commands
-    public HashMap<Player,String> ridePlayers = new HashMap<>();
-    public HashMap<Player,String> queueingPlayers = new HashMap<>();
+    public ConcurrentHashMap<Player,String> ridePlayers = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<Player,String> queueingPlayers = new ConcurrentHashMap<>();
 
     /* Signs */
-    public HashMap<Location,String> rideSigns = new HashMap<>(); //Sign Location, Ride ID
+    public ConcurrentHashMap<Location,String> rideSigns = new ConcurrentHashMap<>(); //Sign Location, Ride ID
 
     /*
     Global Config Options
@@ -80,7 +80,7 @@ public class ConfigHandler {
         LinkPlaceholderAPI = mainConfig.getBoolean("Integrations.placeholderAPI");
 
         //Load Messages
-        Messages.init(messagesConfig);
+        Messages.init(messagesConfig,this);
 
         assert rideFiles!=null;
         //Load Ride configurations

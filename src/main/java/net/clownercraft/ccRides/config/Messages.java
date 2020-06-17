@@ -75,7 +75,7 @@ public class Messages {
     public static String command_admin_create_ride_syntax = "&cMissing/Incorrect arguments! \n" +
             "&cUsage &7/rideadm create <name> <type>\n" +
             "&cAvailable ride types: {types}";
-    public static String command_admin_delete_ride = "&9Deleted ride {test}";
+    public static String command_admin_delete_ride = "&9Deleted ride {ride}";
     public static String command_admin_delete_ride_syntax = "&cMissing arguments! \n&cUsage &7/rideadm delete &8<&7name&8>";
     public static String command_admin_ride_enable = "&9{ride} has been enabled";
     public static String command_admin_ride_enable_fail =
@@ -160,7 +160,7 @@ public class Messages {
      * Loads messages fields based on given config file
      * @param conf a config file containing all messages settings
      */
-    public static void init(YamlConfiguration conf) {
+    public static void init(YamlConfiguration conf, ConfigHandler confHandler) {
         int confVersion = conf.getInt("MessagesVersion");
         //Misc/General Messages
         prefix = conf.getString("Prefix",prefix);
@@ -249,10 +249,10 @@ public class Messages {
 
 
 
-        if (expectedVersion>confVersion) updateFile();
+        if (expectedVersion>confVersion) updateFile(confHandler);
     }
 
-    private static void updateFile() {
+    private static void updateFile(ConfigHandler configHandler) {
         YamlConfiguration conf = new YamlConfiguration();
         RidesPlugin.getInstance().getLogger().warning("Updating Messages file...");
         //v2 Messages
@@ -343,7 +343,7 @@ public class Messages {
         conf.set("Command.Admin.unlinksign.unlinked",command_admin_unlinksign_unlinked);
 
         //Save
-        RidesPlugin.getInstance().getConfigHandler().saveMessageConfig(conf);
+        configHandler.saveMessageConfig(conf);
     
     }
 

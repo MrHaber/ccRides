@@ -3,7 +3,7 @@ version: ${project.version}
 api-version: '1.15'
 main: net.clownercraft.ccRides.RidesPlugin
 authors: [TheClowner, N1ghthauq]
-description: This plugin will be the heart and soul of the ClownerCraft Carnival
+description: Adds working funfair/theme park/carnival rides
 load: POSTWORLD
 prefix: ccRides
 website: clownercraft.net
