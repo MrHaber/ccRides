@@ -11,11 +11,12 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Carousel extends Ride {
     Double radius;//the radius of the carousel seats
     Integer rotatespeed; //number of ticks per full rotation of the carousel
-    Double accelerateLength = 0.3d; //TODO make config
+    Double accelerateLength = 0.3d; //The number of rotations to take to get up to speed/slow down
     Integer length; //number of full rotations per ride.
     Double heightVariation = 0.0; //The maximum change in height while riding (this is +/-)
     Double heightSpeed = 1.0; //How many full sine waves per rotation
@@ -47,6 +48,7 @@ public class Carousel extends Ride {
         heightVariation = conf.getDouble("Carousel.Height.Max_Change_±");
         heightSpeed = conf.getDouble("Carousel.Height.Cycles_Per_Rotation");
         horseMode = conf.getBoolean("Carousel.HorseMode");
+        accelerateLength = conf.getDouble("Carousel.Rotation.AccelerateLength");
 
         if (enabled) enable();
     }
@@ -103,7 +105,7 @@ public class Carousel extends Ride {
             tickPositions();
             if (currentRotation>=2*Math.PI*length) stopRide();
 
-        },1l,1l);
+        }, 1,1);
 
         running = true;
         countdownStarted = false;
@@ -122,7 +124,7 @@ public class Carousel extends Ride {
             ejectPlayer(p);
         }
 
-        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (enabled) checkQueue();},10l);
+        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (enabled) checkQueue();},10);
     }
 
 
@@ -216,6 +218,7 @@ public class Carousel extends Ride {
         out.set("Carousel.Height.Max_Change_±",heightVariation);
         out.set("Carousel.Height.Cycles_Per_Rotation",heightSpeed);
         out.set("Carousel.HorseMode",horseMode);
+        out.set("Carousel.Rotation.AccelerateLength",accelerateLength);
 
         } catch (NullPointerException ignored) {}
 
@@ -407,8 +410,8 @@ public class Carousel extends Ride {
         else out = out.replaceAll("\\{CAPACITY}",Integer.toString(capacity));
 
         String exit,base;
-        if (exitLocation ==null) exit = "NOT SET"; else exit = exitLocation.getWorld().getName() + " x"+ exitLocation.getX() + " y"+ exitLocation.getY() + " z" + exitLocation.getZ();
-        if (baseLocation ==null) base = "NOT SET"; else base = baseLocation.getWorld().getName() + " x"+ baseLocation.getX() + " y"+ baseLocation.getY() + " z" + baseLocation.getZ();
+        if (exitLocation ==null) exit = "NOT SET"; else exit = Objects.requireNonNull(exitLocation.getWorld()).getName() + " x"+ exitLocation.getX() + " y"+ exitLocation.getY() + " z" + exitLocation.getZ();
+        if (baseLocation ==null) base = "NOT SET"; else base = Objects.requireNonNull(baseLocation.getWorld()).getName() + " x"+ baseLocation.getX() + " y"+ baseLocation.getY() + " z" + baseLocation.getZ();
         out = out.replaceAll("\\{EXIT_LOCATION}",exit);
         out = out.replaceAll("\\{BASE_LOCATION}",base);
 

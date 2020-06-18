@@ -14,12 +14,13 @@ public class Utils {
      */
     public static String formatDouble(double val, int decimalPlaces){
 
-        String format = "#.";
+        StringBuilder format = new StringBuilder("#.");
 
         for (int i=0;i<decimalPlaces;i++){
-            format = format + "#";
+            format.append("#");
         }
-        DecimalFormat df = new DecimalFormat("#.##");
+
+        DecimalFormat df = new DecimalFormat(format.toString());
         return df.format(val);
     }
 

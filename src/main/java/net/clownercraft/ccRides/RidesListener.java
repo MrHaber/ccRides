@@ -11,6 +11,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import java.util.Objects;
+
 public class RidesListener implements Listener {
     public static boolean waitingSignClick = false; //Whether we're waiting for a player to click a sign for a command
     public static boolean waitingUnlink = false; //Whether the command was unlink instead of link
@@ -19,7 +21,7 @@ public class RidesListener implements Listener {
 
 
     //getting instance of main class
-    private ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
+    private final ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
 
     /**
      Detect when player clicks a sign to use ride
@@ -29,7 +31,7 @@ public class RidesListener implements Listener {
 
         if(e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (waitingSignClick) {
-                if (e.getPlayer().equals(waitingSender) && e.getClickedBlock().getState() instanceof Sign) {
+                if (e.getPlayer().equals(waitingSender) && Objects.requireNonNull(e.getClickedBlock()).getState() instanceof Sign) {
                     //Set or remove the sign as a ride sign
                     if (waitingUnlink) {
                         conf.rideSigns.remove(e.getClickedBlock().getLocation());
@@ -41,7 +43,7 @@ public class RidesListener implements Listener {
                     conf.saveSignConfig();
                     waitingSignClick = false;
                 }
-            } else if(conf.rideSigns.containsKey(e.getClickedBlock().getLocation())) {
+            } else if(conf.rideSigns.containsKey(Objects.requireNonNull(e.getClickedBlock()).getLocation())) {
                 //Clicked sign was a ride sign.
                 if (e.getPlayer().hasPermission("ccrides.user")) {
                     //IF player has permission, put them on the ride!

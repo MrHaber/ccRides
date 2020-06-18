@@ -139,7 +139,7 @@ public abstract class Ride implements Listener {
             Location loc2 = getPosition(i);
 
             //remove any minecarts within a few blocks of each location in case there's duplicates in the world.
-            for (Entity e:loc2.getWorld().getNearbyEntities(loc2,3,3,3)) {
+            for (Entity e: Objects.requireNonNull(loc2.getWorld()).getNearbyEntities(loc2,3,3,3)) {
                 if (e.getType().equals(EntityType.MINECART)
                 && !seats.contains(e)) e.remove();
             }
@@ -476,7 +476,7 @@ public abstract class Ride implements Listener {
                 try{
                     int cap = Integer.parseInt(values[0]);
                     capacity = cap;
-                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",cap + " seats");;
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",cap + " seats");
                 } catch (NumberFormatException e) {
                     out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeInt;
                 }
@@ -623,9 +623,9 @@ public abstract class Ride implements Listener {
         if (seats.contains(e.getVehicle())) {
 
             if (e.getExited() instanceof Player) {
-                if (riders.containsKey((Player) e.getExited())) {
+                if (riders.containsKey(e.getExited())) {
 
-                    if (seats.indexOf(e.getVehicle()) == riders.get((Player) e.getExited())) {
+                    if (seats.indexOf(e.getVehicle()) == riders.get(e.getExited())) {
 
                         Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> e.getVehicle().addPassenger(e.getExited()),0);
                         //e.setCancelled(true);
@@ -645,7 +645,7 @@ public abstract class Ride implements Listener {
         if (seats.contains(e.getVehicle())) {
 
             if (e.getEntered() instanceof Player) {
-                if (!riders.containsKey((Player) e.getEntered())) {
+                if (!riders.containsKey(e.getEntered())) {
                     e.setCancelled(true);
                 }
             }

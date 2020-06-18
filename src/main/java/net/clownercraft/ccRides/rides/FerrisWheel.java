@@ -221,10 +221,10 @@ public class FerrisWheel extends Ride {
                 case "AXIS": //boolean
                     if (Boolean.parseBoolean(values[0])) {
                         axis = true;
-                        out = Messages.command_admin_ride_setting_GENERAL_success_axis_T.replaceAll("\\{VALUE}",Boolean.toString(axis));
+                        out = Messages.command_admin_ride_setting_GENERAL_success_axis_T.replaceAll("\\{VALUE}",Boolean.toString(true));
                     } else {
                         axis = false;
-                        out = Messages.command_admin_ride_setting_GENERAL_success_axis_F.replaceAll("\\{VALUE}",Boolean.toString(axis));
+                        out = Messages.command_admin_ride_setting_GENERAL_success_axis_F.replaceAll("\\{VALUE}",Boolean.toString(false));
                     }
                     break;
             }
