@@ -10,6 +10,7 @@ import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
+import java.util.UUID;
 
 public class FerrisWheel extends Ride {
     Double radius;//the radius of the FerrisWheel seats
@@ -90,8 +91,8 @@ public class FerrisWheel extends Ride {
         running = false;
 
         //Eject Players
-        for (Player p:riders.keySet()) {
-            ejectPlayer(p);
+        for (UUID uuid:riders.keySet()) {
+            ejectPlayer(Bukkit.getPlayer(uuid));
         }
 
         Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (enabled) checkQueue();},10l);

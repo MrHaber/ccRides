@@ -1,5 +1,6 @@
 package net.clownercraft.ccRides.rides;
 
+import com.sun.istack.internal.NotNull;
 import net.clownercraft.ccRides.config.ConfigHandler;
 import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.RidesPlugin;
@@ -64,7 +65,7 @@ public abstract class Ride implements Listener {
     boolean running = false; //Whether the ride is operating or not
     boolean countdownStarted = false;
     ArrayList<Vehicle> seats = new ArrayList<>(); //stores vehicle entities for the seats
-    ConcurrentHashMap<Player,Integer> riders = new ConcurrentHashMap<>(); //Players mapped to their seat numbers
+    ConcurrentHashMap<UUID,Integer> riders = new ConcurrentHashMap<>(); //Players mapped to their seat numbers
     ArrayList<Player> queue = new ArrayList<>(); //The queue for players waiting to join the ride when it next runs
     BukkitTask countdownTask;
 
@@ -196,8 +197,8 @@ public abstract class Ride implements Listener {
         int seatnum = firstAvailableSeat();
 
         //Otherwise, add them to riders and put them in a seat.
-        riders.put(player,seatnum);
-        RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player, rideID);
+        riders.put(player.getUniqueId(),seatnum);
+        RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player.getUniqueId(), rideID);
 
         seats.get(seatnum).addPassenger(player);
 
@@ -260,10 +261,10 @@ public abstract class Ride implements Listener {
      * Sends a message to all players currently riding
      * @param message the message to send
      */
-    public void messageRiders(String message) {
+    public void messageRiders(@NotNull String message) {
         message = ChatColor.translateAlternateColorCodes('&',message);
-        for (Player p:riders.keySet()) {
-            p.sendMessage(message);
+        for (UUID uid:riders.keySet()) {
+            Objects.requireNonNull(Bukkit.getPlayer(uid)).sendMessage(message);
         }
     }
 
@@ -272,14 +273,14 @@ public abstract class Ride implements Listener {
      * @param player the player to eject
      */
     public void ejectPlayer(Player player) {
-        if (riders.containsKey(player)) {
+        if (riders.containsKey(player.getUniqueId())) {
             //Find the player's seat
-            int i = riders.get(player);
+            int i = riders.get(player.getUniqueId());
 
             //Eject the player and remove them from riders fields
-            riders.remove(player);
+            riders.remove(player.getUniqueId());
 
-            RidesPlugin.getInstance().getConfigHandler().ridePlayers.remove(player);
+            RidesPlugin.getInstance().getConfigHandler().ridePlayers.remove(player.getUniqueId());
 
             seats.get(i).eject();
             //Teleport player to the exit location
@@ -370,15 +371,15 @@ public abstract class Ride implements Listener {
 
         ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
         //Check if player queuing for another ride
-        if (conf.queueingPlayers.containsKey(player)) {
+        if (conf.queueingPlayers.containsKey(player.getUniqueId())) {
             String message = ChatColor.translateAlternateColorCodes('&', Messages.ride_queue_other_queue);
-            message = message.replaceAll("\\{ride}",conf.ridePlayers.get(player));
+            message = message.replaceAll("\\{ride}",conf.queueingPlayers.get(player.getUniqueId()));
             player.sendMessage(message);
             return;
         }
 
         //check if player is riding another ride
-        if (conf.ridePlayers.containsKey(player)) {
+        if (conf.ridePlayers.containsKey(player.getUniqueId())) {
             String message = ChatColor.translateAlternateColorCodes('&', Messages.ride_queue_other_riding);
             player.sendMessage(message);
             return;
@@ -386,7 +387,7 @@ public abstract class Ride implements Listener {
 
         //add to the queue
         queue.add(player);
-        RidesPlugin.getInstance().getConfigHandler().queueingPlayers.put(player, rideID);
+        RidesPlugin.getInstance().getConfigHandler().queueingPlayers.put(player.getUniqueId(), rideID);
 
         String message = ChatColor.translateAlternateColorCodes('&',Messages.ride_queue_joined);
         message = message.replaceAll("\\{ride}", rideID);
@@ -398,7 +399,7 @@ public abstract class Ride implements Listener {
     public void removeFromQueue(Player player) {
         //remove from the queue
         queue.remove(player);
-        RidesPlugin.getInstance().getConfigHandler().queueingPlayers.remove(player);
+        RidesPlugin.getInstance().getConfigHandler().queueingPlayers.remove(player.getUniqueId());
         String message = ChatColor.translateAlternateColorCodes('&',Messages.ride_queue_left);
         message = message.replaceAll("\\{ride}", rideID);
         player.sendMessage(message);
@@ -623,9 +624,9 @@ public abstract class Ride implements Listener {
         if (seats.contains(e.getVehicle())) {
 
             if (e.getExited() instanceof Player) {
-                if (riders.containsKey(e.getExited())) {
+                if (riders.containsKey(e.getExited().getUniqueId())) {
 
-                    if (seats.indexOf(e.getVehicle()) == riders.get(e.getExited())) {
+                    if (seats.indexOf(e.getVehicle()) == riders.get(e.getExited().getUniqueId())) {
 
                         Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> e.getVehicle().addPassenger(e.getExited()),0);
                         //e.setCancelled(true);
@@ -645,7 +646,7 @@ public abstract class Ride implements Listener {
         if (seats.contains(e.getVehicle())) {
 
             if (e.getEntered() instanceof Player) {
-                if (!riders.containsKey(e.getEntered())) {
+                if (!riders.containsKey(e.getEntered().getUniqueId())) {
                     e.setCancelled(true);
                 }
             }
@@ -689,7 +690,7 @@ public abstract class Ride implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e){
         //If on this ride
-        if (riders.containsKey(e.getPlayer())) {
+        if (riders.containsKey(e.getPlayer().getUniqueId())) {
             ejectPlayer(e.getPlayer());
         }
 
@@ -701,11 +702,11 @@ public abstract class Ride implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
-        if (riders.containsKey(e.getPlayer())) e.setCancelled(true);
+        if (riders.containsKey(e.getPlayer().getUniqueId())) e.setCancelled(true);
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent e) {
-        if (riders.containsKey(e.getPlayer())) e.setCancelled(true);
+        if (riders.containsKey(e.getPlayer().getUniqueId())) e.setCancelled(true);
     }
 }

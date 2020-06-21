@@ -52,10 +52,10 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                 //Exit the ride
                 Player player = (Player) commandSender;
                 ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
-                ConcurrentHashMap<Player, String> ridePlayers = conf.ridePlayers;
-                if (ridePlayers.containsKey(player)) {
-                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_player_exit.replaceAll("\\{ride}", ridePlayers.get(player))));
-                    conf.rides.get(ridePlayers.get(player)).ejectPlayer(player);
+                ConcurrentHashMap<UUID, String> ridePlayers = conf.ridePlayers;
+                if (ridePlayers.containsKey(player.getUniqueId())) {
+                    commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_player_exit.replaceAll("\\{ride}", ridePlayers.get(player.getUniqueId()))));
+                    conf.rides.get(ridePlayers.get(player.getUniqueId())).ejectPlayer(player);
                 } else {
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_player_exit_notriding));
                 }
@@ -64,9 +64,9 @@ public class PlayerCommandExecutor implements CommandExecutor, TabCompleter {
                 //leave the ride queue
                 Player player = (Player) commandSender;
                 ConfigHandler conf = RidesPlugin.getInstance().getConfigHandler();
-                ConcurrentHashMap<Player, String> queue = conf.queueingPlayers;
-                if (queue.containsKey(player)) {
-                    conf.rides.get(queue.get(player)).removeFromQueue(player);
+                ConcurrentHashMap<UUID, String> queue = conf.queueingPlayers;
+                if (queue.containsKey(player.getUniqueId())) {
+                    conf.rides.get(queue.get(player.getUniqueId())).removeFromQueue(player);
                     //Remove from queue sends message to player, we don't need to.
                 } else {
                     commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_player_leavequeue_notqueueing));

@@ -6,7 +6,6 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 import java.io.File;
@@ -34,8 +33,8 @@ public class ConfigHandler {
     public ConcurrentHashMap<String,Ride> rides = new ConcurrentHashMap<>(); //Ride Name/ID, Ride Object
 
     //Player tracking for commands
-    public ConcurrentHashMap<Player,String> ridePlayers = new ConcurrentHashMap<>();
-    public ConcurrentHashMap<Player,String> queueingPlayers = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<UUID,String> ridePlayers = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<UUID,String> queueingPlayers = new ConcurrentHashMap<>();
 
     /* Signs */
     public ConcurrentHashMap<Location,String> rideSigns = new ConcurrentHashMap<>(); //Sign Location, Ride ID
@@ -218,9 +217,12 @@ public class ConfigHandler {
         rides.remove(name);
 
        //remove any linked signs
-       for (Location loc : rideSigns.keySet()) {
+       Iterator<Location> iterator = rideSigns.keySet().iterator();
+
+       while (iterator.hasNext()) {
+           Location loc = iterator.next();
            String rname = rideSigns.get(loc);
-           if (rname!=null && rname.equals(name)) {
+           if (rname != null && rname.equals(name)) {
                rideSigns.remove(loc);
            }
        }

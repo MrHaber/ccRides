@@ -26,6 +26,7 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Jets extends Ride {
     Double armLength;//the radius of the jets seats
@@ -171,8 +172,8 @@ public class Jets extends Ride {
         running = false;
 
         //Eject Players
-        for (Player p:riders.keySet()) {
-            ejectPlayer(p);
+        for (UUID uuid:riders.keySet()) {
+            ejectPlayer(Bukkit.getPlayer(uuid));
         }
 
 
@@ -191,7 +192,7 @@ public class Jets extends Ride {
         super.addPlayer(player);
 
         //Tell player how to control height and set their slot to the mid slot
-        if (riders.containsKey(player)) {
+        if (riders.containsKey(player.getUniqueId())) {
             player.getInventory().setHeldItemSlot(4);
             Bukkit.getScheduler().runTaskLater(
                     RidesPlugin.getInstance(),()->{
@@ -728,7 +729,7 @@ public class Jets extends Ride {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onMouseScroll(PlayerItemHeldEvent event) {
-        if (riders.containsKey(event.getPlayer())){
+        if (riders.containsKey(event.getPlayer().getUniqueId())){
 
             int oldslot = event.getPreviousSlot();
             int newslot = event.getNewSlot();
@@ -741,7 +742,7 @@ public class Jets extends Ride {
                 } else if (oldslot==0 && newslot == 8) {
                     jump = 1;
                 }
-                int seatnum = riders.get(event.getPlayer());
+                int seatnum = riders.get(event.getPlayer().getUniqueId());
                 double angle = seatAngles.get(seatnum);
                 angle -= jump * angleSpeed;
                 if (angle>angleMax) angle = angleMax;

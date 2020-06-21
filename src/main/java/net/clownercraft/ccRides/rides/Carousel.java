@@ -12,6 +12,7 @@ import org.bukkit.util.Vector;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Carousel extends Ride {
     Double radius;//the radius of the carousel seats
@@ -120,8 +121,8 @@ public class Carousel extends Ride {
         countdownStarted = false;
         running = false;
         //Eject Players
-        for (Player p:riders.keySet()) {
-            ejectPlayer(p);
+        for (UUID uid:riders.keySet()) {
+            ejectPlayer(Bukkit.getPlayer(uid));
         }
 
         Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (enabled) checkQueue();},10);

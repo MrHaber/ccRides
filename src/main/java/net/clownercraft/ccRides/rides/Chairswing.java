@@ -15,6 +15,7 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Chairswing extends Ride {
     Double radius;//the radius of the chairswing seats
@@ -133,8 +134,8 @@ public class Chairswing extends Ride {
         countdownStarted = false;
         running = false;
         //Eject Players
-        for (Player p:riders.keySet()) {
-            ejectPlayer(p);
+        for (UUID uuid:riders.keySet()) {
+            ejectPlayer(Bukkit.getPlayer(uuid));
         }
 
         Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> { if (enabled) checkQueue();},10l);
