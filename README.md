@@ -1,7 +1,7 @@
 # ccRides
 Premium Spigot Plugin to add Funfair / Theme Park / Carnival Rides to your minecraft server
 
-[Spigot Plugin Page](#) // [Plugin Wiki/Docs](https://github.com/TheClowner/ccRides/wiki)
+[Spigot Plugin Page](https://www.spigotmc.org/resources/ccrides.80364/) // [Plugin Wiki/Docs](https://github.com/TheClowner/ccRides/wiki)
 
 **Originally built for the [Clownercraft Network](https://clownercraft.net/)**
 
@@ -20,8 +20,3 @@ Features
   - **All messages shown to the player** can be completely changed.
   - Most of the admin command messages can be changed.
 - Tab-Completion for all command arguments
- 
-Commands & Permissions
------------------------
-[See wiki](https://github.com/TheClowner/ccRides/wiki/Commands-and-Permissions)
-
