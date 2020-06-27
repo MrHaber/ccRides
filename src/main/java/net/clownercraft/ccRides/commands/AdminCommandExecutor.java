@@ -83,8 +83,10 @@ public class AdminCommandExecutor implements CommandExecutor, TabCompleter {
                 for (String r:rides) {
                     list.append("&9").append(r).append("&1, ");
                 }
-                String finalList = list.substring(0,list.length()-4);
-
+                String finalList = "";
+                if (list.length()>4) {
+                    finalList = list.substring(0,list.length()-4);
+                }
                 commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.command_listRides.replaceAll("\\{ridelist}", finalList)));
                 return true;
             case "create":

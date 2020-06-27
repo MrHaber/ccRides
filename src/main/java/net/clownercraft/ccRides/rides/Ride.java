@@ -1,6 +1,5 @@
 package net.clownercraft.ccRides.rides;
 
-import com.sun.istack.internal.NotNull;
 import net.clownercraft.ccRides.config.ConfigHandler;
 import net.clownercraft.ccRides.config.Messages;
 import net.clownercraft.ccRides.RidesPlugin;
@@ -261,7 +260,7 @@ public abstract class Ride implements Listener {
      * Sends a message to all players currently riding
      * @param message the message to send
      */
-    public void messageRiders(@NotNull String message) {
+    public void messageRiders(String message) {
         message = ChatColor.translateAlternateColorCodes('&',message);
         for (UUID uid:riders.keySet()) {
             Objects.requireNonNull(Bukkit.getPlayer(uid)).sendMessage(message);
@@ -283,13 +282,7 @@ public abstract class Ride implements Listener {
             RidesPlugin.getInstance().getConfigHandler().ridePlayers.remove(player.getUniqueId());
 
             seats.get(i).eject();
-            //Teleport player to the exit location
-            Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), new Runnable() {
-                @Override
-                public void run() {
-                    player.teleport(exitLocation);
-                }
-            },2l);
+            player.teleport(exitLocation);
         }
     }
 
@@ -628,8 +621,8 @@ public abstract class Ride implements Listener {
 
                     if (seats.indexOf(e.getVehicle()) == riders.get(e.getExited().getUniqueId())) {
 
-                        Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> e.getVehicle().addPassenger(e.getExited()),0);
-                        //e.setCancelled(true);
+                        //Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> e.getVehicle().addPassenger(e.getExited()),0);
+                        e.setCancelled(true);
                     }
                 }
             }
@@ -646,7 +639,8 @@ public abstract class Ride implements Listener {
         if (seats.contains(e.getVehicle())) {
 
             if (e.getEntered() instanceof Player) {
-                if (!riders.containsKey(e.getEntered().getUniqueId())) {
+                if (!riders.containsKey(e.getEntered().getUniqueId())
+                || seats.indexOf(e.getVehicle())!=riders.get(e.getEntered().getUniqueId())) {
                     e.setCancelled(true);
                 }
             }
