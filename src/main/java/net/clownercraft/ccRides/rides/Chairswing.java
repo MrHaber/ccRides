@@ -205,7 +205,7 @@ public class Chairswing extends Ride {
     @Override
     public void tickPositions() {
         for (int i=0;i<seats.size();i++) {
-            Vehicle v = seats.get(i);
+            Vehicle v = (Vehicle) Bukkit.getEntity(seats.get(i));
             Location loc = getPosition(i);
             //Teleport cart
             teleportWithPassenger(v,loc);

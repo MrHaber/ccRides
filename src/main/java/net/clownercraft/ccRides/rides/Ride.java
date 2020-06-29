@@ -63,7 +63,7 @@ public abstract class Ride implements Listener {
     /* Running Data */
     boolean running = false; //Whether the ride is operating or not
     boolean countdownStarted = false;
-    ArrayList<Vehicle> seats = new ArrayList<>(); //stores vehicle entities for the seats
+    ArrayList<UUID> seats = new ArrayList<>(); //stores vehicle entities for the seats
     ConcurrentHashMap<UUID,Integer> riders = new ConcurrentHashMap<>(); //Players mapped to their seat numbers
     ArrayList<Player> queue = new ArrayList<>(); //The queue for players waiting to join the ride when it next runs
     BukkitTask countdownTask;
@@ -101,7 +101,7 @@ public abstract class Ride implements Listener {
      */
     public void tickPositions() {
         for (int i=0;i<seats.size();i++) {
-            Vehicle v = seats.get(i);
+            Vehicle v = (Vehicle) Bukkit.getEntity(seats.get(i));
             Location loc = getPosition(i);
             //Teleport cart
             teleportWithPassenger(v,loc);
@@ -123,7 +123,8 @@ public abstract class Ride implements Listener {
      * despawns all this rides minecarts, to prevent duplicates appearing after a shutdown
      */
     public void despawnSeats() {
-        for (Vehicle v : seats) {
+        for (UUID uuid : seats) {
+            Vehicle v = (Vehicle) Bukkit.getEntity(uuid);
             v.remove();
         }
         seats.clear();
@@ -141,7 +142,7 @@ public abstract class Ride implements Listener {
             //remove any minecarts within a few blocks of each location in case there's duplicates in the world.
             for (Entity e: Objects.requireNonNull(loc2.getWorld()).getNearbyEntities(loc2,3,3,3)) {
                 if (e.getType().equals(EntityType.MINECART)
-                && !seats.contains(e)) e.remove();
+                && !seats.contains(e.getUniqueId())) e.remove();
             }
             //Spawn new minecarts
             Minecart cart = (Minecart) loc2.getWorld().spawnEntity(loc2, EntityType.MINECART);
@@ -152,7 +153,7 @@ public abstract class Ride implements Listener {
             cart.setVelocity(new Vector(0, 0, 0));
             cart.setSilent(true);
             cart.setMaxSpeed(0);
-            seats.add(cart);
+            seats.add(cart.getUniqueId());
         }
     }
 
@@ -199,7 +200,7 @@ public abstract class Ride implements Listener {
         riders.put(player.getUniqueId(),seatnum);
         RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player.getUniqueId(), rideID);
 
-        seats.get(seatnum).addPassenger(player);
+        ((Vehicle) Bukkit.getEntity(seats.get(seatnum))).addPassenger(player);
 
         //charge them the price
         if (price !=0) {
@@ -281,7 +282,7 @@ public abstract class Ride implements Listener {
 
             RidesPlugin.getInstance().getConfigHandler().ridePlayers.remove(player.getUniqueId());
 
-            seats.get(i).eject();
+            ((Vehicle) Bukkit.getEntity(seats.get(i))).eject();
             player.teleport(exitLocation);
         }
     }
@@ -608,22 +609,35 @@ public abstract class Ride implements Listener {
 
     /* EVENT LISTENERS */
 
+    //TODO Workaround for 1.16
     /**
      * Prevent players exiting their seat on the ride
      * @param e - the vehicle Exit event
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onCartExit(VehicleExitEvent e) {
-        if (seats.contains(e.getVehicle())) {
+        RidesPlugin.getInstance().getLogger().info("VehicleExitEvent");
+        if (seats.contains(e.getVehicle().getUniqueId())) {
+            RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - is seat");
 
             if (e.getExited() instanceof Player) {
-                if (riders.containsKey(e.getExited().getUniqueId())) {
+                UUID uuid = e.getExited().getUniqueId();
 
-                    if (seats.indexOf(e.getVehicle()) == riders.get(e.getExited().getUniqueId())) {
+                if (riders.containsKey(uuid)) {
+                    RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - is rider");
+                    RidesPlugin.getInstance().getLogger().info("Seat " + seats.indexOf(e.getVehicle().getUniqueId()) + " rider: " + riders.get(uuid));
 
-                        //Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> e.getVehicle().addPassenger(e.getExited()),0);
+                    if (seats.indexOf(e.getVehicle().getUniqueId()) == riders.get(uuid)) {
+                        RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - is riders seat");
                         e.setCancelled(true);
+                        RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - cancelled");
+                        //Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> e.getVehicle().addPassenger(e.getExited()),0);
+                        return;
                     }
+                    e.setCancelled(false);
+                } else {
+                    RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - not rider");
+                    e.setCancelled(false);
                 }
             }
 
@@ -636,11 +650,15 @@ public abstract class Ride implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCartEnter(VehicleEnterEvent e) {
-        if (seats.contains(e.getVehicle())) {
+        RidesPlugin.getInstance().getLogger().info("VehicleEnterEvent");
+        if (seats.contains(e.getVehicle().getUniqueId())) {
 
             if (e.getEntered() instanceof Player) {
-                if (!riders.containsKey(e.getEntered().getUniqueId())
-                || seats.indexOf(e.getVehicle())!=riders.get(e.getEntered().getUniqueId())) {
+//                if (!riders.containsKey(e.getEntered().getUniqueId())
+//                || seats.indexOf(e.getVehicle())!=riders.get(e.getEntered().getUniqueId())) {
+//                    e.setCancelled(true);
+//                }
+                if (!riders.containsKey(e.getEntered().getUniqueId())) {
                     e.setCancelled(true);
                 }
             }
@@ -651,28 +669,28 @@ public abstract class Ride implements Listener {
 
     @EventHandler
     public void onCartBreak(VehicleDamageEvent e) {
-        if (seats.contains(e.getVehicle())) {
+        if (seats.contains(e.getVehicle().getUniqueId())) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onCartBreak(VehicleDestroyEvent e) {
-        if (seats.contains(e.getVehicle())) {
+        if (seats.contains(e.getVehicle().getUniqueId())) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onCartPush(VehicleEntityCollisionEvent e) {
-        if (seats.contains(e.getVehicle())) {
+        if (seats.contains(e.getVehicle().getUniqueId())) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onCartMove(VehicleMoveEvent e) {
-        if (seats.contains(e.getVehicle())) {
+        if (seats.contains(e.getVehicle().getUniqueId())) {
             e.getVehicle().setVelocity(new Vector(0,0,0));
         }
     }
