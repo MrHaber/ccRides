@@ -15,10 +15,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Carousel extends Ride {
-    Double radius;//the radius of the carousel seats
-    Integer rotatespeed; //number of ticks per full rotation of the carousel
+    Double radius = 5.0;//the radius of the carousel seats
+    Integer rotatespeed = 400; //number of ticks per full rotation of the carousel
     Double accelerateLength = 0.3d; //The number of rotations to take to get up to speed/slow down
-    Integer length; //number of full rotations per ride.
+    Integer length = 2; //number of full rotations per ride.
     Double heightVariation = 0.0; //The maximum change in height while riding (this is +/-)
     Double heightSpeed = 1.0; //How many full sine waves per rotation
     Boolean horseMode = false; //Use horses instead of minecarts
@@ -143,7 +143,7 @@ public class Carousel extends Ride {
                 //remove any stray horses within a few blocks of each location in case there's duplicates in the world.
                 for (Entity e:loc2.getWorld().getNearbyEntities(loc2,3,3,3)) {
                     if (e.getType().equals(EntityType.HORSE)
-                            && !seats.contains(e)) e.remove();
+                            && !seats.contains(e.getUniqueId())) e.remove();
                 }
 
 
@@ -157,13 +157,13 @@ public class Carousel extends Ride {
                 horse.setAgeLock(true);
                 horse.setBaby();
                 horse.setAI(false);
-                seats.add(horse);
+                seats.add(horse.getUniqueId());
             } else {
 
                 //remove any stray minecarts within a few blocks of each location in case there's duplicates in the world.
                 for (Entity e:loc2.getWorld().getNearbyEntities(loc2,3,3,3)) {
                     if (e.getType().equals(EntityType.MINECART)
-                            && !seats.contains(e)) e.remove();
+                            && !seats.contains(e.getUniqueId())) e.remove();
                 }
 
 
@@ -175,7 +175,7 @@ public class Carousel extends Ride {
                 cart.setVelocity(new Vector(0, 0, 0));
                 cart.setSilent(true);
                 cart.setMaxSpeed(0);
-                seats.add(cart);
+                seats.add(cart.getUniqueId());
             }
 
         }

@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.UUID;
 
 public class FerrisWheel extends Ride {
-    Double radius;//the radius of the FerrisWheel seats
-    Integer rotatespeed; //number of ticks per full rotation of the FerrisWheel
-    Integer length; //number of full rotations per ride.
+    Double radius = 5.0;//the radius of the FerrisWheel seats
+    Integer rotatespeed = 400; //number of ticks per full rotation of the FerrisWheel
+    Integer length = 2; //number of full rotations per ride.
     boolean axis = false; //false = xy, true=zy
-    Integer cartWidth = 1;
+    Integer cartWidth = 2;
 
     /*
     Running data

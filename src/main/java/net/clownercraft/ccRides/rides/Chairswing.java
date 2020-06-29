@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.UUID;
 
 public class Chairswing extends Ride {
-    Double radius;//the radius of the chairswing seats
-    Integer rotatespeed; //number of ticks per full rotation of the chairswing (once spinning)
-    Integer length; //number of full rotations per ride.
+    Double radius = 5.0;//the radius of the chairswing seats
+    Integer rotatespeed = 150; //number of ticks per full rotation of the chairswing (once spinning)
+    Integer length = 6; //number of full rotations per ride.
     Double chainHeight = 5.0; //The length of the chains supporting the carts
     Double accelerateLength = 1d; //Number of rotations to accelerate to full speed
     Boolean showLeads = true; //Enable/Disable decorative leads to look like chains supporting each seat

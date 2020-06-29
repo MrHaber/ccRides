@@ -29,11 +29,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Jets extends Ride {
-    Double armLength;//the radius of the jets seats
+    Double armLength = 4.0;//the radius of the jets seats
     double centerRadius = 0;
-    Integer rotatespeed; //number of ticks per full rotation of the jets
+    Integer rotatespeed = 200; //number of ticks per full rotation of the jets
     Double accelerateLength = 0.3d;
-    Integer length; //number of full rotations per ride.
+    Integer length = 4; //number of full rotations per ride.
 
     Double angleMax = Math.toRadians(30.0); //The maximum angle of each 'jet' in radians
     Double angleSpeed = Math.toRadians(0.2); //The angle change per tick in radians
