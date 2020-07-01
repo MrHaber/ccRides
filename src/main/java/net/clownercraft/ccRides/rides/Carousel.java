@@ -241,7 +241,7 @@ public class Carousel extends Ride {
         out.add("RIDE_LENGTH");
         out.add("HEIGHT_VAR");
         out.add("HEIGHT_SPEED");
-        out.add("HORSE_MODE");
+        //out.add("HORSE_MODE");
         out.add("ACCELERATE_LENGTH");
         return out;
     }
@@ -314,10 +314,10 @@ public class Carousel extends Ride {
                         out = Messages.command_admin_ride_setting_GENERAL_fail_mustBeDoub;
                     }
                     break;
-                case "HORSE_MODE": //boolean
-                    horseMode = Boolean.parseBoolean(values[0]);
-                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Boolean.toString(horseMode));
-                    break;
+//                case "HORSE_MODE": //boolean
+//                    horseMode = Boolean.parseBoolean(values[0]);
+//                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}",Boolean.toString(horseMode));
+//                    break;
             }
         }
 
@@ -428,7 +428,7 @@ public class Carousel extends Ride {
 
         out = out.replaceAll("\\{HEIGHT_VAR}",Double.toString(heightVariation));
         out = out.replaceAll("\\{HEIGHT_SPEED}",Double.toString(heightSpeed));
-        out = out.replaceAll("\\{HORSE_MODE}",Boolean.toString(horseMode));
+        //out = out.replaceAll("\\{HORSE_MODE}",Boolean.toString(horseMode));
         out = out.replaceAll("\\{ACCELERATE_LENGTH}",Double.toString(accelerateLength));
 
 
