@@ -96,7 +96,13 @@ public class ConfigHandler {
         Set<String> keys = signsConfig.getKeys(false);
         if (!keys.isEmpty()) {
             for (String key : keys) {
-                rideSigns.put(signsConfig.getLocation(key + ".location"), signsConfig.getString(key + ".ride"));
+
+                Location loc = signsConfig.getLocation(key + ".location");
+                String rideID = signsConfig.getString(key + ".ride");
+
+                if (loc!=null && rideID!=null && !rideID.equals("")) {
+                    rideSigns.put(loc, rideID);
+                }
             }
         }
     }
@@ -188,6 +194,7 @@ public class ConfigHandler {
     /**
      * Save the main config to file
      */
+   @SuppressWarnings("unused")
    public void saveMainConfig() {
        //Create a new config
        mainConfig = new YamlConfiguration();
