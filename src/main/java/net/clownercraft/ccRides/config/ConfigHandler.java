@@ -86,7 +86,6 @@ public class ConfigHandler {
         for (File f: rideFiles) {
             YamlConfiguration conf = YamlConfiguration.loadConfiguration(f);
             String Id = conf.getString("Generic.ID");
-            instance.getLogger().info("\"" + Id + "\" ride config loaded.");
             assert Id != null;
             rides.put(Id, Objects.requireNonNull(Ride.RideFromConfig(conf)));
             instance.getLogger().info("\"" + Id + "\" ride config loaded.");

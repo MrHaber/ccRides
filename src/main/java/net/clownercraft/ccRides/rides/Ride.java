@@ -52,7 +52,7 @@ public abstract class Ride implements Listener {
     Location baseLocation; //Center location for the ride layout
     Location exitLocation; //The Location to teleport players to when they exit or the ride is over.
     Integer minStartPlayers = 1; //How many players need to join the ride before it starts
-    Integer startWaitTime = 10; // How long to wait after the minimum passes for more players
+    Integer startWaitTime = 15; // How long to wait after the minimum passes for more players
     Integer price = 0; //The cost in tokens
     boolean joinAfterStart = false; //Whether players can join once the ride has started.
 
