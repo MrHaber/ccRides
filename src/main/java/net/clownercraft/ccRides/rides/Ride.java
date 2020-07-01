@@ -280,8 +280,14 @@ public abstract class Ride implements Listener {
 
             RidesPlugin.getInstance().getConfigHandler().ridePlayers.remove(player.getUniqueId());
 
-            ((Vehicle) Bukkit.getEntity(seats.get(i))).eject();
-            player.teleport(exitLocation);
+            Bukkit.getEntity(seats.get(i)).removePassenger(player);
+
+            if (RidesPlugin.getInstance().isEnabled()) {
+                Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(),() -> {
+                    player.teleport(exitLocation);
+                },1);
+            } else player.teleport(exitLocation);
+
         }
     }
 
