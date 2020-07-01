@@ -14,6 +14,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
@@ -56,10 +57,10 @@ public class Jets extends Ride {
     /*
     Extra Entities
      */
-    ArrayList<Entity> leashHolders = new ArrayList<>();
-    ArrayList<Entity> leashEnds = new ArrayList<>();
-    ArrayList<ArmorStand> decoration1 = new ArrayList<>();
-    ArrayList<ArmorStand> decoration2 = new ArrayList<>();
+    ArrayList<UUID> leashHolders = new ArrayList<>();
+    ArrayList<UUID> leashEnds = new ArrayList<>();
+    ArrayList<UUID> decoration1 = new ArrayList<>();
+    ArrayList<UUID> decoration2 = new ArrayList<>();
 
 
     /**
@@ -213,15 +214,15 @@ public class Jets extends Ride {
         for (int i=0;i<seats.size();i++) {
             Location loc = getPosition(i);
             if (showLeads) {
-                teleportWithPassenger(leashEnds.get(i),loc.clone().subtract(0,1,0));
-                teleportWithPassenger(leashHolders.get(i), getCentrePosition(i));
+                teleportWithPassenger(Bukkit.getEntity(leashEnds.get(i)),loc.clone().subtract(0,1,0));
+                teleportWithPassenger(Bukkit.getEntity(leashHolders.get(i)), getCentrePosition(i));
             }
             if (showBanners) {
                 Location standLoc = getDecorPos(i).clone().subtract(0,0.25,0);
-                teleportWithPassenger(decoration1.get(i),standLoc);
-                teleportWithPassenger(decoration2.get(i),standLoc);
-                decoration1.get(i).setRotation(standLoc.getYaw(),0);
-                decoration2.get(i).setRotation(standLoc.getYaw()+180,0);
+                teleportWithPassenger(Bukkit.getEntity(decoration1.get(i)),standLoc);
+                teleportWithPassenger(Bukkit.getEntity(decoration2.get(i)),standLoc);
+                Bukkit.getEntity(decoration1.get(i)).setRotation(standLoc.getYaw(),0);
+                Bukkit.getEntity(decoration2.get(i)).setRotation(standLoc.getYaw()+180,0);
             }
 
         }
@@ -252,7 +253,7 @@ public class Jets extends Ride {
 
                 for (Entity e:leadHoldLoc.getWorld().getNearbyEntities(leadHoldLoc,3,3,3)) {
                     if (e.getType().equals(EntityType.PARROT)
-                            && !leashEnds.contains(e) && !leashHolders.contains(e)) e.remove();
+                            && !leashEnds.contains(e.getUniqueId()) && !leashHolders.contains(e.getUniqueId())) e.remove();
                 }
 
                 Parrot leadHold = (Parrot) leadHoldLoc.getWorld().spawnEntity(leadHoldLoc,EntityType.PARROT);
@@ -265,11 +266,11 @@ public class Jets extends Ride {
                 leadHold.setCustomName("Jets Parrot");
                 leadHold.setCustomNameVisible(false);
 
-                leashHolders.add(leadHold);
+                leashHolders.add(leadHold.getUniqueId());
 
                 for (Entity e:leadLoc.getWorld().getNearbyEntities(leadLoc,3,3,3)) {
                     if (e.getType().equals(EntityType.PARROT)
-                            && !leashEnds.contains(e) && !leashHolders.contains(e)) e.remove();
+                            && !leashEnds.contains(e.getUniqueId()) && !leashHolders.contains(e.getUniqueId())) e.remove();
                 }
 
                 Parrot leadEnd = (Parrot) leadLoc.getWorld().spawnEntity(leadLoc,EntityType.PARROT);
@@ -283,7 +284,7 @@ public class Jets extends Ride {
                 leadEnd.setCustomNameVisible(false);
 
                 leadEnd.setLeashHolder(leadHold);
-                leashEnds.add(leadEnd);
+                leashEnds.add(leadEnd.getUniqueId());
 
 
             }
@@ -294,7 +295,7 @@ public class Jets extends Ride {
                 Location standloc = getDecorPos(i).clone().subtract(0,0.25,0);
                 for (Entity e:standloc.getWorld().getNearbyEntities(loc2,3,3,3)) {
                     if (e.getType().equals(EntityType.ARMOR_STAND)
-                            && !decoration1.contains(e) && !decoration2.contains(e)) e.remove();
+                            && !decoration1.contains(e.getUniqueId()) && !decoration2.contains(e.getUniqueId())) e.remove();
                 }
 
                 stand1 = (ArmorStand) standloc.getWorld().spawnEntity(standloc,EntityType.ARMOR_STAND);
@@ -319,8 +320,8 @@ public class Jets extends Ride {
                 stand2.setRotation(standloc.getYaw()+180,0);
                 stand2.setHeadPose(new EulerAngle(Math.toRadians(-95),0,0));
 
-                decoration1.add(stand1);
-                decoration2.add(stand2);
+                decoration1.add(stand1.getUniqueId());
+                decoration2.add(stand2.getUniqueId());
             }
 
         }
@@ -334,23 +335,23 @@ public class Jets extends Ride {
     public void despawnSeats() {
         super.despawnSeats();
 
-        for (Entity e:leashHolders) {
-            e.remove();
+        for (UUID u:leashHolders) {
+            Bukkit.getEntity(u).remove();
         }
         leashHolders.clear();
 
-        for (Entity e:leashEnds) {
-            e.remove();
+        for (UUID u:leashEnds) {
+            Bukkit.getEntity(u).remove();
         }
         leashEnds.clear();
 
-        for (ArmorStand e:decoration1) {
-            e.remove();
+        for (UUID u:decoration1) {
+            Bukkit.getEntity(u).remove();
         }
         decoration1.clear();
 
-        for (ArmorStand e:decoration2) {
-            e.remove();
+        for (UUID u:decoration2) {
+            Bukkit.getEntity(u).remove();
         }
         decoration2.clear();
 
@@ -754,14 +755,12 @@ public class Jets extends Ride {
         }
     }
 
-
     /**
      * Prevent players taking/swapping items from armor stands.
      */
-    @EventHandler
-    public void onStandEdit(PlayerInteractEntityEvent e) {
-        if (e.getRightClicked() instanceof ArmorStand
-            && (decoration1.contains((ArmorStand) e.getRightClicked()) || decoration2.contains((ArmorStand) e.getRightClicked()))) {
+    @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    public void onStandEdit(PlayerArmorStandManipulateEvent e) {
+        if (decoration1.contains(e.getRightClicked().getUniqueId()) || decoration2.contains(e.getRightClicked().getUniqueId())) {
             e.setCancelled(true);
         }
     }

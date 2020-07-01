@@ -606,37 +606,28 @@ public abstract class Ride implements Listener {
     }
 
     /* EVENT LISTENERS */
-
-    //TODO Workaround for 1.16
     /**
      * Prevent players exiting their seat on the ride
      * @param e - the vehicle Exit event
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onCartExit(VehicleExitEvent e) {
-        RidesPlugin.getInstance().getLogger().info("VehicleExitEvent");
         if (seats.contains(e.getVehicle().getUniqueId())) {
-            RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - is seat");
 
             if (e.getExited() instanceof Player) {
                 UUID uuid = e.getExited().getUniqueId();
 
                 if (riders.containsKey(uuid)) {
-                    RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - is rider");
-                    RidesPlugin.getInstance().getLogger().info("Seat " + seats.indexOf(e.getVehicle().getUniqueId()) + " rider: " + riders.get(uuid));
 
                     if (seats.indexOf(e.getVehicle().getUniqueId()) == riders.get(uuid)) {
-                        RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - is riders seat");
-                        e.setCancelled(true);
-                        RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - cancelled");
-                        //Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(), () -> e.getVehicle().addPassenger(e.getExited()),0);
-                        return;
-                    }
-                    e.setCancelled(false);
-                } else {
-                    RidesPlugin.getInstance().getLogger().info("VehicleExitEvent - not rider");
-                    e.setCancelled(false);
-                }
+                        if (RidesPlugin.getInstance().isEnabled()) {
+                            Bukkit.getScheduler().runTaskLater(
+                                    RidesPlugin.getInstance(),
+                                    () -> e.getVehicle().addPassenger(e.getExited()),
+                                    0);
+                        }
+                    } else e.setCancelled(false);
+                } else e.setCancelled(false);
             }
 
         }
@@ -648,17 +639,13 @@ public abstract class Ride implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCartEnter(VehicleEnterEvent e) {
-        RidesPlugin.getInstance().getLogger().info("VehicleEnterEvent");
         if (seats.contains(e.getVehicle().getUniqueId())) {
-
             if (e.getEntered() instanceof Player) {
-//                if (!riders.containsKey(e.getEntered().getUniqueId())
-//                || seats.indexOf(e.getVehicle())!=riders.get(e.getEntered().getUniqueId())) {
-//                    e.setCancelled(true);
-//                }
-                if (!riders.containsKey(e.getEntered().getUniqueId())) {
+                if (!riders.containsKey(e.getEntered().getUniqueId()) || seats.indexOf(e.getVehicle().getUniqueId()) != riders.get(e.getEntered().getUniqueId())) {
                     e.setCancelled(true);
                 }
+            } else {
+                e.setCancelled(true);
             }
 
         }
