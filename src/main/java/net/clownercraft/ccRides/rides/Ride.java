@@ -55,6 +55,7 @@ public abstract class Ride implements Listener {
     Integer startWaitTime = 15; // How long to wait after the minimum passes for more players
     Integer price = 0; //The cost in tokens
     boolean joinAfterStart = false; //Whether players can join once the ride has started.
+    boolean joinByCart = false; //allow players to join by walking up and clicking one of the minecarts
 
     boolean enabled = false; //Whether the ride is enabled/disabled.
 
@@ -224,6 +225,64 @@ public abstract class Ride implements Listener {
     }
 
     /**
+     * Put a player onto the ride
+     * Will add to the queue if the ride is full or already running
+     * Will do nothing if the ride is disabled.
+     * @param player the player to add
+     */
+    public void addPlayer(Player player, int seatnum) {
+        //Check if the fude is enabled
+        if (!enabled) return;
+
+        //Check if player can afford to ride
+        if (!RidesPlugin.getInstance().canAfford(player, price)) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',Messages.ride_cant_afford.replaceAll("\\{price}",Integer.toString(price))));
+            return;
+        }
+
+        //Check if Ride is full or already running
+        //add to queue if the player can't join the ruide
+        if (isFull()) {
+            addToQueue(player);
+            return;
+        }
+        if (isRunning() && !joinAfterStart) {
+            addToQueue(player);
+            return;
+        }
+
+        if (riders.contains(seatnum)) return;
+
+        //Otherwise, add them to riders and put them in a seat.
+        riders.put(player.getUniqueId(),seatnum);
+        RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player.getUniqueId(), rideID);
+
+        ((Vehicle) Bukkit.getEntity(seats.get(seatnum))).addPassenger(player);
+
+        //charge them the price
+        if (price !=0) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    Messages.prefix + Messages.ride_paid
+                            .replaceAll("\\{price}",Integer.toString(price))
+                            .replaceAll("\\{ride}", rideID)));
+            RidesPlugin.getInstance().takePayment(player, price);
+        }
+
+
+        if (isFull()) {
+            if (countdownStarted) countdownTask.cancel();
+            messageRiders(ChatColor.translateAlternateColorCodes('&',Messages.prefix + Messages.ride_starting_seatsFUll));
+            startRide();
+        }
+        else if (riders.size()>= minStartPlayers && !countdownStarted) startCountdown();
+        else messageRiders(Messages.prefix +
+                    Messages.ride_starting_needMoreRiders
+                            .replaceAll("\\{count}",
+                                    Integer.toString(minStartPlayers -riders.size())));
+
+    }
+
+    /**
      * Starts the waiting time once the minimum players have joined the ride
      */
     public void startCountdown() {
@@ -319,7 +378,9 @@ public abstract class Ride implements Listener {
             out.set("Generic.Start.MIN_PLAYERS", minStartPlayers);
             out.set("Generic.Start.WAIT_TIME", startWaitTime);
             out.set("Generic.Start.ALLOW_JOIN_AFTER_START", joinAfterStart);
+            out.set("Generic.Start.ALLOW_JOIN_BY_CART",joinByCart);
             out.set("Generic.Price", price);
+
         } catch (NullPointerException ignored) {}
 
 
@@ -416,6 +477,7 @@ public abstract class Ride implements Listener {
         out.add("START_PLAYERS");
         out.add("START_DELAY");
         out.add("JOIN_AFTER_START");
+        out.add("JOIN_BY_CART");
         out.add("PRICE");
         return out;
     }
@@ -536,6 +598,16 @@ public abstract class Ride implements Listener {
                     out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","FALSE");
                 }
                 break;
+            case "JOIN_BY_CART":
+                //Value should be true/false
+                if (Boolean.parseBoolean(values[0])) {
+                    joinByCart = true;
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","TRUE");
+                } else {
+                    joinByCart = false;
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","FALSE");
+                }
+                break;
             case "PRICE":
                 try{
                     int price = Integer.parseInt(values[0]);
@@ -580,6 +652,7 @@ public abstract class Ride implements Listener {
         minStartPlayers = conf.getInt("Generic.Start.MIN_PLAYERS");
         startWaitTime = conf.getInt("Generic.Start.WAIT_TIME");
         joinAfterStart = conf.getBoolean("Generic.Start.ALLOW_JOIN_AFTER_START");
+        joinByCart = conf.getBoolean("Generic.Start.ALLOW_JOIN_BY_CART");
         price = conf.getInt("Generic.Price");
     }
 
@@ -598,6 +671,7 @@ public abstract class Ride implements Listener {
         out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(minStartPlayers));
         out = out.replaceAll("\\{START_DELAY}",Integer.toString(startWaitTime));
         out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(joinAfterStart));
+        out = out.replaceAll("\\{JOIN_BY_CART}",Boolean.toString(joinByCart));
 
         if (capacity ==null|| capacity ==0)         out = out.replaceAll("\\{CAPACITY}","NOT SET");
         else out = out.replaceAll("\\{CAPACITY}",Integer.toString(capacity));
@@ -611,6 +685,17 @@ public abstract class Ride implements Listener {
         return out;
     }
 
+    /**
+     * @return if a given player can join the ride
+     */
+    public boolean canJoin(Player player) {
+        return (!isRunning() || joinAfterStart)
+                && (!isFull())
+                && (!riders.containsKey(player.getUniqueId()))
+                && (enabled)
+                && (RidesPlugin.getInstance().canAfford(player, price));
+    }
+
     /* EVENT LISTENERS */
     /**
      * Prevent players exiting their seat on the ride
@@ -619,23 +704,22 @@ public abstract class Ride implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onCartExit(VehicleExitEvent e) {
         if (seats.contains(e.getVehicle().getUniqueId())) {
-
             if (e.getExited() instanceof Player) {
                 UUID uuid = e.getExited().getUniqueId();
-
                 if (riders.containsKey(uuid)) {
-
                     if (seats.indexOf(e.getVehicle().getUniqueId()) == riders.get(uuid)) {
                         if (RidesPlugin.getInstance().isEnabled()) {
-                            Bukkit.getScheduler().runTaskLater(
+                            //Temporary 1.16 fix -> Eject the player from the ride
+                            ejectPlayer((Player) e.getExited());
+
+                            /*Bukkit.getScheduler().runTaskLater(
                                     RidesPlugin.getInstance(),
                                     () -> e.getVehicle().addPassenger(e.getExited()),
-                                    0);
-                        }
+                                    0);*/
+                        } else e.getVehicle().addPassenger(e.getExited());
                     } else e.setCancelled(false);
                 } else e.setCancelled(false);
             }
-
         }
     }
 
@@ -647,7 +731,20 @@ public abstract class Ride implements Listener {
     public void onCartEnter(VehicleEnterEvent e) {
         if (seats.contains(e.getVehicle().getUniqueId())) {
             if (e.getEntered() instanceof Player) {
-                if (!riders.containsKey(e.getEntered().getUniqueId()) || seats.indexOf(e.getVehicle().getUniqueId()) != riders.get(e.getEntered().getUniqueId())) {
+                if (!riders.containsKey(e.getEntered().getUniqueId())){
+                    if (joinByCart) {
+                        Player player = (Player) e.getEntered();
+                        if (canJoin(player)) {
+                            int seatNum = seats.indexOf(e.getVehicle().getUniqueId());
+                            if (!riders.contains(seatNum)) {
+                                addPlayer(player,seatNum);
+                                return;
+                            }
+                        }
+                    }
+                    e.setCancelled(true);
+                } else if (seats.indexOf(e.getVehicle().getUniqueId()) != riders.get(e.getEntered().getUniqueId())) {
+
                     e.setCancelled(true);
                 }
             } else {

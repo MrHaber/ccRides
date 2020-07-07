@@ -316,6 +316,7 @@ public class FerrisWheel extends Ride {
         out = out.replaceAll("\\{START_PLAYERS}",Integer.toString(minStartPlayers));
         out = out.replaceAll("\\{START_DELAY}",Integer.toString(startWaitTime));
         out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(joinAfterStart));
+        out = out.replaceAll("\\{JOIN_BY_CART}",Boolean.toString(joinByCart));
 
         if (capacity ==null|| capacity ==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
         else out = out.replaceAll("\\{CAPACITY}",Integer.toString(capacity));

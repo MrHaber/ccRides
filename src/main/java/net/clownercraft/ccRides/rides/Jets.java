@@ -687,7 +687,8 @@ public class Jets extends Ride {
                 .replaceAll("\\{QUEUE_COUNT}",Integer.toString(queue.size()))
                 .replaceAll("\\{START_PLAYERS}",Integer.toString(minStartPlayers))
                 .replaceAll("\\{START_DELAY}",Integer.toString(startWaitTime))
-                .replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(joinAfterStart));
+                .replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(joinAfterStart))
+                .replaceAll("\\{JOIN_BY_CART}",Boolean.toString(joinByCart));
 
         if (capacity ==null|| capacity ==0) out = out.replaceAll("\\{CAPACITY}","NOT SET");
         else out = out.replaceAll("\\{CAPACITY}",Integer.toString(capacity));
