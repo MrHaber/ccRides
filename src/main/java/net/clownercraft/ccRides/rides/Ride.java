@@ -257,7 +257,7 @@ public abstract class Ride implements Listener {
         riders.put(player.getUniqueId(),seatnum);
         RidesPlugin.getInstance().getConfigHandler().ridePlayers.put(player.getUniqueId(), rideID);
 
-        ((Vehicle) Bukkit.getEntity(seats.get(seatnum))).addPassenger(player);
+        //((Vehicle) Bukkit.getEntity(seats.get(seatnum))).addPassenger(player);
 
         //charge them the price
         if (price !=0) {
@@ -741,8 +741,8 @@ public abstract class Ride implements Listener {
                                 return;
                             }
                         }
-                    }
-                    e.setCancelled(true);
+                    } e.setCancelled(true);
+
                 } else if (seats.indexOf(e.getVehicle().getUniqueId()) != riders.get(e.getEntered().getUniqueId())) {
 
                     e.setCancelled(true);
