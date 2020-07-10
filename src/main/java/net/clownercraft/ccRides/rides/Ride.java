@@ -29,21 +29,21 @@ import java.util.function.Supplier;
  * Represents a generic single ride.
  */
 public abstract class Ride implements Listener {
-    public static HashMap<String,Class<? extends Ride>> RideTypes = new HashMap<>();
+    public static HashMap<String,Class<?>> RideTypes = new HashMap<>();
     /**
      * Gets the method to set a vehicle's position by NMS.
      * Necessary to allow vehicles to move with their passengers.
      */
-    private final Method[] setPositionRotationMethod = ((Supplier<Method[]>) () -> {
+    private final Supplier<Method[]> setPositionRotationMethod = (() -> {
         try {
             Method getHandle = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".entity.CraftEntity").getDeclaredMethod("getHandle");
             return new Method[] {
                     getHandle, getHandle.getReturnType().getDeclaredMethod("setPositionRotation", double.class, double.class, double.class, float.class, float.class)
             };
         } catch (Exception ex) {
-            return null;
+            return ex.printStackTrace();
         }
-    }).get();
+    });
 
     /* SETTINGS */
     public String type; //Which type of ride this is
