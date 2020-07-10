@@ -56,6 +56,7 @@ public abstract class Ride implements Listener {
     Integer price = 0; //The cost in tokens
     boolean joinAfterStart = false; //Whether players can join once the ride has started.
     boolean joinByCart = false; //allow players to join by walking up and clicking one of the minecarts
+    boolean exitTeleport = true; //Whether to teleport players to an exit location or just eject them at their cart.
 
     boolean enabled = false; //Whether the ride is enabled/disabled.
 
@@ -341,12 +342,13 @@ public abstract class Ride implements Listener {
 
             Bukkit.getEntity(seats.get(i)).removePassenger(player);
 
-            if (RidesPlugin.getInstance().isEnabled()) {
-                Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(),() -> {
-                    player.teleport(exitLocation);
-                },1);
-            } else player.teleport(exitLocation);
-
+            if (exitTeleport) {
+                if (RidesPlugin.getInstance().isEnabled()) {
+                    Bukkit.getScheduler().runTaskLater(RidesPlugin.getInstance(),() -> {
+                        player.teleport(exitLocation);
+                    },1);
+                } else player.teleport(exitLocation);
+            }
         }
     }
 
@@ -380,6 +382,7 @@ public abstract class Ride implements Listener {
             out.set("Generic.Start.ALLOW_JOIN_AFTER_START", joinAfterStart);
             out.set("Generic.Start.ALLOW_JOIN_BY_CART",joinByCart);
             out.set("Generic.Price", price);
+            out.set("Generic.End.TELEPORT_TO_EXIT",exitTeleport);
 
         } catch (NullPointerException ignored) {}
 
@@ -479,6 +482,7 @@ public abstract class Ride implements Listener {
         out.add("JOIN_AFTER_START");
         out.add("JOIN_BY_CART");
         out.add("PRICE");
+        out.add("EXIT_TELEPORT");
         return out;
     }
 
@@ -608,6 +612,16 @@ public abstract class Ride implements Listener {
                     out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","FALSE");
                 }
                 break;
+            case "EXIT_TELEPORT":
+                //Value should be true/false
+                if (Boolean.parseBoolean(values[0])) {
+                    exitTeleport = true;
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","TRUE");
+                } else {
+                    exitTeleport = false;
+                    out = Messages.command_admin_ride_setting_GENERAL_success.replaceAll("\\{VALUE}","FALSE");
+                }
+                break;
             case "PRICE":
                 try{
                     int price = Integer.parseInt(values[0]);
@@ -653,6 +667,7 @@ public abstract class Ride implements Listener {
         startWaitTime = conf.getInt("Generic.Start.WAIT_TIME");
         joinAfterStart = conf.getBoolean("Generic.Start.ALLOW_JOIN_AFTER_START");
         joinByCart = conf.getBoolean("Generic.Start.ALLOW_JOIN_BY_CART");
+        exitTeleport = conf.getBoolean("Generic.End.TELEPORT_TO_EXIT");
         price = conf.getInt("Generic.Price");
     }
 
@@ -672,6 +687,7 @@ public abstract class Ride implements Listener {
         out = out.replaceAll("\\{START_DELAY}",Integer.toString(startWaitTime));
         out = out.replaceAll("\\{JOIN_AFTER_START}",Boolean.toString(joinAfterStart));
         out = out.replaceAll("\\{JOIN_BY_CART}",Boolean.toString(joinByCart));
+        out = out.replaceAll("\\{EXIT_TELEPORT}",Boolean.toString(exitTeleport));
 
         if (capacity ==null|| capacity ==0)         out = out.replaceAll("\\{CAPACITY}","NOT SET");
         else out = out.replaceAll("\\{CAPACITY}",Integer.toString(capacity));

@@ -91,19 +91,22 @@ public class ConfigHandler {
             instance.getLogger().info("\"" + Id + "\" ride config loaded.");
         }
         if (rideFiles.length==0) instance.getLogger().info("No Rides Configured yet.");
+        try {
+            //Load signs
+            Set<String> keys = signsConfig.getKeys(false);
+            if (!keys.isEmpty()) {
+                for (String key : keys) {
 
-        //Load signs
-        Set<String> keys = signsConfig.getKeys(false);
-        if (!keys.isEmpty()) {
-            for (String key : keys) {
+                    Location loc = signsConfig.getLocation(key + ".location");
+                    String rideID = signsConfig.getString(key + ".ride");
 
-                Location loc = signsConfig.getLocation(key + ".location");
-                String rideID = signsConfig.getString(key + ".ride");
-
-                if (loc!=null && rideID!=null && !rideID.equals("")) {
-                    rideSigns.put(loc, rideID);
+                    if (loc!=null && rideID!=null && !rideID.equals("")) {
+                        rideSigns.put(loc, rideID);
+                    }
                 }
             }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
 

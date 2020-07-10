@@ -114,7 +114,7 @@ public class Messages {
             "&9Current Riders: &b{RIDER_COUNT}  &8// &9Queue Size: &b{QUEUE_COUNT}\n" +
             "&9Start Players: &b{START_PLAYERS} &8// &9Start Delay: &b{START_DELAY} seconds\n" +
             "&9Join After Start: &b{JOIN_AFTER_START} &8// &9Join By Cart: &b{JOIN_BY_CART}\n" +
-            "&9Exit Location: &b{EXIT_LOCATION}\n" +
+            "&9Exit Teleport: &b{EXIT_TELEPORT} &8// &9Exit Location: &b{EXIT_LOCATION}\n" +
             "&4&m------------------------------------------------\n";
     public static String command_admin_ride_info_carousel = "&4  -- &cCAROUSEL Specific Info &4--\n" +
             "&9Radius: &b{RADIUS} &8// &9Capacity: &b{CAPACITY} &9seats\n" +
